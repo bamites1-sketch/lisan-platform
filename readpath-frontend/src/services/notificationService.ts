@@ -1,5 +1,5 @@
 // notificationService — real API-backed notification system
-// Replaces the old in-memory notificationStore
+import { apiUrl } from '../lib/apiBase'
 
 export interface AppNotification {
   id: string
@@ -38,7 +38,7 @@ function authHeaders() {
 
 // ── Fetch notifications for the current user ──────────────────────────────────
 export async function fetchNotifications(unreadOnly = false): Promise<AppNotification[]> {
-  const url = `/api/notifications${unreadOnly ? '?unreadOnly=true' : ''}`
+  const url = apiUrl(`/api/notifications${unreadOnly ? '?unreadOnly=true' : ''}`)
   const res = await fetch(url, { headers: authHeaders(), credentials: 'include' })
   if (!res.ok) return []
   const data = await res.json()
@@ -47,7 +47,7 @@ export async function fetchNotifications(unreadOnly = false): Promise<AppNotific
 
 // ── Fetch unread count only (lightweight, used by the bell) ───────────────────
 export async function fetchUnreadCount(): Promise<number> {
-  const res = await fetch('/api/notifications/unread-count', {
+  const res = await fetch(apiUrl('/api/notifications/unread-count'), {
     headers: authHeaders(),
     credentials: 'include',
   })
@@ -58,7 +58,7 @@ export async function fetchUnreadCount(): Promise<number> {
 
 // ── Mark a single notification as read ───────────────────────────────────────
 export async function markRead(id: string): Promise<void> {
-  await fetch(`/api/notifications/${id}/read`, {
+  await fetch(apiUrl(`/api/notifications/${id}/read`), {
     method: 'PATCH',
     headers: authHeaders(),
     credentials: 'include',
@@ -67,7 +67,7 @@ export async function markRead(id: string): Promise<void> {
 
 // ── Mark all notifications as read ───────────────────────────────────────────
 export async function markAllRead(): Promise<void> {
-  await fetch('/api/notifications/read-all', {
+  await fetch(apiUrl('/api/notifications/read-all'), {
     method: 'PATCH',
     headers: authHeaders(),
     credentials: 'include',
@@ -76,7 +76,7 @@ export async function markAllRead(): Promise<void> {
 
 // ── Delete a single notification ─────────────────────────────────────────────
 export async function deleteNotification(id: string): Promise<void> {
-  await fetch(`/api/notifications/${id}`, {
+  await fetch(apiUrl(`/api/notifications/${id}`), {
     method: 'DELETE',
     headers: authHeaders(),
     credentials: 'include',
@@ -85,7 +85,7 @@ export async function deleteNotification(id: string): Promise<void> {
 
 // ── Clear all notifications for the current user ─────────────────────────────
 export async function clearAllNotifications(): Promise<void> {
-  await fetch('/api/notifications/clear-all', {
+  await fetch(apiUrl('/api/notifications/clear-all'), {
     method: 'DELETE',
     headers: authHeaders(),
     credentials: 'include',

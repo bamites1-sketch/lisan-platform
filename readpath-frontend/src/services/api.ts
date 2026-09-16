@@ -1,6 +1,8 @@
 // Central API service — all real HTTP calls go through here.
 // Every function returns data or throws an Error with a human-readable message.
 
+import { apiUrl } from '../lib/apiBase'
+
 function token() {
   return localStorage.getItem('lisan_token') ?? ''
 }
@@ -15,7 +17,7 @@ async function request<T>(
   body?: unknown,
   signal?: AbortSignal,
 ): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(apiUrl(path), {
     method,
     headers: headers(),
     credentials: 'include',
@@ -223,7 +225,7 @@ export const recordingApi = {
   review:     (id: string, note: string, rating: number, flagged?: boolean) =>
     post<ApiRecording>(`/api/recordings/${id}/review`, { note, rating, flagged }),
   upload: async (formData: FormData) => {
-    const res = await fetch('/api/recordings/upload', {
+    const res = await fetch(apiUrl('/api/recordings/upload'), {
       method: 'POST',
       headers: { Authorization: `Bearer ${token()}` },
       credentials: 'include',

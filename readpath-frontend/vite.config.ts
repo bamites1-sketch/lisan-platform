@@ -16,4 +16,9 @@ export default defineConfig({
       }
     }
   },
+  // In production the frontend fetches from VITE_API_URL (set in Vercel env vars)
+  // In dev the Vite proxy above handles /api → localhost:5000
+  define: {
+    __API_BASE__: JSON.stringify(process.env.VITE_API_URL ?? ''),
+  },
 })

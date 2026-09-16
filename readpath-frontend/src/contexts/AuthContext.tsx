@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import type { User } from '../types'
+import { apiUrl } from '../lib/apiBase'
 
 interface AuthContextType {
   user: User | null
@@ -65,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ── Silent refresh via HttpOnly cookie ───────────────────────────────────
   const silentRefresh = useCallback(async (): Promise<string | null> => {
     try {
-      const res = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
+      const res = await fetch(apiUrl('/api/auth/refresh'), { method: 'POST', credentials: 'include' })
       if (!res.ok) return null
       const data = await res.json()
       return data?.data?.token ?? null
@@ -141,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string) => {
     let res: Response
     try {
-      res = await fetch('/api/auth/login', {
+      res = await fetch(apiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -168,7 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ── register ─────────────────────────────────────────────────────────────
   const register = useCallback(async (data: RegisterData) => {
-    const res = await fetch('/api/auth/register', {
+    const res = await fetch(apiUrl('/api/auth/register'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -185,7 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ── changePassword ───────────────────────────────────────────────────────
   const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
     if (!token) throw new Error('Not authenticated.')
-    const res = await fetch('/api/auth/change-password', {
+    const res = await fetch(apiUrl('/api/auth/change-password'), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       credentials: 'include',
@@ -197,7 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ── logout ───────────────────────────────────────────────────────────────
   const logout = useCallback(() => {
-    fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
+    fetch(apiUrl('/api/auth/logout'), { method: 'POST', credentials: 'include' }).catch(() => {})
     clearSession()
   }, [clearSession])
 
