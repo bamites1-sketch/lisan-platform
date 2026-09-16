@@ -5,6 +5,7 @@ services:
     rootDir: readpath-backend
     buildCommand: npm install && npx prisma generate && npm run build
     startCommand: node dist/server.js
+    plan: free
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,12 +14,12 @@ services:
       - key: PORT
         value: 5000
       - key: FRONTEND_URL
-        sync: false   # set this in Render dashboard to your Vercel URL
+        value: ""
       - key: JWT_SECRET
-        sync: false   # set in Render dashboard
+        value: readpath-super-secret-jwt-key-2026
       - key: JWT_REFRESH_SECRET
-        sync: false   # set in Render dashboard
+        value: readpath-super-secret-refresh-key-2026-different
       - key: GEMINI_API_KEY
-        sync: false   # set in Render dashboard
+        value: AIzaSyAb8RN6J0-JOXIaheRy8WP1s4bNw8-KGA37lvCPahwq5KjPFIug
       - key: GEMINI_MODEL
         value: gemini-3.5-flash
