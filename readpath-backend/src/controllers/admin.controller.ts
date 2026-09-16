@@ -508,18 +508,24 @@ export const uploadPDFResource = async (req: AuthRequest, res: Response, next: N
     }
 
     const { title } = req.body;
-    
-    // Upload to R2
-    const { uploadToR2, FileCategory } = await import('../lib/r2storage');
-    const result = await uploadToR2(req.file, FileCategory.RESOURCE);
-    
+
+    // Upload to R2 if configured, otherwise store a placeholder
+    const { uploadToR2, FileCategory, isR2Configured } = await import('../lib/r2storage');
+    let fileKey: string;
+    if (isR2Configured()) {
+      const result = await uploadToR2(req.file, FileCategory.RESOURCE);
+      fileKey = result.key;
+    } else {
+      console.warn('[R2] Storage not configured — PDF resource upload skipped.');
+      fileKey = `__no_storage__/resources/${Date.now()}-${req.file.originalname}`;
+    }
     const resource = await prisma.pDFResource.create({
       data: {
         title: title || req.file.originalname.replace(/\.(pdf|ppt|pptx|xls|xlsx|doc|docx)$/i, ''),
         description: '',
         fileType: req.file.originalname.match(/\.([^.]+)$/)?.[1]?.toUpperCase() || 'PDF',
         fileName: req.file.originalname,
-        fileUrl: result.key, // Store R2 key
+        fileUrl: fileKey, // Store R2 key (or placeholder)
         fileSize: req.file.size,
         category: 'RESOURCE',
         grade: 'GRADE_6',
@@ -542,6 +548,11 @@ export const getResourceDownloadUrl = async (req: AuthRequest, res: Response, ne
     const resource = await prisma.pDFResource.findUnique({ where: { id } });
     if (!resource) throw new AppError('Resource not found', 404);
     if (!resource.fileUrl) throw new AppError('No file available', 404);
+
+    // If R2 not configured or file was never stored, return helpful error
+    if (resource.fileUrl.startsWith('__no_storage__/')) {
+      throw new AppError('File storage is not configured. This file was not saved. Please configure R2 and re-upload.', 503);
+    }
 
     // Generate signed URL (valid for 1 hour)
     const { getSignedDownloadUrl } = await import('../lib/r2storage');

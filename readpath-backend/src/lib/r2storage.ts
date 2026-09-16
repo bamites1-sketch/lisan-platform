@@ -101,6 +101,13 @@ export async function uploadToR2(
   file: Express.Multer.File,
   category: FileCategory
 ): Promise<{ key: string; size: number }> {
+  // If R2 is not configured, skip upload and return a placeholder key
+  if (!isR2Configured()) {
+    console.warn('[R2] Storage not configured — file upload skipped (no R2 credentials).');
+    const key = generateFileKey(category, file.originalname);
+    return { key: `__no_storage__/${key}`, size: file.size };
+  }
+
   // Validate file
   const validation = validateFile(file, category);
   if (!validation.valid) {
@@ -135,6 +142,11 @@ export async function getSignedDownloadUrl(
   key: string,
   expiresInSeconds: number = 3600
 ): Promise<string> {
+  // If key is a no-storage placeholder or R2 not configured, return empty string
+  if (!isR2Configured() || key.startsWith('__no_storage__/')) {
+    return '';
+  }
+
   const command = new GetObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
@@ -145,6 +157,10 @@ export async function getSignedDownloadUrl(
 
 // ─── Delete File from R2 ──────────────────────────────────────────────────────
 export async function deleteFromR2(key: string): Promise<void> {
+  if (!isR2Configured() || key.startsWith('__no_storage__/')) {
+    return; // Nothing to delete
+  }
+
   const command = new DeleteObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,

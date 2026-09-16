@@ -27,6 +27,11 @@ services:
         sync: false
       - key: GEMINI_MODEL
         value: gemini-2.0-flash-exp
+      - key: SETUP_KEY
+        sync: false
+      # ── File storage (Cloudflare R2) ─────────────────────────────────────────
+      # Optional: app works without these — file uploads are skipped gracefully.
+      # Add these later in the Render dashboard when you set up Cloudflare R2.
       - key: R2_ACCOUNT_ID
         sync: false
       - key: R2_ACCESS_KEY_ID

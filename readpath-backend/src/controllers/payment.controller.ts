@@ -4,7 +4,7 @@ import prisma from '../lib/prisma';
 import { AppError } from '../middleware/errorHandler';
 import { createNotification } from './notification.controller';
 import multer from 'multer';
-import { uploadToR2, deleteFromR2, FileCategory } from '../lib/r2storage';
+import { uploadToR2, deleteFromR2, FileCategory, isR2Configured } from '../lib/r2storage';
 
 // ─── Multer configuration (memory storage for R2) ─────────────────────────────
 export const upload = multer({
@@ -29,7 +29,8 @@ export const submitPayment = async (req: AuthRequest, res: Response, next: NextF
     if (!amount || amount <= 0)  errors.amount         = 'Amount must be greater than 0.';
     if (!paymentMethod?.trim())  errors.paymentMethod  = 'Payment method is required.';
     if (!paymentDate?.trim())    errors.paymentDate    = 'Payment date is required.';
-    if (!file)                   errors.receipt        = 'Receipt screenshot is required.';
+    // Only require receipt file when R2 is configured and can actually store it
+    if (!file && isR2Configured()) errors.receipt = 'Receipt screenshot is required.';
     if (Object.keys(errors).length) { res.status(422).json({ success: false, errors }); return; }
 
     // Prevent duplicate pending submissions
@@ -115,6 +116,11 @@ export const getReceiptUrl = async (req: AuthRequest, res: Response, next: NextF
     const submission = await prisma.paymentSubmission.findUnique({ where: { id } });
     if (!submission) throw new AppError('Payment submission not found.', 404);
     if (!submission.receiptUrl) throw new AppError('No receipt available.', 404);
+
+    // If R2 not configured, the receipt was not stored
+    if (!isR2Configured() || submission.receiptUrl.startsWith('__no_storage__/')) {
+      throw new AppError('File storage is not configured. Receipt was not saved.', 503);
+    }
 
     // Generate signed URL (valid for 1 hour)
     const { getSignedDownloadUrl } = await import('../lib/r2storage');
