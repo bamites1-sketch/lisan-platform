@@ -1,0 +1,22 @@
+# Backend
+readpath-backend/node_modules/
+readpath-backend/dist/
+readpath-backend/.env
+readpath-backend/.env.local
+readpath-backend/prisma/dev.db
+readpath-backend/prisma/dev.db-journal
+readpath-backend/uploads/receipts/*
+readpath-backend/uploads/recordings/*
+readpath-backend/uploads/resources/*
+!readpath-backend/uploads/receipts/.gitkeep
+!readpath-backend/uploads/recordings/.gitkeep
+!readpath-backend/uploads/resources/.gitkeep
+
+# Frontend
+readpath-frontend/node_modules/
+readpath-frontend/dist/
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
