@@ -6,7 +6,7 @@ const router = Router();
 const prisma = new PrismaClient();
 
 // ONE-TIME setup endpoint to create initial admin
-router.post('/create-admin', async (req, res) => {
+router.get('/create-admin', async (req, res) => {
   try {
     // Check if any admin exists
     const existingAdmin = await prisma.user.findFirst({
