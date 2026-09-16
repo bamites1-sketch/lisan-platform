@@ -4,36 +4,12 @@ import prisma from '../lib/prisma';
 import { AppError } from '../middleware/errorHandler';
 import { createNotification } from './notification.controller';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { uploadToR2, deleteFromR2, FileCategory } from '../lib/r2storage';
 
-// ─── File upload configuration ────────────────────────────────────────────────
-const uploadDir = path.join(__dirname, '../../uploads/receipts');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  },
-});
-
-const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowed = /jpeg|jpg|png|pdf/;
-  const ext = path.extname(file.originalname).toLowerCase();
-  const mime = file.mimetype;
-  if (allowed.test(ext) && (mime.startsWith('image/') || mime === 'application/pdf')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only JPG, PNG, and PDF files are allowed'));
-  }
-};
-
+// ─── Multer configuration (memory storage for R2) ─────────────────────────────
 export const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter,
 });
 
 // ─── Submit payment (student/parent) ──────────────────────────────────────────
@@ -61,8 +37,6 @@ export const submitPayment = async (req: AuthRequest, res: Response, next: NextF
       where: { userId, status: 'PENDING' },
     });
     if (existing) {
-      // Delete uploaded file if submission fails
-      if (file) fs.unlinkSync(file.path);
       res.status(409).json({
         success: false,
         message: 'You already have a pending payment submission. Please wait for admin review.',
@@ -70,7 +44,12 @@ export const submitPayment = async (req: AuthRequest, res: Response, next: NextF
       return;
     }
 
-    const receiptUrl = file ? `/uploads/receipts/${file.filename}` : null;
+    // Upload receipt to R2
+    let receiptKey: string | null = null;
+    if (file) {
+      const result = await uploadToR2(file, FileCategory.RECEIPT);
+      receiptKey = result.key;
+    }
 
     const submission = await prisma.paymentSubmission.create({
       data: {
@@ -80,7 +59,7 @@ export const submitPayment = async (req: AuthRequest, res: Response, next: NextF
         paymentMethod:  paymentMethod!.trim(),
         transactionRef: transactionRef?.trim() || '',
         paymentDate:    paymentDate!.trim(),
-        receiptUrl,
+        receiptUrl:     receiptKey, // Store R2 key
         notes:          notes?.trim() ?? null,
         status:         'PENDING',
       },
@@ -125,6 +104,23 @@ export const listAllPayments = async (_req: AuthRequest, res: Response, next: Ne
       },
     });
     res.json({ success: true, data: submissions });
+  } catch (error) { next(error); }
+};
+
+// ─── Get signed URL for receipt viewing (admin only) ──────────────────────────
+export const getReceiptUrl = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    const submission = await prisma.paymentSubmission.findUnique({ where: { id } });
+    if (!submission) throw new AppError('Payment submission not found.', 404);
+    if (!submission.receiptUrl) throw new AppError('No receipt available.', 404);
+
+    // Generate signed URL (valid for 1 hour)
+    const { getSignedDownloadUrl } = await import('../lib/r2storage');
+    const signedUrl = await getSignedDownloadUrl(submission.receiptUrl, 3600);
+
+    res.json({ success: true, data: { url: signedUrl } });
   } catch (error) { next(error); }
 };
 
@@ -183,6 +179,15 @@ export const rejectPayment = async (req: AuthRequest, res: Response, next: NextF
 
     // Revert user status to PENDING so they can resubmit
     await prisma.user.update({ where: { id: submission.userId }, data: { status: 'PENDING' } });
+
+    // Delete rejected receipt from R2 to save storage
+    if (submission.receiptUrl) {
+      try {
+        await deleteFromR2(submission.receiptUrl);
+      } catch (err) {
+        console.error('Failed to delete rejected receipt from R2:', err);
+      }
+    }
 
     // Notify the user with the reason
     await createNotification({

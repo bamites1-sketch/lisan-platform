@@ -4,7 +4,7 @@ import {
   getDashboard, getAllUsers, createContent, getAnalytics,
   getAssignments, createAssignment, updateAssignment, deleteAssignment,
   getPassages, getQuestions, getVocabulary, getLessons, getAssessments, getPDFResources, 
-  uploadPDFResource, trackDownload, deleteContent, updateContent, upload,
+  uploadPDFResource, trackDownload, getResourceDownloadUrl, deleteContent, updateContent, upload,
   getStudents, getTeachers, getParents, createUser, deleteUser, getClasses, createClass, assignClassStudents, deleteClass,
 } from '../controllers/admin.controller';
 import {
@@ -52,7 +52,8 @@ router.get('/content/lessons',       getLessons);
 router.get('/content/assessments',   getAssessments);
 router.get('/content/pdf-resources', getPDFResources);
 router.post('/upload/pdf-resource',  upload.single('file'), uploadPDFResource);
-router.post('/content/pdf-resource/:id/download', trackDownload);
+router.get('/content/pdf-resource/:id/download', getResourceDownloadUrl);
+router.post('/content/pdf-resource/:id/track', trackDownload);
 router.delete('/content/:type/:id',  deleteContent);
 
 // Assignments

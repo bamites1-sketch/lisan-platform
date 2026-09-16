@@ -23,3 +23,6 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Deployment secrets — never commit
+YOUR_DEPLOYMENT_SECRETS.md

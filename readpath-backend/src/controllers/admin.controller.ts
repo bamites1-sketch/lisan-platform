@@ -4,41 +4,12 @@ import prisma from '../lib/prisma';
 import { AppError } from '../middleware/errorHandler';
 import { createNotification, broadcastToRole } from './notification.controller';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 
-// ─── File Upload Configuration ────────────────────────────────────────────────
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(process.cwd(), 'uploads', 'resources');
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedTypes = ['.pdf', '.ppt', '.pptx', '.xls', '.xlsx'];
-  const fileExtension = path.extname(file.originalname).toLowerCase();
-  
-  if (allowedTypes.includes(fileExtension)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only PDF, PPT, and Excel files are allowed.'));
-  }
-};
-
+// ─── File Upload Configuration (Memory Storage for R2) ────────────────────────
 export const upload = multer({
-  storage,
-  fileFilter,
+  storage: multer.memoryStorage(),
   limits: {
-    fileSize: 50 * 1024 * 1024 // 50MB limit
+    fileSize: 20 * 1024 * 1024 // 20MB limit
   }
 });
 
@@ -537,15 +508,18 @@ export const uploadPDFResource = async (req: AuthRequest, res: Response, next: N
     }
 
     const { title } = req.body;
-    const fileUrl = `/uploads/resources/${req.file.filename}`;
+    
+    // Upload to R2
+    const { uploadToR2, FileCategory } = await import('../lib/r2storage');
+    const result = await uploadToR2(req.file, FileCategory.RESOURCE);
     
     const resource = await prisma.pDFResource.create({
       data: {
-        title: title || req.file.originalname.replace('.pdf', ''),
+        title: title || req.file.originalname.replace(/\.(pdf|ppt|pptx|xls|xlsx|doc|docx)$/i, ''),
         description: '',
-        fileType: 'PDF',
+        fileType: req.file.originalname.match(/\.([^.]+)$/)?.[1]?.toUpperCase() || 'PDF',
         fileName: req.file.originalname,
-        fileUrl,
+        fileUrl: result.key, // Store R2 key
         fileSize: req.file.size,
         category: 'RESOURCE',
         grade: 'GRADE_6',
@@ -557,9 +531,30 @@ export const uploadPDFResource = async (req: AuthRequest, res: Response, next: N
 
     res.status(201).json({ success: true, data: resource });
   } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
+    next(error);
+  }
+};
+
+export const getResourceDownloadUrl = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    
+    const resource = await prisma.pDFResource.findUnique({ where: { id } });
+    if (!resource) throw new AppError('Resource not found', 404);
+    if (!resource.fileUrl) throw new AppError('No file available', 404);
+
+    // Generate signed URL (valid for 1 hour)
+    const { getSignedDownloadUrl } = await import('../lib/r2storage');
+    const signedUrl = await getSignedDownloadUrl(resource.fileUrl, 3600);
+
+    // Track download
+    await prisma.pDFResource.update({
+      where: { id },
+      data: { downloadCount: { increment: 1 } }
+    });
+
+    res.json({ success: true, data: { url: signedUrl } });
+  } catch (error) {
     next(error);
   }
 };
@@ -614,12 +609,15 @@ export const deleteContent = async (req: AuthRequest, res: Response, next: NextF
     }
 
     if (type === 'pdf-resource') {
-      // Get the resource to delete the physical file
+      // Get the resource to delete from R2
       const resource = await prisma.pDFResource.findUnique({ where: { id } });
       if (resource && resource.fileUrl) {
-        const filePath = path.join(process.cwd(), resource.fileUrl);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
+        try {
+          const { deleteFromR2 } = await import('../lib/r2storage');
+          await deleteFromR2(resource.fileUrl);
+        } catch (err) {
+          console.error('Failed to delete resource from R2:', err);
+          // Continue with database deletion
         }
       }
       await prisma.pDFResource.delete({ where: { id } });

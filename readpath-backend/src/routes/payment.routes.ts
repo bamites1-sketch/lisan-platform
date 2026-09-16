@@ -1,7 +1,7 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import {
-  submitPayment, getMySubmissions,
+  submitPayment, getMySubmissions, getReceiptUrl,
   listAllPayments, approvePayment, rejectPayment, upload,
 } from '../controllers/payment.controller';
 
@@ -12,8 +12,9 @@ router.use(authenticate);
 router.post('/',     authorize('STUDENT', 'PARENT'), upload.single('receipt'), submitPayment);
 router.get('/mine',  authorize('STUDENT', 'PARENT'), getMySubmissions);
 
-// Admin — list all + approve/reject
-router.get('/',            authorize('ADMIN'), listAllPayments);
+// Admin — list all + approve/reject + view receipt
+router.get('/',             authorize('ADMIN'), listAllPayments);
+router.get('/:id/receipt',  authorize('ADMIN'), getReceiptUrl);
 router.post('/:id/approve', authorize('ADMIN'), approvePayment);
 router.post('/:id/reject',  authorize('ADMIN'), rejectPayment);
 

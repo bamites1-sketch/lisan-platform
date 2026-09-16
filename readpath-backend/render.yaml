@@ -1,26 +1,43 @@
 services:
   - type: web
-    name: readpath-backend
-    env: node
+    name: lisan-backend
+    runtime: node
     region: oregon
-    plan: free
+    plan: starter
+    branch: main
     buildCommand: npm install && npx prisma generate && npm run build
-    startCommand: npm start
+    startCommand: npm run start:prod
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 5000
+        value: 10000
       - key: DATABASE_URL
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-      - key: JWT_REFRESH_SECRET
-        sync: false
+        fromDatabase:
+          name: lisan-db
+          property: connectionString
       - key: FRONTEND_URL
-        sync: false
+        value: https://readpath-frontend.vercel.app
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
       - key: GEMINI_API_KEY
         sync: false
-      - key: GEMINI_MODEL
-        value: gemini-3.5-flash
-    healthCheckPath: /health
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+
+databases:
+  - name: lisan-db
+    databaseName: lisan
+    user: lisan
+    region: oregon
+    plan: starter

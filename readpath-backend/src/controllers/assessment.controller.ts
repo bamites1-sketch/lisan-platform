@@ -4,27 +4,11 @@ import prisma from '../lib/prisma';
 import { AppError } from '../middleware/errorHandler';
 import { createNotification, broadcastToRole } from './notification.controller';
 import multer from 'multer';
+import { uploadToR2, FileCategory } from '../lib/r2storage';
 
-// Configure multer for audio uploads
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, 'uploads/recordings/');
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `assessment-${uniqueSuffix}.${file.mimetype.split('/')[1]}`);
-  }
-});
-
+// Configure multer for audio uploads (memory storage for R2)
 export const upload = multer({ 
-  storage,
-  fileFilter: (_req, file, cb) => {
-    if (file.mimetype.startsWith('audio/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only audio files are allowed'));
-    }
-  },
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 100 * 1024 * 1024 // Technical storage safeguard; no short recording duration limit.
   }
@@ -678,10 +662,14 @@ export const submitAssessmentRecording = async (
       throw new AppError('Assessment has already been submitted', 400);
     }
 
-    // Get uploaded file path
-    const audioUrl = req.file ? `/uploads/recordings/${req.file.filename}` : null;
+    // Upload audio to R2
+    let audioKey: string | null = null;
+    if (req.file) {
+      const result = await uploadToR2(req.file, FileCategory.RECORDING);
+      audioKey = result.key;
+    }
 
-    if (!audioUrl) {
+    if (!audioKey) {
       throw new AppError('Audio file is required', 400);
     }
 
@@ -689,7 +677,7 @@ export const submitAssessmentRecording = async (
     const updatedSubmission = await prisma.assessmentSubmission.update({
       where: { id: submission.id },
       data: {
-        audioUrl,
+        audioUrl: audioKey,
         duration: duration ? parseInt(duration) : null,
         status: 'SUBMITTED',
         submittedAt: new Date()

@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -70,13 +69,6 @@ const apiLimiter = rateLimit({
   message: { success: false, message: 'Too many requests. Please try again later.' },
   skipSuccessfulRequests: true,
 });
-
-// ─── Static files (uploaded audio) ───────────────────────────────────────────
-// Serve under /uploads but strip directory listing via express.static options
-app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
-  index: false,          // disable directory listing
-  dotfiles: 'deny',
-}));
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', message: 'ReadPath API is running' }));
