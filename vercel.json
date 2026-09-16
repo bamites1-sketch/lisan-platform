@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "readpath-backend/src/server.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "readpath-frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "readpath-frontend/dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "readpath-backend/src/server.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "readpath-frontend/dist/$1"
+    }
+  ],
+  "env": {
+    "JWT_SECRET": "readpath-super-secret-jwt-key-2026",
+    "JWT_REFRESH_SECRET": "readpath-super-secret-refresh-key-2026-different",
+    "GEMINI_API_KEY": "AIzaSyAb8RN6J0-JOXIaheRy8WP1s4bNw8-KGA37lvCPahwq5KjPFIug",
+    "GEMINI_MODEL": "gemini-3.5-flash",
+    "DATABASE_URL": "file:./dev.db"
+  }
+}
