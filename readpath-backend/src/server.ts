@@ -20,6 +20,7 @@ import recordingRoutes  from './routes/recording.routes';
 import notificationRoutes from './routes/notification.routes';
 import contactRoutes      from './routes/contact.routes';
 import paymentRoutes      from './routes/payment.routes';
+import setupRoutes        from './routes/setup.routes';
 
 dotenv.config();
 
@@ -95,6 +96,7 @@ app.use('/api/recordings',     apiLimiter,   recordingRoutes);
 app.use('/api/notifications',  apiLimiter,   notificationRoutes);
 app.use('/api/contact',        apiLimiter,   contactRoutes);   // public — no auth
 app.use('/api/payments',       apiLimiter,   paymentRoutes);
+app.use('/api/setup',          setupRoutes);                    // ONE-TIME admin creation
 
 app.use(errorHandler);
 
