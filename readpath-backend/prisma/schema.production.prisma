@@ -1,0 +1,328 @@
+// ReadPath Database Schema — PostgreSQL version for production
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  phone             String?
+  password          String
+  role              String    // STUDENT | PARENT | TEACHER | ADMIN
+  status            String    @default("PENDING") // PENDING | PAYMENT_PENDING | ACTIVE | SUSPENDED
+  passwordChangedAt DateTime? // set whenever password is changed; tokens issued before this are rejected
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  student Student?
+  parent  Parent?
+  teacher Teacher?
+  admin   Admin?
+  notifications      Notification[]
+  paymentSubmissions PaymentSubmission[]
+
+  @@map("users")
+}
+
+model Student {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName    String
+  lastName     String
+  grade        String   // GRADE_1 … GRADE_12
+  parentId     String?
+  parent       Parent?  @relation(fields: [parentId], references: [id])
+  teacherId    String?
+  teacher      Teacher? @relation(fields: [teacherId], references: [id])
+  xp           Int      @default(0)
+  level        Int      @default(1)
+  streakDays   Int      @default(0)
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assessments           Assessment[]
+  milestones            StudentMilestone[]
+  practiceReadings      PracticeReading[]
+  streaks               Streak[]
+  badges                Badge[]
+  studentTeacherNotes   StudentTeacherNote[]
+  assignedContent       StudentAssignedContent[]
+  diagnosticAssessments DiagnosticAssessment[]
+  lisanAssessments      LisanAssessment[]
+
+  @@map("students")
+}
+
+model Parent {
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName String
+  lastName  String
+  students  Student[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("parents")
+}
+
+model Teacher {
+  id                 String               @id @default(uuid())
+  userId             String               @unique
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName          String
+  lastName           String
+  specialization     String?
+  students           Student[]
+  studentTeacherNotes StudentTeacherNote[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@map("teachers")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName String
+  lastName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+model Assessment {
+  id                  String   @id @default(uuid())
+  studentId           String
+  student             Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type                String   // DIAGNOSTIC | PROGRESS | FINAL
+  readingLevel        String?  // A | B | C …
+  fluencyScore        Int?
+  comprehensionScore  Int?
+  accuracyScore       Int?
+  voiceRecordingUrl   String?
+  diagnosticResult    Json?
+  feedback            String?
+  completedAt         DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("assessments")
+}
+
+model StudentMilestone {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  milestoneId String
+  milestone   Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  progress    Float    @default(0)
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([studentId, milestoneId])
+  @@map("student_milestones")
+}
+
+model Milestone {
+  id          String             @id @default(uuid())
+  title       String
+  description String
+  xpReward    Int                @default(0)
+  order       Int
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  students    StudentMilestone[]
+
+  @@map("milestones")
+}
+
+model PracticeReading {
+  id                String   @id @default(uuid())
+  studentId         String
+  student           Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  contentId         String
+  content           Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  voiceRecordingUrl String?
+  fluencyScore      Int?
+  accuracyScore     Int?
+  completedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("practice_readings")
+}
+
+model Content {
+  id                     String                   @id @default(uuid())
+  title                  String
+  body                   String
+  readingLevel           String   // A | B | C …
+  genre                  String?
+  isPublic               Boolean  @default(false)
+  status                 String   @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  publishedAt            DateTime?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  practiceReadings       PracticeReading[]
+  assignedStudents       StudentAssignedContent[]
+  pdfResourcesAsContent  PDFResource[] @relation("ContentPDFs")
+  pdfResourcesAsAssessment PDFResource[] @relation("AssessmentPDFs")
+
+  @@map("content")
+}
+
+model Streak {
+  id        String   @id @default(uuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  startDate DateTime
+  endDate   DateTime?
+  days      Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("streaks")
+}
+
+model Badge {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  name        String
+  description String
+  iconUrl     String?
+  earnedAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("badges")
+}
+
+model StudentTeacherNote {
+  id        String   @id @default(uuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  note      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("student_teacher_notes")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   // INFO | SUCCESS | WARNING | ERROR
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notifications")
+}
+
+model StudentAssignedContent {
+  id        String   @id @default(uuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+  dueDate   DateTime?
+  completed Boolean  @default(false)
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, contentId])
+  @@map("student_assigned_content")
+}
+
+model PaymentSubmission {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount           Float
+  currency         String   @default("USD")
+  proofUrl         String?
+  status           String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  notes            String?
+  submittedAt      DateTime @default(now())
+  reviewedAt       DateTime?
+  reviewedBy       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("payment_submissions")
+}
+
+model DiagnosticAssessment {
+  id               String   @id @default(uuid())
+  studentId        String
+  student          Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  assessmentData   Json
+  result           Json?
+  completed        Boolean  @default(false)
+  completedAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("diagnostic_assessments")
+}
+
+model LisanAssessment {
+  id                String   @id @default(uuid())
+  studentId         String
+  student           Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  surahName         String
+  ayahRange         String
+  recitationUrl     String
+  transcription     String?
+  accuracyScore     Int?
+  tajweedScore      Int?
+  fluencyScore      Int?
+  overallScore      Int?
+  feedback          Json?
+  completed         Boolean  @default(false)
+  completedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("lisan_assessments")
+}
+
+model PDFResource {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  fileUrl     String
+  fileSize    Int?
+  mimeType    String   @default("application/pdf")
+  category    String   // CONTENT | ASSESSMENT | REFERENCE
+  contentId   String?
+  content     Content? @relation("ContentPDFs", fields: [contentId], references: [id], onDelete: SetNull)
+  assessmentContentId String?
+  assessmentContent   Content? @relation("AssessmentPDFs", fields: [assessmentContentId], references: [id], onDelete: SetNull)
+  uploadedBy  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("pdf_resources")
+}

@@ -100,8 +100,8 @@ app.use('/api/setup',          setupRoutes);                    // ONE-TIME admi
 
 app.use(errorHandler);
 
-// Only start the server if not in serverless environment (Vercel)
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+// Start the server
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`🚀 ReadPath API running on port ${PORT}`);
     console.log(`📂 Database: ${process.env.DATABASE_URL}`);
