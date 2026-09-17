@@ -2,7 +2,7 @@
 // In development: empty string — Vite proxy forwards /api → localhost:5000
 
 // PRODUCTION: Always use Back4app URL
-const BACK4APP_URL = 'https://readpathbackend-fm8jnxat.b4a.run';
+const BACK4APP_URL = 'https://readpathbackend-6ne04uax.b4a.run';
 
 export const apiBase = import.meta.env.MODE === 'production' 
   ? BACK4APP_URL 
