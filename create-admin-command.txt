@@ -1,0 +1,9 @@
+curl -X POST https://lisan-backend-nl8c.onrender.com/api/setup/create-admin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@lisan.com",
+    "password": "LiSAN2026!",
+    "firstName": "Admin",
+    "lastName": "User",
+    "setupKey": "lisan2026"
+  }'
