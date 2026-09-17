@@ -25,6 +25,7 @@ import TeacherDashboard from './pages/teacher/Dashboard'
 import AdminDashboard from './pages/admin/Dashboard'
 import AssessmentSubmissionsPage from './pages/admin/AssessmentSubmissionsPage'
 import CreateAssignmentPage from './components/admin/CreateAssignmentPage'
+import DiagnosticPage from './pages/DiagnosticPage'
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { user, isLoading } = useAuth()
@@ -106,6 +107,9 @@ export default function App() {
 
           {/* Notifications — all roles */}
           <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+
+          {/* Diagnostic page - temporary */}
+          <Route path="/diagnostic" element={<DiagnosticPage />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
