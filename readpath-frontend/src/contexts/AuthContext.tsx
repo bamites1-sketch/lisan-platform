@@ -142,27 +142,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string) => {
     let res: Response
     try {
-      res = await fetch(apiUrl('/api/auth/login'), {
+      const loginUrl = apiUrl('/api/auth/login')
+      console.log('🔐 Login attempt:', { loginUrl, email })
+      
+      res = await fetch(loginUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ email, password }),
       })
-    } catch {
-      throw new Error('The login service is unavailable. Please start the backend and try again.')
+      
+      console.log('📥 Login response:', { status: res.status, ok: res.ok })
+    } catch (err) {
+      console.error('❌ Login network error:', err)
+      throw new Error('The login service is unavailable. Please check your connection.')
     }
 
     const responseText = await res.text()
+    console.log('📄 Response text:', responseText.substring(0, 200))
+    
     let data: { success?: boolean; message?: string; data?: { token: string; user: User } } = {}
     try {
       data = responseText ? JSON.parse(responseText) : {}
-    } catch {
-      throw new Error(`The login service returned an invalid response (${res.status}).`)
+    } catch (parseErr) {
+      console.error('❌ JSON parse error:', parseErr)
+      throw new Error(`Invalid response from server (${res.status}). Please try again.`)
     }
+    
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Login failed. Please try again.')
+      console.error('❌ Login failed:', data)
+      throw new Error(data.message || `Login failed (${res.status}). Please try again.`)
     }
-    if (!data.data?.token || !data.data.user) throw new Error('Login response was incomplete. Please try again.')
+    
+    if (!data.data?.token || !data.data.user) {
+      console.error('❌ Incomplete response:', data)
+      throw new Error('Login response was incomplete. Please try again.')
+    }
+    
+    console.log('✅ Login successful:', { user: data.data.user.email, role: data.data.user.role })
     persistSession(data.data.token, data.data.user)
     scheduleRefresh(data.data.token)
   }, [persistSession, scheduleRefresh])
