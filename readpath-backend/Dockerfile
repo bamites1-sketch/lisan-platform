@@ -1,6 +1,9 @@
 # Use Node.js 20 Alpine for AWS SDK compatibility
 FROM node:20-alpine
 
+# Install OpenSSL for Prisma compatibility
+RUN apk add --no-cache openssl
+
 # Set working directory
 WORKDIR /app
 
