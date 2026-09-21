@@ -1,0 +1,16 @@
+node_modules
+src
+*.ts
+tsconfig.json
+.env.local
+.env.example
+prisma/migrations
+prisma/dev.db
+prisma/dev.db-journal
+uploads
+*.md
+.git
+.gitignore
+test-*.js
+create-*.js
+milestone-verify.js

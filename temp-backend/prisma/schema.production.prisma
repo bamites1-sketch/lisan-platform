@@ -129,12 +129,12 @@ model Assessment {
   id               String    @id @default(uuid())
   title            String
   description      String?
-  passage          String    // The reading passage/paragraph
-  grade            String    // Target grade level
-  skillAreas       String    // JSON array of skills to assess
-  instructions     String?   // Instructions for students
-  status           String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
-  createdBy        String    // Admin user ID
+  passage          String
+  grade            String
+  skillAreas       String
+  instructions     String?
+  status           String    @default("DRAFT")
+  createdBy        String
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -148,11 +148,11 @@ model AssessmentAssignment {
   id              String    @id @default(uuid())
   assessmentId    String
   assessment      Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-  assignmentType  String    // INDIVIDUAL | CLASS | GRADE
-  targetId        String?   // Student ID for individual, Teacher ID for class, null for grade
-  targetGrade     String?   // Grade level when assignmentType is GRADE
+  assignmentType  String
+  targetId        String?
+  targetGrade     String?
   dueDate         DateTime?
-  status          String    @default("ACTIVE") // ACTIVE | EXPIRED | CANCELLED
+  status          String    @default("ACTIVE")
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -165,15 +165,14 @@ model AssessmentSubmission {
   assessment        Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
   studentId         String
   student           Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  audioUrl          String?   // Path to recorded audio file
-  duration          Int?      // Duration in seconds
-  status            String    @default("IN_PROGRESS") // IN_PROGRESS | SUBMITTED | REVIEWED
+  audioUrl          String?
+  duration          Int?
+  status            String    @default("IN_PROGRESS")
   submittedAt       DateTime?
   reviewedAt        DateTime?
-  reviewedBy        String?   // Admin/Teacher user ID
+  reviewedBy        String?
   
-  // Scoring fields
-  overallScore      Int?      // Out of 100
+  overallScore      Int?
   fluencyScore      Int?
   accuracyScore     Int?
   phonemicAwarenessScore Int?
@@ -185,11 +184,10 @@ model AssessmentSubmission {
   correctWords      Int?
   totalWords        Int?
   
-  // Feedback fields
-  strengths         String?   // JSON array of strings
-  weaknesses        String?   // JSON array of strings
-  feedback          String?   // Detailed feedback text
-  recommendations   String?   // JSON array of recommendations
+  strengths         String?
+  weaknesses        String?
+  feedback          String?
+  recommendations   String?
   recommendedNextLevel String?
   intervention      String?
   
@@ -233,10 +231,10 @@ model ReadingProfile {
   fluencyScore           Int
   vocabularyScore        Int
   comprehensionScore     Int
-  strengths              String     // JSON string
-  weaknesses             String     // JSON string
-  priorities             String     // JSON string
-  recommendations        String     // JSON string
+  strengths              String
+  weaknesses             String
+  priorities             String
+  recommendations        String
   createdAt              DateTime   @default(now())
   updatedAt              DateTime   @updatedAt
 
@@ -268,7 +266,7 @@ model LearningWeek {
   learningPlan   LearningPlan @relation(fields: [learningPlanId], references: [id], onDelete: Cascade)
   weekNumber     Int
   title          String
-  goals          String       // JSON string
+  goals          String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -304,9 +302,9 @@ model Passage {
   topic           String?
   wordCount       Int
   language        String   @default("en")
-  status          String   @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
-  assignedGrades  String?  // JSON array of grade strings
-  requiredPlan    String?  // BASIC | PREMIUM | DIAGNOSTIC (null = all plans)
+  status          String   @default("DRAFT")
+  assignedGrades  String?
+  requiredPlan    String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -324,15 +322,15 @@ model Question {
   subskill        String?
   questionText    String
   questionType    String
-  options         String?  // JSON string
+  options         String?
   correctAnswer   String
   explanation     String?
   grade           String
   difficulty      String
   successRate     Float?
-  status          String   @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
-  assignedGrades  String?  // JSON array of grade strings
-  requiredPlan    String?  // BASIC | PREMIUM | DIAGNOSTIC (null = all plans)
+  status          String   @default("DRAFT")
+  assignedGrades  String?
+  requiredPlan    String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -355,9 +353,9 @@ model Vocabulary {
   amharicTranslation  String?
   oromoTranslation    String?
   tigrinyaTranslation String?
-  status              String   @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
-  assignedGrades      String?  // JSON array of grade strings
-  requiredPlan        String?  // BASIC | PREMIUM | DIAGNOSTIC (null = all plans)
+  status              String   @default("DRAFT")
+  assignedGrades      String?
+  requiredPlan        String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -372,15 +370,15 @@ model Lesson {
   grade               String
   difficulty          String
   explanation         String
-  examples            String   // JSON string
-  tips                String?  // JSON string
-  demonstrationSteps  String   // JSON string
-  guidedPractice      String   // JSON string
-  independentPractice String   // JSON string
+  examples            String
+  tips                String?
+  demonstrationSteps  String
+  guidedPractice      String
+  independentPractice String
   order               Int      @default(0)
-  status              String   @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
-  assignedGrades      String?  // JSON array of grade strings
-  requiredPlan        String?  // BASIC | PREMIUM | DIAGNOSTIC (null = all plans)
+  status              String   @default("DRAFT")
+  assignedGrades      String?
+  requiredPlan        String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -402,7 +400,7 @@ model FluencyAssessment {
   accuracy              Float?
   wordsPerMinute        Int?
   correctWordsPerMinute Int?
-  errors                String?   // JSON string
+  errors                String?
   pauses                Int?
   hesitations           Int?
   repetitions           Int?
@@ -454,7 +452,7 @@ model ChatMessage {
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   role      String
   message   String
-  context   String?  // JSON string
+  context   String?
   createdAt DateTime @default(now())
 
   @@map("chat_messages")
@@ -477,7 +475,7 @@ model ProgressLog {
   metric    String
   value     Float
   date      DateTime @default(now())
-  metadata  String?  // JSON string
+  metadata  String?
 
   @@map("progress_logs")
 }
@@ -508,15 +506,15 @@ model FluencyRecording {
 
 model Notification {
   id          String   @id @default(uuid())
-  recipientId String   // User.id (not profile id)
-  role        String   // STUDENT | TEACHER | ADMIN | PARENT
-  type        String   // new_content | new_recording | assessment_done | plan_updated | achievement | reminder | system | teacher_feedback
+  recipientId String
+  role        String
+  type        String
   title       String
   message     String
   icon        String   @default("🔔")
   link        String?
   read        Boolean  @default(false)
-  meta        String?  // JSON blob for extra data (score, rating, note, passage, etc.)
+  meta        String?
   createdAt   DateTime @default(now())
 
   recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
@@ -544,17 +542,17 @@ model PDFResource {
   id              String   @id @default(uuid())
   title           String
   description     String
-  fileType        String   // PDF | PPT | EXCEL
+  fileType        String
   fileName        String
   fileUrl         String
-  fileSize        Int      // in bytes
-  category        String   // WORKSHEET | GUIDE | ASSESSMENT | etc
+  fileSize        Int
+  category        String
   grade           String
   difficulty      String
-  status          String   @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
-  assignedGrades  String?  // JSON array of grade strings
-  requiredPlan    String?  // BASIC | PREMIUM | DIAGNOSTIC (null = all plans)
-  uploadedBy      String   // Admin user ID
+  status          String   @default("DRAFT")
+  assignedGrades  String?
+  requiredPlan    String?
+  uploadedBy      String
   downloadCount   Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -578,17 +576,17 @@ model PaymentSubmission {
   id              String    @id @default(uuid())
   userId          String
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  package         String    // e.g. "Reading Diagnostic Assessment"
+  package         String
   amount          Float
-  paymentMethod   String    // CBE | Telebirr | Abyssinia | Other
+  paymentMethod   String
   transactionRef  String
-  paymentDate     String    // ISO date string
-  receiptUrl      String?   // uploaded screenshot URL
+  paymentDate     String
+  receiptUrl      String?
   notes           String?
-  status          String    @default("PENDING") // PENDING | APPROVED | REJECTED
-  adminNote       String?   // rejection reason
+  status          String    @default("PENDING")
+  adminNote       String?
   reviewedAt      DateTime?
-  reviewedBy      String?   // admin userId
+  reviewedBy      String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

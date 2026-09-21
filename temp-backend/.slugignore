@@ -1,0 +1,10 @@
+*.md
+.env.local
+.env.example
+test-*.js
+create-*.js
+milestone-verify.js
+prisma/dev.db
+prisma/dev.db-journal
+uploads/*
+.git
