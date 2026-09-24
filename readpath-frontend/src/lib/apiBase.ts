@@ -1,4 +1,4 @@
-// Always use Back4App URL in production - updated for new deployment
+// Always use Back4App URL in production - updated for new deployment (CORS fixed)
 export const apiBase = import.meta.env.MODE === 'production' 
   ? 'https://lisanplatform2-0my7f45h.b4a.run'
   : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
