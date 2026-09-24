@@ -1,13 +1,12 @@
-// ReadPath Database Schema — SQLite FINAL FIX v2
+// ReadPath Database Schema — PostgreSQL for production
 
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "linux-musl"]
-  engineType = "library"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
