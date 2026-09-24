@@ -1,4 +1,5 @@
-FROM node:18-alpine
+FROM node:20-alpine
+# Force rebuild for SQLite schema fix
 
 WORKDIR /app
 

@@ -1,7 +1,8 @@
-// ReadPath Database Schema — SQLite for production (fixed deployment)
+// ReadPath Database Schema — SQLite for production (FORCE REBUILD)
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native"]
 }
 
 datasource db {
