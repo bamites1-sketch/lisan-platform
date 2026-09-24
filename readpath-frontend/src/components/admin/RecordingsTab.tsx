@@ -8,6 +8,31 @@ function recordingUrl(url?: string) {
   return url.startsWith('http') ? url : url
 }
 
+// Function to get signed URL for audio playback
+async function getAudioUrl(recordingId: string): Promise<string> {
+  try {
+    const token = localStorage.getItem('lisan_token') || localStorage.getItem('token') || '';
+    
+    const response = await fetch(`/api/admin/recordings/${recordingId}/audio`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Audio URL response:', data); // Debug logging
+    return data.data?.url || '';
+  } catch (error) {
+    console.error('Error getting audio URL:', error);
+    return '';
+  }
+}
+
 export default function RecordingsTab() {
   const toast = useToast()
   const [rows, setRows] = useState<ApiRecording[]>([])
@@ -17,12 +42,47 @@ export default function RecordingsTab() {
   const [saving, setSaving] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [ratings, setRatings] = useState<Record<string, number>>({})
+  const [audioUrls, setAudioUrls] = useState<Record<string, string>>({}) // Store signed URLs
 
-  const load = () => {
+  const load = async () => {
     setLoading(true)
-    recordingApi.forAdmin().then(setRows).catch(error => {
+    try {
+      const recordings = await recordingApi.forAdmin()
+      setRows(recordings)
+      
+      console.log('Loaded recordings:', recordings) // Debug logging
+      
+      // Load signed URLs for recordings that have audio
+      const recordingsWithAudio = recordings.filter(r => r.audioUrl && !r.audioUrl.includes('__no_storage__'))
+      console.log('Recordings with audio files:', recordingsWithAudio.length) // Debug logging
+      
+      const urlPromises = recordingsWithAudio.map(async (r) => {
+        try {
+          console.log(`Loading audio URL for recording ${r.id}...`) // Debug logging
+          const url = await getAudioUrl(r.id)
+          console.log(`Audio URL for ${r.id}:`, url) // Debug logging
+          return { id: r.id, url }
+        } catch (error) {
+          console.error(`Failed to load audio URL for ${r.id}:`, error)
+          return { id: r.id, url: '' }
+        }
+      })
+      
+      const urls = await Promise.all(urlPromises)
+      const urlMap: Record<string, string> = {}
+      urls.forEach(({ id, url }) => {
+        if (url) urlMap[id] = url
+      })
+      
+      console.log('Audio URL map:', urlMap) // Debug logging
+      setAudioUrls(urlMap)
+      
+    } catch (error) {
+      console.error('Load error:', error) // Debug logging
       toast.error('Could not load recordings', error instanceof Error ? error.message : 'Please try again.')
-    }).finally(() => setLoading(false))
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -67,7 +127,7 @@ export default function RecordingsTab() {
       {loading ? <div className="card text-center text-sm text-gray-500 py-12">Loading recordings...</div> : filtered.length === 0 ? (
         <div className="card"><EmptyState emoji="🎙️" title="No recordings found" subtitle={rows.length ? 'Try another search or filter.' : 'Student voice submissions will appear here.'} /></div>
       ) : <div className="space-y-4">{filtered.map(row => {
-        const url = recordingUrl(row.audioUrl)
+        const url = audioUrls[row.id] || '' // Use signed URL from state
         return <div key={row.id} className="card">
           <div className="flex flex-col lg:flex-row lg:items-start gap-4">
             <div className="flex-1 min-w-0">

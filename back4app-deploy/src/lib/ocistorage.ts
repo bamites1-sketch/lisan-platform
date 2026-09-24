@@ -1,7 +1,8 @@
 /**
- * Cloudflare R2 Storage Service
+ * Oracle Cloud Object Storage Service
  * 
- * Handles all file uploads, downloads, and deletions using Cloudflare R2 (S3-compatible).
+ * Handles all file uploads, downloads, and deletions using Oracle OCI Object Storage.
+ * Compatible with S3 API (uses AWS SDK with OCI endpoints).
  * Files are private by default and accessed via signed URLs.
  */
 
@@ -10,17 +11,18 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'crypto';
 import path from 'path';
 
-// ─── R2 Client Configuration ──────────────────────────────────────────────────
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: process.env.R2_ENDPOINT,
+// ─── OCI Storage Client Configuration ─────────────────────────────────────────
+const ociClient = new S3Client({
+  region: process.env.OCI_REGION || 'us-ashburn-1',
+  endpoint: `https://${process.env.OCI_NAMESPACE}.compat.objectstorage.${process.env.OCI_REGION || 'us-ashburn-1'}.oraclecloud.com`,
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+    accessKeyId: process.env.OCI_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.OCI_SECRET_ACCESS_KEY || '',
   },
+  forcePathStyle: true, // Required for OCI
 });
 
-const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'lisan-storage';
+const BUCKET_NAME = process.env.OCI_BUCKET_NAME || 'lisan-storage';
 
 // ─── File Type Configurations ─────────────────────────────────────────────────
 export enum FileCategory {
@@ -96,23 +98,11 @@ export function generateFileKey(category: FileCategory, originalName: string): s
   return `${category}/${timestamp}-${randomName}${ext}`;
 }
 
-// ─── Upload File to R2 ────────────────────────────────────────────────────────
-export async function uploadToR2(
+// ─── Upload File to OCI ───────────────────────────────────────────────────────
+export async function uploadToOCI(
   file: Express.Multer.File,
   category: FileCategory
 ): Promise<{ key: string; size: number }> {
-  // If R2 is not configured, use local storage
-  if (!isR2Configured()) {
-    console.warn('[R2] Storage not configured — using local storage for development.');
-    const { uploadToLocal, FileCategory: LocalCategory } = await import('./localStorage');
-    
-    // Map R2 categories to local categories
-    const localCategory = category as any;
-    const result = await uploadToLocal(file, localCategory);
-    
-    return { key: result.key, size: result.size };
-  }
-
   // Validate file
   const validation = validateFile(file, category);
   if (!validation.valid) {
@@ -134,7 +124,7 @@ export async function uploadToR2(
     },
   });
 
-  await r2Client.send(command);
+  await ociClient.send(command);
 
   return {
     key,
@@ -147,59 +137,42 @@ export async function getSignedDownloadUrl(
   key: string,
   expiresInSeconds: number = 3600
 ): Promise<string> {
-  // If R2 not configured, return local URL
-  if (!isR2Configured()) {
-    const { getLocalUrl } = await import('./localStorage');
-    return getLocalUrl(key);
-  }
-
-  // If key is a no-storage placeholder, return empty string
-  if (key.startsWith('__no_storage__/')) {
-    return '';
-  }
-
   const command = new GetObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
   });
 
-  return await getSignedUrl(r2Client, command, { expiresIn: expiresInSeconds });
+  return await getSignedUrl(ociClient, command, { expiresIn: expiresInSeconds });
 }
 
-// ─── Delete File from R2 ──────────────────────────────────────────────────────
-export async function deleteFromR2(key: string): Promise<void> {
-  if (!isR2Configured() || key.startsWith('__no_storage__/')) {
-    return; // Nothing to delete
-  }
-
+// ─── Delete File from OCI ─────────────────────────────────────────────────────
+export async function deleteFromOCI(key: string): Promise<void> {
   const command = new DeleteObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
   });
 
-  await r2Client.send(command);
+  await ociClient.send(command);
 }
 
 // ─── Batch Delete ─────────────────────────────────────────────────────────────
-export async function batchDeleteFromR2(keys: string[]): Promise<void> {
-  await Promise.all(keys.map(key => deleteFromR2(key)));
+export async function batchDeleteFromOCI(keys: string[]): Promise<void> {
+  await Promise.all(keys.map(key => deleteFromOCI(key)));
 }
 
-// ─── Check if R2 is Configured ────────────────────────────────────────────────
-export function isR2Configured(): boolean {
+// ─── Check if OCI is Configured ───────────────────────────────────────────────
+export function isOCIConfigured(): boolean {
   return !!(
-    process.env.R2_ACCOUNT_ID &&
-    process.env.R2_ACCESS_KEY_ID &&
-    process.env.R2_SECRET_ACCESS_KEY &&
-    process.env.R2_BUCKET_NAME &&
-    process.env.R2_ENDPOINT
+    process.env.OCI_NAMESPACE &&
+    process.env.OCI_ACCESS_KEY_ID &&
+    process.env.OCI_SECRET_ACCESS_KEY &&
+    process.env.OCI_BUCKET_NAME &&
+    process.env.OCI_REGION
   );
 }
 
-// ─── Get Public URL (if configured) ───────────────────────────────────────────
-export function getPublicUrl(key: string): string {
-  if (process.env.R2_PUBLIC_URL) {
-    return `${process.env.R2_PUBLIC_URL}/${key}`;
-  }
-  return `${process.env.R2_ENDPOINT}/${BUCKET_NAME}/${key}`;
-}
+// ─── Backward compatibility aliases for R2 code ───────────────────────────────
+export const uploadToR2 = uploadToOCI;
+export const deleteFromR2 = deleteFromOCI;
+export const batchDeleteFromR2 = batchDeleteFromOCI;
+export const isR2Configured = isOCIConfigured;

@@ -221,9 +221,9 @@ export interface ApiChildDetail {
 export const recordingApi = {
   mine:       ()                                         => get<ApiRecording[]>('/api/recordings/mine'),
   forTeacher: ()                                         => get<ApiRecording[]>('/api/recordings/teacher'),
-  forAdmin:   ()                                         => get<ApiRecording[]>('/api/recordings/admin'),
+  forAdmin:   ()                                         => get<ApiRecording[]>('/api/admin/recordings'), // Updated to use admin endpoint
   review:     (id: string, note: string, rating: number, flagged?: boolean) =>
-    post<ApiRecording>(`/api/recordings/${id}/review`, { note, rating, flagged }),
+    post<ApiRecording>(`/api/admin/recordings/${id}/review`, { note, rating, flagged }), // Updated to use admin endpoint
   upload: async (formData: FormData) => {
     const res = await fetch(apiUrl('/api/recordings/upload'), {
       method: 'POST',

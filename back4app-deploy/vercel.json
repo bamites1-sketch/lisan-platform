@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "DATABASE_URL": "file:./production.db",
+    "JWT_SECRET": "a28f056f0eb23fd1fcb09f42e3967daca296dd6a8f70b70e137bd03b49a54b53c2f50b9f462bc3401fe3d3f45d331ed069d0d881ea8797ed97cc3cf6e3dc377d",
+    "JWT_REFRESH_SECRET": "4fb224f78a9657e795240678728982a9b009ec8068fbb16225513c6c50520bd9d8440592eba4d8f89a5468c2119f805baad5ded748d1d54d47324b3ded62a6f5",
+    "FRONTEND_URL": "https://readpath-frontend.vercel.app"
+  }
+}
