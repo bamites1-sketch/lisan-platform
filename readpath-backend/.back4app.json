@@ -1,0 +1,12 @@
+{
+  "server": {
+    "parseVersions": [
+      {
+        "version": "6.5.1"
+      }
+    ]
+  },
+  "dockerImage": "node:20-alpine",
+  "port": 3000,
+  "healthCheck": "/health"
+}

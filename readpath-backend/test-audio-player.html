@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recordings Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .recording { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .recording h3 { margin: 0 0 10px 0; }
+        .info { color: #666; font-size: 14px; margin: 5px 0; }
+        audio { width: 100%; margin: 10px 0; }
+        .error { color: red; }
+        .success { color: green; }
+        .loading { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🎙️ Voice Recordings Admin Test</h1>
+    <p>Testing if admin can listen to student voice recordings...</p>
+    
+    <div id="status" class="loading">Loading recordings...</div>
+    <div id="recordings"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        let authToken = '';
+
+        async function login() {
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@lisan.com',
+                        password: 'LiSAN2026!'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success && data.data.token) {
+                    authToken = data.data.token;
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Login failed:', error);
+                return false;
+            }
+        }
+
+        async function getRecordings() {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/recordings`, {
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                return data.success ? data.data : [];
+            } catch (error) {
+                console.error('Failed to get recordings:', error);
+                return [];
+            }
+        }
+
+        async function getAudioUrl(recordingId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/recordings/${recordingId}/audio`, {
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                return data.success ? data.data.url : '';
+            } catch (error) {
+                console.error('Failed to get audio URL:', error);
+                return '';
+            }
+        }
+
+        async function loadRecordings() {
+            const statusDiv = document.getElementById('status');
+            const recordingsDiv = document.getElementById('recordings');
+            
+            // Login first
+            statusDiv.textContent = 'Logging in as admin...';
+            const loginSuccess = await login();
+            
+            if (!loginSuccess) {
+                statusDiv.className = 'error';
+                statusDiv.textContent = '❌ Login failed';
+                return;
+            }
+            
+            // Get recordings
+            statusDiv.textContent = 'Loading recordings...';
+            const recordings = await getRecordings();
+            
+            if (recordings.length === 0) {
+                statusDiv.className = 'error';
+                statusDiv.textContent = '❌ No recordings found';
+                return;
+            }
+            
+            statusDiv.className = 'success';
+            statusDiv.textContent = `✅ Found ${recordings.length} recordings`;
+            
+            // Display recordings
+            for (const recording of recordings) {
+                const recordingDiv = document.createElement('div');
+                recordingDiv.className = 'recording';
+                
+                recordingDiv.innerHTML = `
+                    <h3>${recording.studentName} - ${recording.passageTitle}</h3>
+                    <div class="info">Grade: ${recording.studentGrade?.replace('GRADE_', '') || 'Unknown'}</div>
+                    <div class="info">Recorded: ${new Date(recording.recordedAt).toLocaleString()}</div>
+                    <div class="info">Status: ${recording.reviewed ? 'Reviewed' : 'Pending Review'}</div>
+                    <div class="info">Audio: ${recording.audioUrl}</div>
+                    <div id="audio-${recording.id}">Loading audio player...</div>
+                `;
+                
+                recordingsDiv.appendChild(recordingDiv);
+                
+                // Get audio URL and create player
+                if (recording.audioUrl && !recording.audioUrl.includes('__no_storage__')) {
+                    const audioUrl = await getAudioUrl(recording.id);
+                    const audioDiv = document.getElementById(`audio-${recording.id}`);
+                    
+                    if (audioUrl) {
+                        audioDiv.innerHTML = `
+                            <audio controls preload="metadata" style="width: 100%; margin: 10px 0;">
+                                <source src="${audioUrl}" type="audio/webm">
+                                <source src="${audioUrl}" type="audio/mp4">
+                                Your browser does not support the audio element.
+                            </audio>
+                            <div style="margin: 5px 0;">
+                                <a href="${audioUrl}" target="_blank" style="color: blue; text-decoration: underline;">
+                                    🔗 Open audio file directly
+                                </a>
+                                <span style="margin: 0 10px;">|</span>
+                                <a href="${audioUrl}" download style="color: green; text-decoration: underline;">
+                                    ⬇️ Download audio file
+                                </a>
+                            </div>
+                        `;
+                    } else {
+                        audioDiv.innerHTML = '<div class="error">❌ Could not load audio URL</div>';
+                    }
+                } else {
+                    const audioDiv = document.getElementById(`audio-${recording.id}`);
+                    audioDiv.innerHTML = '<div class="error">❌ No audio file available (old recording)</div>';
+                }
+            }
+        }
+
+        // Start loading when page loads
+        window.addEventListener('load', loadRecordings);
+    </script>
+</body>
+</html>
