@@ -34,7 +34,7 @@ app.use(helmet.hsts({ maxAge: 60 * 60 * 24 * 365, includeSubDomains: true }));
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
   'https://readpath-frontend.vercel.app',
-  'https://readpath-backend.vercel.app',
+  'https://readpath-api.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173'
 ];
