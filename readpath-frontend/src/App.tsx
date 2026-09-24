@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { LangProvider } from './contexts/LangContext'
 
-// Build: 2026-09-24 12:17 - FORCE DEPLOYMENT
+// Build: 2026-09-24 12:30 - CACHE BYPASS DEPLOYMENT
+// CRITICAL: Fixed backend URL issue
 // Pages
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/auth/LoginPage'
