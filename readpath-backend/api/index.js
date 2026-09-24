@@ -1,10 +1,4 @@
 // Vercel serverless function entry point
-const path = require('path');
-
-// Set environment for production
-process.env.NODE_ENV = 'production';
-
-// Load the compiled Express app
-const app = require('../dist/server.js');
+const app = require('../dist/server.js').default;
 
 module.exports = app;

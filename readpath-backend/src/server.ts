@@ -34,6 +34,7 @@ app.use(helmet.hsts({ maxAge: 60 * 60 * 24 * 365, includeSubDomains: true }));
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
   'https://readpath-frontend.vercel.app',
+  'https://readpath-backend.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173'
 ];
@@ -124,10 +125,12 @@ app.use(errorHandler);
 
 // Start the server
 if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`🚀 ReadPath API running on port ${PORT}`);
     console.log(`📂 Database: ${process.env.DATABASE_URL}`);
   });
 }
 
+// Export for Vercel
 export default app;
