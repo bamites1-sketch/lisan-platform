@@ -1,4 +1,4 @@
-// ReadPath Database Schema — SQLite for production
+// ReadPath Database Schema — SQLite for production (fixed deployment)
 
 generator client {
   provider = "prisma-client-js"
