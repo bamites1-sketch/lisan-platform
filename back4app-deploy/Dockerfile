@@ -12,7 +12,8 @@ RUN npm ci --only=production
 # Copy source code
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma client with cache busting
+RUN rm -rf node_modules/.prisma node_modules/@prisma/client 2>/dev/null || true
 RUN npx prisma generate
 
 # Build the application
