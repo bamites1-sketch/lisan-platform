@@ -1,11 +1,11 @@
-// ReadPath Database Schema — SQLite for Back4App
+// ReadPath Database Schema — PostgreSQL for production
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
