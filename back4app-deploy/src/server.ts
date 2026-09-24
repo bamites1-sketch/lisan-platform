@@ -32,11 +32,26 @@ app.use(helmet());
 app.use(helmet.hsts({ maxAge: 60 * 60 * 24 * 365, includeSubDomains: true }));
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',');
+const allowedOrigins = [
+  'https://readpath-frontend.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173'
+];
+
+// Add FRONTEND_URL from env if it exists
+if (process.env.FRONTEND_URL) {
+  const envOrigins = process.env.FRONTEND_URL.split(',').map(url => url.trim());
+  allowedOrigins.push(...envOrigins);
+}
+
+console.log('🌐 Allowed CORS origins:', allowedOrigins);
+
 app.use(cors({
   origin: (origin, cb) => {
-    // Allow server-to-server calls (no origin) in dev; reject unknown origins in prod
+    console.log('CORS check - Origin:', origin, 'Allowed:', !origin || allowedOrigins.includes(origin));
+    // Allow server-to-server calls (no origin) or whitelisted origins
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    console.log('CORS rejected origin:', origin);
     cb(new Error('CORS: origin not allowed'));
   },
   credentials: true,          // required for HttpOnly cookies
