@@ -1,13 +1,16 @@
 {
   "version": 2,
-  "framework": null,
   "buildCommand": "npm run vercel-build",
-  "outputDirectory": null,
-  "installCommand": null,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/api/index.js"
+      "src": "api/index.js",
+      "use": "@vercel/node@20.x"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.js"
     }
   ]
 }
