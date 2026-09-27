@@ -1,0 +1,26 @@
+import { Response, NextFunction } from 'express';
+import { AuthRequest } from '../middleware/auth';
+import multer from 'multer';
+export declare const upload: multer.Multer;
+export declare const createAssessment: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getAllAssessments: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getAssessment: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const updateAssessment: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const deleteAssessment: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getStudentsForAssignment: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getTeachersForAssignment: (_req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getGradesForAssignment: (_req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const assignAssessment: (req: AuthRequest, res: Response, next: NextFunction) => Promise<Response<any, Record<string, any>> | undefined>;
+export declare const startDiagnosticAssessment: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getAssessmentQuestions: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const submitAssessmentResponse: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const completeAssessment: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getStudentAssessments: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getAssessmentForStudent: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const submitAssessmentRecording: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getSubmissionsForReview: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getSubmissionForReview: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const scoreSubmission: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getStudentAssessmentHistory: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const getAssessmentResult: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+//# sourceMappingURL=assessment.controller.d.ts.map
