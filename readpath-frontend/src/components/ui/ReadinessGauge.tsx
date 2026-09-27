@@ -13,7 +13,7 @@ export default function ReadinessGauge({ score, targetGrade, size = 'md' }: Prop
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (score / 100) * circumference
 
-  const color = score >= 75 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444'
+  const color = score >= 75 ? '#2d6a4f' : score >= 60 ? '#d4a017' : '#e11d48'
   const textSize = size === 'lg' ? 'text-4xl' : size === 'md' ? 'text-3xl' : 'text-2xl'
 
   return (
@@ -23,7 +23,7 @@ export default function ReadinessGauge({ score, targetGrade, size = 'md' }: Prop
           {/* Track */}
           <circle
             cx={cx} cy={cy} r={radius}
-            fill="none" stroke="#e5e7eb" strokeWidth={stroke}
+            fill="none" stroke="#e8f4f0" strokeWidth={stroke}
           />
           {/* Fill */}
           <circle
@@ -38,11 +38,11 @@ export default function ReadinessGauge({ score, targetGrade, size = 'md' }: Prop
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={`${textSize} font-bold`} style={{ color }}>{score}</span>
+          <span className={`${textSize} font-extrabold text-[#1a3a2a]`}>{score}</span>
           <span className="text-xs text-gray-400 font-medium">/100</span>
         </div>
       </div>
-      <p className="text-sm text-gray-600 text-center font-medium">
+      <p className="text-sm font-semibold text-[#1a3a2a] text-center">
         {targetGrade} Readiness
       </p>
     </div>

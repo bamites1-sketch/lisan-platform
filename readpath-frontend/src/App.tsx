@@ -1,6 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { LangProvider } from './contexts/LangContext'
+
+function AdminRedirect() {
+  const location = useLocation()
+  return <Navigate to={`/admin/dashboard${location.search}`} replace />
+}
 
 // Build: 2026-09-24 12:30 - CACHE BYPASS DEPLOYMENT
 // CRITICAL: Fixed backend URL issue
@@ -21,6 +26,7 @@ import ProgressPage from './pages/student/ProgressPage'
 import ReadingPracticePage from './pages/student/ReadingPracticePage'
 import AssignmentsPage from './pages/student/AssignmentsPage'
 import ClassesPage from './pages/student/ClassesPage'
+import ResourcesPage from './pages/student/ResourcesPage'
 import ParentDashboard from './pages/parent/Dashboard'
 import NotificationsPage from './pages/NotificationsPage'
 import TeacherDashboard from './pages/teacher/Dashboard'
@@ -95,6 +101,7 @@ export default function App() {
           <Route path="/student/reading-practice" element={<ProtectedRoute roles={['STUDENT']}><ReadingPracticePage /></ProtectedRoute>} />
           <Route path="/student/assignments" element={<ProtectedRoute roles={['STUDENT']}><AssignmentsPage /></ProtectedRoute>} />
           <Route path="/student/classes" element={<ProtectedRoute roles={['STUDENT']}><ClassesPage /></ProtectedRoute>} />
+          <Route path="/student/resources" element={<ProtectedRoute roles={['STUDENT']}><ResourcesPage /></ProtectedRoute>} />
 
           {/* Parent routes */}
           <Route path="/parent/dashboard" element={<ProtectedRoute roles={['PARENT']}><ParentDashboard /></ProtectedRoute>} />
@@ -103,6 +110,7 @@ export default function App() {
           <Route path="/teacher/dashboard" element={<ProtectedRoute roles={['TEACHER']}><TeacherDashboard /></ProtectedRoute>} />
 
           {/* Admin routes */}
+          <Route path="/admin" element={<AdminRedirect />} />
           <Route path="/admin/dashboard" element={<ProtectedRoute roles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/assessment-submissions" element={<ProtectedRoute roles={['ADMIN']}><AssessmentSubmissionsPage /></ProtectedRoute>} />
           <Route path="/admin/assignments/create" element={<ProtectedRoute roles={['ADMIN']}><CreateAssignmentPage /></ProtectedRoute>} />

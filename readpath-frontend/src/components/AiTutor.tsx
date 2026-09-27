@@ -36,10 +36,65 @@ export default function AiTutor() {
   const [historyLoaded, setHistoryLoaded] = useState(false)
   const [aiProvider, setAiProvider] = useState<'gemini' | 'openai' | 'offline' | null>(null)
   const [hasError, setHasError] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const profile = user?.profile as StudentProfile | undefined
   const firstName = profile?.firstName ?? 'there'
+
+  // Voice Speech-to-Text handler
+  const toggleSpeechRecognition = () => {
+    if (isListening) {
+      recognitionRef.current?.stop()
+      setIsListening(false)
+      return
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in this browser. Please try Chrome, Edge, or Safari.')
+      return
+    }
+
+    try {
+      const recognition = new SpeechRecognition()
+      recognition.continuous = false
+      recognition.interimResults = true
+      recognition.lang = 'en-US'
+
+      recognition.onstart = () => {
+        setIsListening(true)
+      }
+
+      recognition.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((r: any) => r[0].transcript)
+          .join('')
+        setInput(transcript)
+      }
+
+      recognition.onerror = () => {
+        setIsListening(false)
+      }
+
+      recognition.onend = () => {
+        setIsListening(false)
+      }
+
+      recognitionRef.current = recognition
+      recognition.start()
+    } catch {
+      setIsListening(false)
+    }
+  }
+
+  // Cleanup speech recognition on unmount
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop()
+    }
+  }, [])
 
   // Load chat history the first time the panel opens
   useEffect(() => {
@@ -254,6 +309,23 @@ export default function AiTutor() {
             ))}
           </div>
 
+          {/* Active Listening Indicator */}
+          {isListening && (
+            <div className="px-3 py-1.5 bg-red-50 border-t border-red-200 text-xs text-red-700 flex items-center justify-between animate-in">
+              <span className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping" />
+                <span className="font-semibold">Listening… speak your question now</span>
+              </span>
+              <button
+                type="button"
+                onClick={toggleSpeechRecognition}
+                className="text-[11px] font-bold text-red-800 underline hover:text-red-950"
+              >
+                Done / Stop
+              </button>
+            </div>
+          )}
+
           {/* Input bar */}
           <div className="p-3 border-t border-gray-100 flex gap-2 flex-shrink-0">
             <input
@@ -261,14 +333,37 @@ export default function AiTutor() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Ask me anything…"
+              placeholder={isListening ? "Listening to your voice..." : "Ask me anything…"}
               disabled={loading}
               className="flex-1 text-sm px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#003f3a]/30 focus:border-[#003f3a] disabled:bg-gray-50"
             />
+            {/* Voice Mic Button */}
+            <button
+              type="button"
+              onClick={toggleSpeechRecognition}
+              disabled={loading}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all flex-shrink-0 cursor-pointer ${
+                isListening
+                  ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse shadow-md ring-2 ring-red-300'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-[#003f3a]'
+              }`}
+              title={isListening ? 'Listening… click to stop' : 'Speak your question (Voice Input)'}
+              aria-label="Voice input"
+            >
+              {isListening ? (
+                <span className="text-sm">⏹</span>
+              ) : (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Send Button */}
             <button
               onClick={() => sendMessage()}
               disabled={!input.trim() || loading}
-              className="w-10 h-10 bg-[#003f3a] hover:bg-[#005a53] disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
+              className="w-10 h-10 bg-[#003f3a] hover:bg-[#005a53] disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer"
               aria-label="Send message"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>

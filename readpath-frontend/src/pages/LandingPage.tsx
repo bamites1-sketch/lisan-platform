@@ -364,7 +364,7 @@ function About() {
                 Built from the classroom.<br />Designed for the student.
               </h3>
               <p className="text-white/70 text-sm leading-relaxed">
-                LISAN was created by an educator who has spent over a decade in the classroom
+                LISAN was created by an educator who has spent over two decades in the classroom
                 watching students struggle with reading — not because they lack ability, but
                 because they lack a clear path. LISAN is that path.
               </p>
@@ -372,29 +372,40 @@ function About() {
 
             {/* Right — founder info */}
             <div className="p-8 sm:p-10 bg-white flex flex-col justify-center">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-5"
-                style={{ backgroundColor: C.light }}>
-                👨‍🏫
+              <div className="flex items-center gap-4 mb-5">
+                <img
+                  src="/founder.png"
+                  alt="Dr. Habtamu - Founder & Educator"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover object-top shadow-md border-2 border-[#d4af37]/50"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+                <div>
+                  <h4 className="text-xl font-extrabold mb-1" style={{ color: C.dark }}>Dr. Habtamu</h4>
+                  <p className="text-sm font-bold tracking-wide" style={{ color: C.mid }}>
+                    Founder &amp; Lead Educator
+                  </p>
+                  <span className="inline-block mt-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#f2c94c]/20 text-[#003f3a]">
+                    20+ Years Classroom Experience
+                  </span>
+                </div>
               </div>
-              <h4 className="text-xl font-extrabold mb-1" style={{ color: C.dark }}>Dr. Habtamu</h4>
-              <p className="text-sm font-semibold mb-4" style={{ color: C.mid }}>
-                Founder &amp; Educator
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2.5 text-sm text-gray-600">
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0"
-                    style={{ backgroundColor: C.light }}>✓</span>
-                  Over 10 years of teaching experience
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2.5 text-sm text-gray-700">
+                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold"
+                    style={{ backgroundColor: C.light, color: C.dark }}>✓</span>
+                  Over 20 years of dedicated teaching experience
                 </div>
-                <div className="flex items-center gap-2.5 text-sm text-gray-600">
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0"
-                    style={{ backgroundColor: C.light }}>✓</span>
-                  Specialised in reading literacy development
+                <div className="flex items-center gap-2.5 text-sm text-gray-700">
+                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold"
+                    style={{ backgroundColor: C.light, color: C.dark }}>✓</span>
+                  Specialised in reading literacy &amp; diagnostic development
                 </div>
-                <div className="flex items-center gap-2.5 text-sm text-gray-600">
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0"
-                    style={{ backgroundColor: C.light }}>✓</span>
-                  Designed LISAN around real classroom needs
+                <div className="flex items-center gap-2.5 text-sm text-gray-700">
+                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold"
+                    style={{ backgroundColor: C.light, color: C.dark }}>✓</span>
+                  Designed LISAN around real classroom and child literacy needs
                 </div>
               </div>
             </div>
@@ -1005,10 +1016,20 @@ function Contact() {
             <div className="p-8">
               <EthPattern className="w-10 h-10 mb-6 opacity-25" style={{ color: C.gold }} />
 
-              <h3 className="text-xl font-extrabold text-white mb-1">Dr. Habtamu</h3>
-              <p className="text-sm font-medium mb-6" style={{ color: C.gold }}>
-                Founder &amp; Educator
-              </p>
+              <div className="flex items-center gap-4 mb-6">
+                <img
+                  src="/founder.png"
+                  alt="Dr. Habtamu"
+                  className="w-16 h-16 rounded-2xl object-cover object-top border-2 border-[#d4af37]/40 shadow-sm"
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                />
+                <div>
+                  <h3 className="text-xl font-extrabold text-white mb-0.5">Dr. Habtamu</h3>
+                  <p className="text-sm font-semibold" style={{ color: C.gold }}>
+                    Founder &amp; Educator
+                  </p>
+                </div>
+              </div>
 
               <div className="space-y-5">
                 <div className="flex items-start gap-3">
@@ -1046,7 +1067,7 @@ function Contact() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-white/50 mb-0.5">Experience</p>
-                    <p className="text-sm text-white/85">Over 10 years of teaching experience</p>
+                    <p className="text-sm text-white/85">Over 20 years of teaching experience</p>
                   </div>
                 </div>
               </div>
@@ -1291,8 +1312,14 @@ function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-xs text-white/35">© 2026 LISAN. All rights reserved.</p>
+          <p className="text-[11px] text-white/30 text-center">
+            Developed by Beamlak Tesfahun — for any comment and update{' '}
+            <a href="mailto:bamites1@gmail.com" className="text-white/45 hover:text-white/80 transition-colors underline decoration-white/20">
+              bamites1@gmail.com
+            </a>
+          </p>
           <div className="flex gap-5">
             {/* These routes don't exist yet — rendered as plain text until pages are built */}
             <span className="text-xs text-white/35 cursor-default">Privacy Policy</span>

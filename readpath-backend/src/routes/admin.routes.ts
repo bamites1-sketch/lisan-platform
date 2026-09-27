@@ -7,6 +7,7 @@ import {
   uploadPDFResource, trackDownload, getResourceDownloadUrl, deleteContent, updateContent, upload,
   getStudents, getTeachers, getParents, createUser, deleteUser, getClasses, createClass, assignClassStudents, deleteClass,
   getAllRecordingSubmissions, reviewRecordingSubmission, getRecordingSubmissionAudioUrl,
+  updateAdminProfile, updateUserStatus,
 } from '../controllers/admin.controller';
 import {
   createAssessment,
@@ -31,12 +32,16 @@ router.use(authorize('ADMIN'));
 router.get('/dashboard',  getDashboard);
 router.get('/analytics',  getAnalytics);
 
+// Admin Profile
+router.put('/profile', updateAdminProfile);
+
 // Users
 router.get('/users',           getAllUsers);
 router.get('/students',        getStudents);
 router.get('/teachers',        getTeachers);
 router.get('/parents',         getParents);
 router.post('/users',          createUser);
+router.patch('/users/:id/status', updateUserStatus);
 router.delete('/users/:id',    deleteUser);
 router.get('/classes',         getClasses);
 router.post('/classes',        createClass);
@@ -81,10 +86,11 @@ router.get('/assessments/submissions/review',  getSubmissionsForReview);
 router.get('/assessments/submissions/:id',     getSubmissionForReview);
 router.put('/assessments/submissions/:id/score', scoreSubmission);
 
-export default router;
 // Voice recordings - get all assessment submissions with audio
 router.get('/recordings', getAllRecordingSubmissions);
 // Review recording submission
 router.post('/recordings/:id/review', reviewRecordingSubmission);
 // Get audio URL for recording submission
 router.get('/recordings/:id/audio', getRecordingSubmissionAudioUrl);
+
+export default router;

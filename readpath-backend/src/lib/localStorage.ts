@@ -8,12 +8,19 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import os from 'os';
 
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
+const UPLOAD_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'uploads')
+  : path.join(process.cwd(), 'uploads');
 
-// Ensure upload directory exists
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+// Ensure upload directory exists safely
+try {
+  if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  }
+} catch (e) {
+  console.warn('[localStorage] Could not create UPLOAD_DIR:', e);
 }
 
 export enum FileCategory {
@@ -55,9 +62,27 @@ export async function uploadToLocal(
   };
 }
 
-// Get local URL for file
-export function getLocalUrl(key: string, baseUrl: string = 'http://localhost:5000'): string {
-  return `${baseUrl}/uploads/${key}`;
+// Get local URL for file — in production, resolve from BACKEND_PUBLIC_URL env.
+// Never returns a localhost URL in production — falls back to an empty string with a warning.
+export function getLocalUrl(key: string, baseUrl?: string): string {
+  const resolvedBase =
+    baseUrl ??
+    process.env.BACKEND_PUBLIC_URL ??
+    (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
+
+  if (!resolvedBase) {
+    console.warn(
+      `[storage] getLocalUrl: no BACKEND_PUBLIC_URL configured in production. ` +
+        `Returning empty URL for key "${key}". ` +
+        `Set BACKEND_PUBLIC_URL=https://your-backend.example.com or configure Cloudflare R2.`
+    );
+    return '';
+  }
+
+  const trimmed = resolvedBase.endsWith('/')
+    ? resolvedBase.slice(0, -1)
+    : resolvedBase;
+  return `${trimmed}/uploads/${key}`;
 }
 
 // Delete local file

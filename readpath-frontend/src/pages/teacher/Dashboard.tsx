@@ -367,27 +367,107 @@ function RecordingCard({
                 />
               </div>
 
-              {/* Quick phrases */}
-              <div>
-                <p className="text-[11px] text-gray-400 mb-1.5">Quick phrases</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    'Good pacing!',
-                    'Work on expression',
-                    'Pause at punctuation',
-                    'Excellent accuracy',
-                    'Slow down slightly',
-                    'Strong fluency',
-                  ].map(phrase => (
+              {/* Categorized Quick-Feedback Chips */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">
+                    ⚡ Quick Feedback Presets (tap to insert)
+                  </p>
+                  {note && (
                     <button
-                      key={phrase}
                       type="button"
-                      onClick={() => setNote(n => n ? `${n} ${phrase}` : phrase)}
-                      className="text-[11px] bg-white border border-gray-200 hover:border-brand-300 hover:bg-brand-50 text-gray-600 hover:text-brand-700 px-2.5 py-1 rounded-lg transition-colors"
+                      onClick={() => setNote('')}
+                      className="text-[11px] text-gray-400 hover:text-red-500 transition-colors"
                     >
-                      + {phrase}
+                      Clear
                     </button>
-                  ))}
+                  )}
+                </div>
+
+                {/* Categories */}
+                <div className="space-y-1.5 text-left">
+                  {/* Praise */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Praise</span>
+                    {[
+                      { emoji: '👏', text: 'Outstanding accuracy and confident expression!' },
+                      { emoji: '🌟', text: 'Great rhythm and natural reading pace!' },
+                      { emoji: '🔥', text: 'Noticeable improvement since your last recording!' },
+                    ].map(item => (
+                      <button
+                        key={item.text}
+                        type="button"
+                        onClick={() => setNote(n => n ? `${n.trim()} ${item.text}` : item.text)}
+                        className="text-[11px] bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded-lg transition-all active:scale-95 shadow-2xs flex items-center gap-1"
+                        title={item.text}
+                      >
+                        <span>{item.emoji}</span>
+                        <span className="truncate max-w-[200px] sm:max-w-none">{item.text}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Phonics & Accuracy */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-purple-800 bg-purple-100 px-2 py-0.5 rounded">Phonics</span>
+                    {[
+                      { emoji: '🎯', text: 'Focus on ending consonants (-ed, -s, -ing).' },
+                      { emoji: '🔤', text: 'Break longer multisyllabic words into syllables.' },
+                      { emoji: '👂', text: 'Sound out the vowel blends clearly.' },
+                    ].map(item => (
+                      <button
+                        key={item.text}
+                        type="button"
+                        onClick={() => setNote(n => n ? `${n.trim()} ${item.text}` : item.text)}
+                        className="text-[11px] bg-white border border-purple-200 hover:border-purple-400 hover:bg-purple-50 text-purple-900 px-2 py-0.5 rounded-lg transition-all active:scale-95 shadow-2xs flex items-center gap-1"
+                        title={item.text}
+                      >
+                        <span>{item.emoji}</span>
+                        <span className="truncate max-w-[200px] sm:max-w-none">{item.text}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Pacing & Expression */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded">Pacing</span>
+                    {[
+                      { emoji: '⏱️', text: 'Remember to pause at commas and full stops.' },
+                      { emoji: '🐢', text: 'Slow down slightly to maintain clarity and accuracy.' },
+                      { emoji: '🗣️', text: 'Read in smooth phrases rather than word-by-word.' },
+                    ].map(item => (
+                      <button
+                        key={item.text}
+                        type="button"
+                        onClick={() => setNote(n => n ? `${n.trim()} ${item.text}` : item.text)}
+                        className="text-[11px] bg-white border border-sky-200 hover:border-sky-400 hover:bg-sky-50 text-sky-900 px-2 py-0.5 rounded-lg transition-all active:scale-95 shadow-2xs flex items-center gap-1"
+                        title={item.text}
+                      >
+                        <span>{item.emoji}</span>
+                        <span className="truncate max-w-[200px] sm:max-w-none">{item.text}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Next Step */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">Next Steps</span>
+                    {[
+                      { emoji: '📖', text: 'Re-read this passage once more aloud today.' },
+                      { emoji: '💡', text: 'Practice reading this passage with a family member tonight.' },
+                    ].map(item => (
+                      <button
+                        key={item.text}
+                        type="button"
+                        onClick={() => setNote(n => n ? `${n.trim()} ${item.text}` : item.text)}
+                        className="text-[11px] bg-white border border-amber-200 hover:border-amber-400 hover:bg-amber-50 text-amber-900 px-2 py-0.5 rounded-lg transition-all active:scale-95 shadow-2xs flex items-center gap-1"
+                        title={item.text}
+                      >
+                        <span>{item.emoji}</span>
+                        <span className="truncate max-w-[200px] sm:max-w-none">{item.text}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 

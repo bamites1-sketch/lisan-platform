@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { paymentApi, type ApiPaymentSubmission } from '../services/api'
+import PaymentQrCard from '../components/ui/PaymentQrCard'
 
 const C = { dark: '#1a3a2a', mid: '#2d6a4f', gold: '#d4a017', light: '#e8f4f0', cream: '#f5f0e8' }
 
@@ -218,35 +219,8 @@ export default function PaymentPage() {
           </div>
         )}
 
-        {/* Payment accounts */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100" style={{ backgroundColor: C.dark }}>
-            <p className="font-bold text-white text-sm">Step 1 — Make Your Payment</p>
-            <p className="text-xs text-white/60 mt-0.5">Transfer to one of the accounts below</p>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {BANK_ACCOUNTS.map(b => (
-              <div key={b.name} className="flex items-center gap-4 px-5 py-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                  style={{ backgroundColor: b.color }}>
-                  {b.name.slice(0, 2)}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-900">{b.name}</p>
-                  <p className="text-xs text-gray-500">{b.full}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Account</p>
-                  <p className="text-sm font-bold text-gray-700 font-mono">{b.account}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="px-5 py-3 text-xs text-gray-400 border-t border-gray-50"
-            style={{ backgroundColor: '#fafafa' }}>
-            ⚠️ After paying, keep your transaction reference number — you'll need it below.
-          </div>
-        </div>
+        {/* Payment accounts & QR codes */}
+        <PaymentQrCard onSelectBank={(bankName) => set('paymentMethod', bankName)} />
 
         {/* Submission form */}
         {!latestPending ? (

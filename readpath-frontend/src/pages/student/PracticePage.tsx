@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import StudentLayout from '../../components/layout/StudentLayout'
 import type { Question, SkillArea } from '../../types'
+import FlashcardMode from '../../components/ui/FlashcardMode'
 
 type Phase = 'loading' | 'error' | 'empty' | 'intro' | 'practice' | 'result'
 
@@ -36,6 +37,7 @@ export default function PracticePage() {
   const [showHint, setShowHint] = useState(false)
   const [hintLevel, setHintLevel] = useState(0)
   const [hintsUsed, setHintsUsed] = useState(0)
+  const [studyMode, setStudyMode] = useState<'quiz' | 'flashcards'>('quiz')
 
   const startPractice = async () => {
     setPhase('loading')
@@ -179,6 +181,15 @@ export default function PracticePage() {
     </StudentLayout>
   )
 
+  // ── FLASHCARD STUDY MODE ──────────────────────────────────────────────────
+  if (studyMode === 'flashcards') {
+    return (
+      <StudentLayout>
+        <FlashcardMode onBackToQuiz={() => setStudyMode('quiz')} />
+      </StudentLayout>
+    )
+  }
+
   // ── EMPTY ──────────────────────────────────────────────────────────────────
   if (phase === 'empty') return (
     <StudentLayout>
@@ -187,9 +198,15 @@ export default function PracticePage() {
           <div className="text-5xl mb-4">📭</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{info.title}</h1>
           <p className="text-gray-500 mb-6 text-sm">
-            No questions are available for <strong>{info.title}</strong> yet. An admin needs to add questions to the content library before you can practice this skill.
+            No questions are available for <strong>{info.title}</strong> yet. You can still practice vocabulary words with the interactive Flashcard Deck below.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => setStudyMode('flashcards')}
+              className="btn-primary flex items-center justify-center gap-2 px-6"
+            >
+              <span>🎴</span> Study Flashcards Deck
+            </button>
             <Link to="/student/dashboard" className="btn-secondary px-6">Back to Dashboard</Link>
           </div>
         </div>
@@ -221,10 +238,16 @@ export default function PracticePage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{info.title}</h1>
           <p className="text-gray-500 mb-6 text-sm leading-relaxed max-w-sm mx-auto">{info.tip}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button onClick={() => setPhase('practice')} className="btn-primary px-8">
-              Start Practice →
+            <button onClick={() => setPhase('practice')} className="btn-primary px-6">
+              Start Quiz Practice →
             </button>
-            <Link to="/student/dashboard" className="btn-secondary px-6">Back to Dashboard</Link>
+            <button
+              onClick={() => setStudyMode('flashcards')}
+              className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-sm"
+            >
+              <span>🎴</span> Flashcards Mode
+            </button>
+            <Link to="/student/dashboard" className="btn-secondary px-5">Back to Dashboard</Link>
           </div>
           <p className="text-xs text-gray-400 mt-4">{questions.length} question{questions.length !== 1 ? 's' : ''} · Hints available</p>
         </div>
@@ -308,7 +331,17 @@ export default function PracticePage() {
         <div className="card mb-5">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold text-gray-700">{info.emoji} {info.title}</span>
-            <span className="text-sm text-gray-500">{currentIdx + 1} / {questions.length}</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setStudyMode('flashcards')}
+                className="text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
+                title="Switch to Flashcards"
+              >
+                <span>🎴</span> Flashcards
+              </button>
+              <span className="text-sm text-gray-500">{currentIdx + 1} / {questions.length}</span>
+            </div>
           </div>
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-2 bg-brand-500 rounded-full transition-all duration-500"

@@ -4,6 +4,7 @@ import StudentLayout from '../../components/layout/StudentLayout'
 import { useAuth } from '../../contexts/AuthContext'
 import { studentApi, profileApi, type ApiProgressLog } from '../../services/api'
 import type { StudentProfile } from '../../types'
+import PrintableReportCard from '../../components/ui/PrintableReportCard'
 
 // ─── Tiny SVG line chart ──────────────────────────────────────────────────────
 function MiniLineChart({ data, color = '#2563eb', height = 120 }: {
@@ -120,6 +121,7 @@ export default function ProgressPage() {
   const [profileHistory, setProfileHistory] = useState<ProfileSnapshot[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState('')
+  const [showCertificate, setShowCertificate] = useState(false)
 
   useEffect(() => {
     const ac = new AbortController()
@@ -211,6 +213,30 @@ export default function ProgressPage() {
 
         {!loading && profileHistory.length > 0 && (
           <>
+            {/* Printable Certificate & Official Report Banner */}
+            <div className="card bg-gradient-to-r from-[#1a3a2a] to-[#2d6a4f] text-white p-5 border-0 shadow-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-2xl flex-shrink-0">
+                    📜
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-bold">Official Reading Diagnostic Certificate</h2>
+                    <p className="text-xs text-white/80 mt-0.5">
+                      Generate and print an official verified progress report with skill breakdowns and seals.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCertificate(true)}
+                  className="px-5 py-2.5 bg-[#d4a017] hover:bg-[#e5ac1d] text-gray-950 font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 flex-shrink-0 cursor-pointer"
+                >
+                  <span>🖨️</span> View Official Certificate
+                </button>
+              </div>
+            </div>
+
             {/* Score hero */}
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="card text-center">
@@ -322,6 +348,24 @@ export default function ProgressPage() {
             </Link>
           </div>
         </div>
+        {/* Printable Certificate Modal */}
+        {latest && (
+          <PrintableReportCard
+            open={showCertificate}
+            onClose={() => setShowCertificate(false)}
+            data={{
+              studentName: profile ? `${profile.firstName} ${profile.lastName}` : 'Student',
+              grade: profile?.grade || 'GRADE_1',
+              readinessScore: latest.readinessScore,
+              date: new Date(latest.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+              phonemicAwareness: latest.phonemicAwarenessScore,
+              phonicsDecoding: latest.phonicsDecodingScore,
+              fluency: latest.fluencyScore,
+              vocabulary: latest.vocabularyScore,
+              comprehension: latest.comprehensionScore,
+            }}
+          />
+        )}
       </div>
     </StudentLayout>
   )

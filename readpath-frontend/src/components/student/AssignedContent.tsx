@@ -87,17 +87,17 @@ export default function AssignedContent() {
   if (loading || items.length === 0) return null
 
   return (
-    <div className="card">
+    <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="section-title flex items-center gap-2">
-            📋 Assigned to You
+          <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+            <span>📋</span> Assigned to You
           </h2>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Content assigned for Grade {profile?.grade?.replace('GRADE_', '')}
+          <p className="text-xs text-gray-500 mt-0.5">
+            Curated lessons and passages for Grade {profile?.grade?.replace('GRADE_', '')}
           </p>
         </div>
-        <span className="text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-full">
+        <span className="text-xs font-semibold text-[#1a3a2a] bg-[#e8f4f0] border border-[#2d6a4f]/20 px-3 py-1 rounded-full">
           {items.length} item{items.length !== 1 ? 's' : ''}
         </span>
       </div>
@@ -108,35 +108,35 @@ export default function AssignedContent() {
           const diff = item.contentDifficulty ?? 'MEDIUM'
 
           return (
-            <div key={item.id} className="border border-brand-200 bg-brand-50 rounded-2xl overflow-hidden">
+            <div key={item.id} className="border border-[#2d6a4f]/25 bg-gradient-to-r from-[#e8f4f0]/40 to-white rounded-2xl overflow-hidden transition-all shadow-2xs">
               <button
                 onClick={() => setExpanded(isOpen ? null : item.id)}
-                className="w-full flex items-start gap-3 p-4 text-left"
+                className="w-full flex items-start gap-3.5 p-4 text-left hover:bg-[#e8f4f0]/30 transition-colors"
               >
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${
-                  item.contentType === 'passage' ? 'bg-blue-100' : 'bg-green-100'
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 shadow-xs ${
+                  item.contentType === 'passage' ? 'bg-[#e8f4f0] text-[#1a3a2a]' : 'bg-[#f5f0e8] text-[#936605]'
                 }`}>
                   {item.contentType === 'passage' ? '📖' : '🎓'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-semibold text-gray-900">{item.contentTitle}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${DIFF_COLORS[diff] ?? DIFF_COLORS.MEDIUM}`}>
+                    <p className="text-sm font-bold text-[#1a3a2a]">{item.contentTitle}</p>
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${DIFF_COLORS[diff] ?? DIFF_COLORS.MEDIUM}`}>
                       {diff.charAt(0) + diff.slice(1).toLowerCase()}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="text-xs text-gray-500 capitalize">{item.contentType}</span>
                     {item.contentWordCount && <span className="text-xs text-gray-400">· {item.contentWordCount} words</span>}
-                    {item.note && <span className="text-xs text-brand-600 font-medium">· "{item.note}"</span>}
+                    {item.note && <span className="text-xs text-[#2d6a4f] font-semibold">· "{item.note}"</span>}
                     {item.dueDate && (
-                      <span className="text-xs text-orange-600 font-medium">
+                      <span className="text-xs text-amber-600 font-semibold">
                         · Due {new Date(item.dueDate).toLocaleDateString()}
                       </span>
                     )}
                   </div>
                 </div>
-                <span className="text-gray-400 flex-shrink-0 mt-1">{isOpen ? '▲' : '▼'}</span>
+                <span className="text-[#2d6a4f] flex-shrink-0 mt-1 font-bold text-xs">{isOpen ? '▲' : '▼'}</span>
               </button>
 
               {isOpen && (

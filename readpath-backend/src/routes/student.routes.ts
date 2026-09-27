@@ -6,18 +6,23 @@ import {
   getProgressLogs, 
   getStudentAssignments,
   getStudentContent,
-  getContentItem
-  ,getStudentClasses
+  getContentItem,
+  getStudentClasses,
+  getStudentResources,
+  getStudentResourceDownloadUrl
 } from '../controllers/student.controller';
 
 const router = express.Router();
 router.use(authenticate);
 router.use(authorize('STUDENT'));
 
-// These two are accessible even without an active account
-// (so PENDING students can see the payment wall with their info)
+// Accessible even without an active account
 router.get('/dashboard',    getDashboard);
 router.put('/profile',      updateProfile);
+
+// Learning materials & study resources
+router.get('/resources',                 getStudentResources);
+router.get('/resources/:id/download',    getStudentResourceDownloadUrl);
 
 // Everything below requires an active (paid) account
 router.get('/progress',     requireActive, getProgressLogs);

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { parentApi, type ApiChildDetail } from '../../services/api'
 import type { ParentProfile } from '../../types'
+import PrintableReportCard from '../../components/ui/PrintableReportCard'
 
 // ─── Skill bar ────────────────────────────────────────────────────────────────
 function SkillBar({ label, value, color }: { label: string; value: number; color: string }) {
@@ -36,7 +37,7 @@ function ChildSkeleton() {
 }
 
 // ─── Single child card ────────────────────────────────────────────────────────
-function ChildCard({ child }: { child: ApiChildDetail }) {
+function ChildCard({ child, onOpenCertificate }: { child: ApiChildDetail; onOpenCertificate?: (c: ApiChildDetail) => void }) {
   const skills = [
     { label: '🔊 Phonemic Awareness', v: child.skillScores.phonemicAwareness, c: 'bg-purple-500' },
     { label: '🔤 Phonics',            v: child.skillScores.phonicsDecoding,    c: 'bg-brand-500'   },
@@ -153,6 +154,20 @@ function ChildCard({ child }: { child: ApiChildDetail }) {
             </span>
           )}
         </div>
+
+        {/* Certificate Button */}
+        {child.currentScore > 0 && onOpenCertificate && (
+          <div className="pt-3 border-t border-gray-100 flex justify-between items-center flex-wrap gap-2">
+            <span className="text-xs text-gray-500">Official Reading Evaluation Record</span>
+            <button
+              type="button"
+              onClick={() => onOpenCertificate(child)}
+              className="px-3.5 py-1.5 bg-[#1a3a2a] hover:bg-[#2d6a4f] text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <span>📜</span> Official Certificate & Report
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -167,6 +182,7 @@ export default function ParentDashboard() {
   const [children, setChildren] = useState<ApiChildDetail[]>([])
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState('')
+  const [selectedChildCert, setSelectedChildCert] = useState<ApiChildDetail | null>(null)
 
   useEffect(() => {
     const ac = new AbortController()
@@ -240,8 +256,28 @@ export default function ParentDashboard() {
 
         {/* Children list */}
         {!loading && children.map(child => (
-          <ChildCard key={child.id} child={child} />
+          <ChildCard key={child.id} child={child} onOpenCertificate={c => setSelectedChildCert(c)} />
         ))}
+
+        {/* Certificate Modal */}
+        {selectedChildCert && (
+          <PrintableReportCard
+            open={!!selectedChildCert}
+            onClose={() => setSelectedChildCert(null)}
+            data={{
+              studentName: `${selectedChildCert.firstName} ${selectedChildCert.lastName}`,
+              grade: selectedChildCert.grade,
+              readinessScore: selectedChildCert.currentScore,
+              phonemicAwareness: selectedChildCert.skillScores.phonemicAwareness,
+              phonicsDecoding: selectedChildCert.skillScores.phonicsDecoding,
+              fluency: selectedChildCert.skillScores.fluency,
+              vocabulary: selectedChildCert.skillScores.vocabulary,
+              comprehension: selectedChildCert.skillScores.comprehension,
+              strengths: selectedChildCert.strengths,
+              growthPoints: selectedChildCert.weaknesses,
+            }}
+          />
+        )}
 
         {/* At-home tips */}
         {!loading && children.length > 0 && (

@@ -83,7 +83,7 @@ export default function CreateAssignmentPage() {
         })
       }
       toast.success('Assignment created!', `Successfully assigned ${form.selectedContent.length} item(s) to ${form.gradeLevel}`)
-      navigate('/admin?tab=assignments')
+      navigate('/admin/dashboard?tab=assignments')
     } catch (error) {
       toast.error('Failed to create assignment', error instanceof Error ? error.message : 'Unknown error')
     }
@@ -116,7 +116,7 @@ export default function CreateAssignmentPage() {
         {/* Header */}
         <div className="mb-8">
           <button 
-            onClick={() => navigate('/admin?tab=assignments')}
+            onClick={() => navigate('/admin/dashboard?tab=assignments')}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

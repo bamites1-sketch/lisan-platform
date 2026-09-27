@@ -21,6 +21,8 @@ interface RegisterData {
   grade?: string
 }
 
+const REFRESH_STORAGE_KEY = 'lisan_refresh_token'
+
 /** Decode the `exp` claim without verifying signature. Returns expiry Date or null. */
 function getTokenExpiry(token: string): Date | null {
   try {
@@ -48,11 +50,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshTimerRef           = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── Persist helpers ──────────────────────────────────────────────────────
-  const persistSession = useCallback((newToken: string, newUser: User) => {
+  const persistSession = useCallback((newToken: string, newUser: User, newRefreshToken?: string) => {
     setToken(newToken)
     setUser(newUser)
     localStorage.setItem('lisan_token', newToken)
     localStorage.setItem('lisan_user', JSON.stringify(newUser))
+    if (newRefreshToken) {
+      localStorage.setItem(REFRESH_STORAGE_KEY, newRefreshToken)
+    }
   }, [])
 
   const clearSession = useCallback(() => {
@@ -60,16 +65,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null)
     localStorage.removeItem('lisan_token')
     localStorage.removeItem('lisan_user')
+    localStorage.removeItem(REFRESH_STORAGE_KEY)
     if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
   }, [])
 
-  // ── Silent refresh via HttpOnly cookie ───────────────────────────────────
+  // ── Silent refresh via HttpOnly cookie, fallback to localStorage refresh token ───────────────────────────────────
   const silentRefresh = useCallback(async (): Promise<string | null> => {
     try {
-      const res = await fetch(apiUrl('/api/auth/refresh'), { method: 'POST', credentials: 'include' })
+      const storedRefresh = localStorage.getItem(REFRESH_STORAGE_KEY)
+
+      const headers: Record<string, string> = {}
+      if (storedRefresh) {
+        headers['Authorization'] = `Bearer ${storedRefresh}`
+      }
+
+      const res = await fetch(apiUrl('/api/auth/refresh'), {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+      })
       if (!res.ok) return null
       const data = await res.json()
-      return data?.data?.token ?? null
+      const newAccess = data?.data?.token ?? null
+      const newRefresh = data?.data?.refreshToken ?? null
+      if (newRefresh) {
+        localStorage.setItem(REFRESH_STORAGE_KEY, newRefresh)
+      }
+      return newAccess
     } catch {
       return null
     }
@@ -144,14 +166,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const loginUrl = apiUrl('/api/auth/login')
       console.log('🔐 Login attempt:', { loginUrl, email })
-      
+
       res = await fetch(loginUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ email, password }),
       })
-      
+
       console.log('📥 Login response:', { status: res.status, ok: res.ok })
     } catch (err) {
       console.error('❌ Login network error:', err)
@@ -160,27 +182,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const responseText = await res.text()
     console.log('📄 Response text:', responseText.substring(0, 200))
-    
-    let data: { success?: boolean; message?: string; data?: { token: string; user: User } } = {}
+
+    let data: { success?: boolean; message?: string; data?: { token: string; refreshToken?: string; user: User } } = {}
     try {
       data = responseText ? JSON.parse(responseText) : {}
     } catch (parseErr) {
       console.error('❌ JSON parse error:', parseErr)
       throw new Error(`Invalid response from server (${res.status}). Please try again.`)
     }
-    
+
     if (!res.ok || !data.success) {
       console.error('❌ Login failed:', data)
       throw new Error(data.message || `Login failed (${res.status}). Please try again.`)
     }
-    
+
     if (!data.data?.token || !data.data.user) {
       console.error('❌ Incomplete response:', data)
       throw new Error('Login response was incomplete. Please try again.')
     }
-    
+
     console.log('✅ Login successful:', { user: data.data.user.email, role: data.data.user.role })
-    persistSession(data.data.token, data.data.user)
+    persistSession(data.data.token, data.data.user, data.data.refreshToken)
     scheduleRefresh(data.data.token)
   }, [persistSession, scheduleRefresh])
 
@@ -196,7 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!res.ok || !result.success) {
       throw new Error(result.message || 'Registration failed. Please try again.')
     }
-    persistSession(result.data.token, result.data.user)
+    persistSession(result.data.token, result.data.user, result.data.refreshToken)
     scheduleRefresh(result.data.token)
   }, [persistSession, scheduleRefresh])
 
@@ -211,6 +233,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.message || 'Password change failed.')
+    if (data?.data?.refreshToken) {
+      localStorage.setItem(REFRESH_STORAGE_KEY, data.data.refreshToken)
+    }
   }, [token])
 
   // ── logout ───────────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ import StudentLayout from '../../components/layout/StudentLayout'
 import VoiceRecorder from '../../components/ui/VoiceRecorder'
 import type { SkillArea, StudentProfile, Question } from '../../types'
 import { recordingApi, calculateFluencyScore, assessmentApi } from '../../services/api'
+import { apiUrl } from '../../lib/apiBase'
 
 // ─── Section config ───────────────────────────────────────────────────────────
 const SECTIONS: { id: SkillArea; label: string; emoji: string; description: string }[] = [
@@ -51,7 +52,7 @@ function FluencySection({
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/students/content', {
+        const res = await fetch(apiUrl('/api/students/content'), {
           headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` },
         })
         if (!res.ok) throw new Error(`Server error ${res.status}`)
@@ -247,7 +248,7 @@ export default function AssessmentPage() {
     setQuestions([])
     try {
       const res = await fetch(
-        `/api/assessments/${asmId}/questions?skillArea=${sectionId}`,
+        apiUrl(`/api/assessments/${asmId}/questions?skillArea=${sectionId}`),
         { headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` } }
       )
       if (!res.ok) {
@@ -270,7 +271,7 @@ export default function AssessmentPage() {
       for (const pid of passageIds) {
         if (passageCache[pid]) continue
         try {
-          const pr = await fetch(`/api/students/content/passage/${pid}`, {
+          const pr = await fetch(apiUrl(`/api/students/content/passage/${pid}`), {
             headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` },
           })
           if (pr.ok) {

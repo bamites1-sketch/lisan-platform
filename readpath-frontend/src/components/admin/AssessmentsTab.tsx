@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '../ui/Toast';
+import { apiUrl } from '../../lib/apiBase';
 
 interface Assessment {
   id: string;
@@ -66,7 +67,7 @@ const AssessmentsTab = () => {
   const loadAssessments = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/assessments', {
+      const response = await fetch(apiUrl('/api/admin/assessments'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('lisan_token')}`
         }
@@ -229,7 +230,7 @@ const AssessmentsTab = () => {
     const [classGroups, setClassGroups] = useState<Teacher[]>([]);
 
     useEffect(() => {
-      fetch('/api/admin/assessments/helpers/teachers', {
+      fetch(apiUrl('/api/admin/assessments/helpers/teachers'), {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('lisan_token')}` }
       }).then(response => response.json()).then(data => setClassGroups(data.data || [])).catch(() => setClassGroups([]));
     }, []);
@@ -250,46 +251,52 @@ const AssessmentsTab = () => {
 
       try {
         setSaving(true);
-        const response = await fetch('/api/admin/assessments', {
+        const response = await fetch(apiUrl('/api/admin/assessments'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('lisan_token')}`
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify({ ...formData, status: 'PUBLISHED' })
         });
 
         if (!response.ok) {
-          throw new Error('Failed to create assessment');
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || 'Failed to create assessment');
         }
 
         const created = await response.json();
-        const assessmentId = created.data.id;
-        const publishResponse = await fetch(`/api/admin/assessments/${assessmentId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('lisan_token')}` },
-          body: JSON.stringify({ status: 'PUBLISHED' })
-        });
-        if (!publishResponse.ok) throw new Error('Could not publish assessment');
+        const assessmentId = created.data?.id;
 
-        const assignmentBody: Record<string, unknown> = { assignmentType: formData.assignmentType, dueDate: null };
-        if (formData.assignmentType === 'GRADE') assignmentBody.targetGrade = formData.grade;
-        if (formData.assignmentType === 'PLAN') assignmentBody.targetGrade = formData.plan;
-        if (formData.assignmentType === 'CLASS') assignmentBody.targetIds = [formData.classId];
-        const assignResponse = await fetch(`/api/admin/assessments/${assessmentId}/assign`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('lisan_token')}` },
-          body: JSON.stringify(assignmentBody)
-        });
-        if (!assignResponse.ok) {
-          const assignError = await assignResponse.json().catch(() => ({}));
-          throw new Error(assignError.message || 'Could not assign assessment');
+        if (assessmentId && formData.assignmentType) {
+          const assignmentBody: Record<string, unknown> = { assignmentType: formData.assignmentType, dueDate: null };
+          if (formData.assignmentType === 'GRADE') assignmentBody.targetGrade = formData.grade;
+          if (formData.assignmentType === 'PLAN') assignmentBody.targetGrade = formData.plan;
+          if (formData.assignmentType === 'CLASS' && formData.classId) assignmentBody.targetIds = [formData.classId];
+          
+          try {
+            const assignResponse = await fetch(apiUrl(`/api/admin/assessments/${assessmentId}/assign`), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('lisan_token')}` },
+              body: JSON.stringify(assignmentBody)
+            });
+            const assignData = await assignResponse.json().catch(() => ({}));
+            if (assignResponse.ok) {
+              showToast(assignData.message || 'Assessment created and assigned to students!', 'success');
+            } else {
+              showToast('Assessment created and published!', 'success');
+            }
+          } catch {
+            showToast('Assessment created and published!', 'success');
+          }
+        } else {
+          showToast('Assessment created successfully!', 'success');
         }
-        showToast('Assessment created and assigned', 'success');
+
         setActiveView('list');
         loadAssessments();
-      } catch (error) {
-        showToast('Failed to create assessment', 'error');
+      } catch (error: any) {
+        showToast(error?.message || 'Failed to create assessment', 'error');
       } finally {
         setSaving(false);
       }
@@ -470,7 +477,7 @@ const AssessmentsTab = () => {
 
       try {
         setSaving(true);
-        const response = await fetch(`/api/admin/assessments/${selectedAssessment.id}`, {
+        const response = await fetch(apiUrl(`/api/admin/assessments/${selectedAssessment.id}`), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -508,7 +515,7 @@ const AssessmentsTab = () => {
 
       try {
         setSaving(true);
-        const response = await fetch(`/api/admin/assessments/${selectedAssessment.id}`, {
+        const response = await fetch(apiUrl(`/api/admin/assessments/${selectedAssessment.id}`), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -723,13 +730,13 @@ const AssessmentsTab = () => {
       try {
         setLoading(true);
         const [studentsRes, teachersRes, gradesRes] = await Promise.all([
-          fetch('/api/admin/assessments/helpers/students', {
+          fetch(apiUrl('/api/admin/assessments/helpers/students'), {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('lisan_token')}` }
           }),
-          fetch('/api/admin/assessments/helpers/teachers', {
+          fetch(apiUrl('/api/admin/assessments/helpers/teachers'), {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('lisan_token')}` }
           }),
-          fetch('/api/admin/assessments/helpers/grades', {
+          fetch(apiUrl('/api/admin/assessments/helpers/grades'), {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('lisan_token')}` }
           })
         ]);
@@ -742,7 +749,18 @@ const AssessmentsTab = () => {
 
         setStudents(studentsData.data || []);
         setTeachers(teachersData.data || []);
-        setGrades(gradesData.data || []);
+
+        const allStandardGrades = [
+          'GRADE_1', 'GRADE_2', 'GRADE_3', 'GRADE_4', 'GRADE_5', 'GRADE_6',
+          'GRADE_7', 'GRADE_8', 'GRADE_9', 'GRADE_10', 'GRADE_11', 'GRADE_12'
+        ].map(g => ({ grade: g, studentCount: 0 }));
+
+        const rawGrades: Grade[] = gradesData.data || [];
+        const mergedGrades = allStandardGrades.map(sg => {
+          const found = rawGrades.find(rg => rg.grade === sg.grade);
+          return found ? found : sg;
+        });
+        setGrades(mergedGrades);
       } catch (error) {
         showToast('Failed to load assignment data', 'error');
       } finally {
@@ -780,7 +798,7 @@ const AssessmentsTab = () => {
 
       try {
         setAssigning(true);
-        const response = await fetch(`/api/admin/assessments/${selectedAssessment.id}/assign`, {
+        const response = await fetch(apiUrl(`/api/admin/assessments/${selectedAssessment.id}/assign`), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

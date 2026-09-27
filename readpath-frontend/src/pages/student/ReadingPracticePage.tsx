@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import StudentLayout from '../../components/layout/StudentLayout'
 import { useAuth } from '../../contexts/AuthContext'
 import { recordingApi, calculateFluencyScore } from '../../services/api'
 import type { StudentProfile } from '../../types'
+import InteractivePassage from '../../components/ui/InteractivePassage'
+import { apiUrl } from '../../lib/apiBase'
 
 // ─── Assignment type (from real API) ─────────────────────────────────────────
 interface AssignedPassage {
@@ -352,18 +355,12 @@ function RecordingPanel({
   return (
     <div className="space-y-5">
 
-      {/* Passage display */}
-      <div className="p-5 bg-gray-50 border border-gray-200 rounded-2xl">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-            📖 {assignment.passageTitle}
-          </p>
-          <span className="text-xs text-gray-400">{assignment.wordCount} words</span>
-        </div>
-        <p className="text-gray-900 leading-8 text-base sm:text-[15px] font-serif whitespace-pre-line select-none">
-          {assignment.passageText}
-        </p>
-      </div>
+      {/* Interactive Passage with TTS and Click-to-Define */}
+      <InteractivePassage
+        title={assignment.passageTitle}
+        text={assignment.passageText}
+        wordCount={assignment.wordCount}
+      />
 
       {/* Teacher instructions */}
       {assignment.instructions && (
@@ -676,6 +673,9 @@ export default function ReadingPracticePage() {
   const studentId  = profile?.id    ?? ''
   const studentName = `${profile?.firstName ?? ''} ${profile?.lastName ?? ''}`.trim()
 
+  const [searchParams] = useSearchParams()
+  const targetId = searchParams.get('id')
+
   const [assignments, setAssignments] = useState<AssignedPassage[]>([])
   const [loadingAssignments, setLoadingAssignments] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -692,9 +692,9 @@ export default function ReadingPracticePage() {
 
       // Use student-scoped endpoints; admin routes reject student tokens.
       const [aRes, pRes, recRes] = await Promise.all([
-        fetch('/api/students/assignments', { headers }),
-        fetch('/api/students/content', { headers }),
-        fetch('/api/recordings/mine', { headers }),
+        fetch(apiUrl('/api/students/assignments'), { headers }),
+        fetch(apiUrl('/api/students/content'), { headers }),
+        fetch(apiUrl('/api/recordings/mine'), { headers }),
       ])
 
       const asgns: { id: string; contentId: string; contentType: string; grade: string; note?: string; dueDate?: string; assignedAt: string; status: string }[] =
@@ -753,6 +753,10 @@ export default function ReadingPracticePage() {
       })
 
       setAssignments(resolved)
+      if (targetId) {
+        const match = resolved.find(a => a.id === targetId || a.passageId === targetId)
+        if (match) setSelected(match)
+      }
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Failed to load assignments')
     } finally {

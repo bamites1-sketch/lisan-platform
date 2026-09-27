@@ -1,11 +1,17 @@
 // ReadPath Database Schema — PostgreSQL production version
+// NOTE: This file (default schema) uses postgresql on purpose.
+// @prisma/client postinstall runs `prisma generate` against this default
+// path, so using sqlite here would silently generate an sqlite client even
+// when the vercel-build step re-generates against schema.production.prisma
+// afterwards (node_modules cache can flip it back on some hosts). Keep this
+// in sync with schema.production.prisma.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

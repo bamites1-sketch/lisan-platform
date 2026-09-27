@@ -300,3 +300,26 @@ html {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Print optimization for Official Certificates & Report Cards */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  nav, header, .print\:hidden {
+    display: none !important;
+  }
+  .printable-certificate {
+    border-width: 6px !important;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 0.8cm;
+  }
+}
+

@@ -120,7 +120,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     res.status(201).json({
       success: true,
       message: 'Registration successful.',
-      data: { token: accessToken, user: buildUserResponse(user) },
+      data: { token: accessToken, refreshToken, user: buildUserResponse(user) },
     });
   } catch (error) {
     next(error);
@@ -145,7 +145,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     });
 
     // Use a dummy compare when user not found to preserve constant time
-    const dummyHash = '$2b$12$invalidhashforunregisteredemail000000000000000000000000';
+    // IMPORTANT: dummyHash must be a FORMATTED-VALID bcrypt $2b$12$ hash
+    // (22-char salt + 31-char hash in radix-64).  An invalid hash string
+    // causes bcrypt.compare to throw, which bubbles up as 500 instead of 401.
+    const dummyHash = '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW';
     const isValid = user
       ? await bcrypt.compare(String(password), user.password)
       : await bcrypt.compare(String(password), dummyHash).then(() => false);
@@ -175,7 +178,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     res.json({
       success: true,
       message: 'Login successful.',
-      data: { token: accessToken, user: buildUserResponse(user) },
+      data: { token: accessToken, refreshToken, user: buildUserResponse(user) },
     });
   } catch (error) {
     next(error);
@@ -185,7 +188,14 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 // ─── refreshToken ─────────────────────────────────────────────────────────────
 export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.cookies?.refreshToken;
+    let token: string | undefined = req.cookies?.refreshToken;
+
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+      }
+    }
     if (!token) throw new AppError('No refresh token provided.', 401);
 
     let decoded: { userId: string };
@@ -203,8 +213,16 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
     if (!user) throw new AppError('Account no longer exists.', 401);
 
     const accessToken = signAccessToken({ userId: user.id, role: user.role, email: user.email });
+    const newRefreshToken = signRefreshToken({ userId: user.id });
 
-    res.json({ success: true, data: { token: accessToken } });
+    res.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ success: true, data: { token: accessToken, refreshToken: newRefreshToken } });
   } catch (error) {
     next(error);
   }
@@ -261,7 +279,7 @@ export const changePassword = async (req: AuthRequest, res: Response, next: Next
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ success: true, message: 'Password changed successfully. Please sign in again on other devices.' });
+    res.json({ success: true, message: 'Password changed successfully. Please sign in again on other devices.', data: { refreshToken: newRefreshToken } });
   } catch (error) {
     next(error);
   }

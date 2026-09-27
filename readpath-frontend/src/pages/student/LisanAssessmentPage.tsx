@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import StudentLayout from '../../components/layout/StudentLayout';
+import InteractivePassage from '../../components/ui/InteractivePassage';
+import { apiUrl } from '../../lib/apiBase';
 
 function AssessmentRecorder({ onComplete, onReset, disabled }: { onComplete: (blob: Blob, duration: number) => void; onReset: () => void; disabled?: boolean }) {
   const recorderRef = useRef<MediaRecorder | null>(null)
@@ -140,7 +142,7 @@ const LisanAssessmentPage = () => {
   const loadAssessment = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/assessments/${assessmentId}`, {
+      const response = await fetch(apiUrl(`/api/assessments/${assessmentId}`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('lisan_token')}`
         }
@@ -201,7 +203,7 @@ const LisanAssessmentPage = () => {
       formData.append('audio', audioBlob, 'assessment-recording.webm');
       formData.append('duration', recordingDuration.toString());
 
-      const response = await fetch(`/api/assessments/${assessmentId}/submit`, {
+      const response = await fetch(apiUrl(`/api/assessments/${assessmentId}/submit`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('lisan_token')}`
@@ -311,14 +313,11 @@ const LisanAssessmentPage = () => {
               </p>
             </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3">Reading Passage</h3>
-              <div className="text-gray-800 leading-relaxed whitespace-pre-line">
-                {submission.assessment.passage}
-              </div>
-              <p className="text-sm text-gray-500 mt-3">
-                {submission.assessment.passage.split(' ').filter(word => word.trim()).length} words
-              </p>
+            <div className="mb-6">
+              <InteractivePassage
+                title="Reading Passage"
+                text={submission.assessment.passage}
+              />
             </div>
 
             <div className="text-center">
@@ -346,10 +345,11 @@ const LisanAssessmentPage = () => {
               <p className="text-gray-600">{submission.assessment.title}</p>
             </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-              <div className="text-gray-800 leading-relaxed whitespace-pre-line">
-                {submission.assessment.passage}
-              </div>
+            <div className="mb-6">
+              <InteractivePassage
+                title={submission.assessment.title}
+                text={submission.assessment.passage}
+              />
             </div>
 
             <div className="space-y-6">

@@ -37,3 +37,6 @@ coverage/
 # Prisma — keep migrations tracked, only ignore the local SQLite DB
 prisma/dev.db
 prisma/dev.db-journal
+
+.vercel
+.env*

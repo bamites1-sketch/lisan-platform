@@ -90,224 +90,334 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
     .sort((a, b) => parseInt(a[0].replace('Gr ','')) - parseInt(b[0].replace('Gr ','')))
     .map(([label, scores]) => {
       const avg = Math.round(scores.reduce((a,b) => a+b,0) / scores.length)
-      return { label, value: avg, color: avg >= 75 ? '#22c55e' : avg >= 60 ? '#f59e0b' : '#ef4444' }
+      return { label, value: avg, color: avg >= 75 ? '#2d6a4f' : avg >= 60 ? '#d4a017' : '#e11d48' }
     })
 
   const recentlyActive = students.filter(s => Date.now() - new Date(s.lastActiveAt).getTime() < 86400000 * 7)
 
   return (
-    <div className="space-y-6">
-      <h1 className="page-title">Platform Overview</h1>
+    <div className="space-y-6 animate-in">
+      {/* Page Title & Subtitle */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-[#e8f4f0] text-[#1a3a2a] border border-[#2d6a4f]/25 mb-1.5">
+            <span>⚙️</span> ADMINISTRATION CONSOLE
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1a3a2a] tracking-tight">
+            Platform Overview
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            Real-time telemetry, diagnostic readiness, and platform-wide reading progression metrics.
+          </p>
+        </div>
+      </div>
 
       {loading && (
         <div className="flex justify-center py-20">
-          <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+          <div className="w-12 h-12 border-4 border-[#e8f4f0] border-t-[#2d6a4f] rounded-full animate-spin" />
         </div>
       )}
 
       {!loading && (
         <>
           {/* KPI cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { emoji: '📖', label: 'Students', value: students.length, color: 'text-brand-600',  bg: 'bg-brand-50',  nav: 'users_students' },
-          { emoji: '🧑‍🏫', label: 'Teachers', value: teachers.length, color: 'text-green-700', bg: 'bg-green-50',  nav: 'users_teachers' },
-          { emoji: '👨‍👩‍👧', label: 'Parents',  value: parents.length,  color: 'text-purple-700',bg: 'bg-purple-50', nav: 'users_parents'  },
-          { emoji: '📝', label: 'Assessed',  value: assessed.length,  color: 'text-orange-700',bg: 'bg-orange-50', nav: 'analytics'      },
-        ].map(c => (
-          <button key={c.label} onClick={() => onNavigate(c.nav)}
-            className={`card border-0 ${c.bg} text-center hover:shadow-card-hover transition-all cursor-pointer active:scale-95`}>
-            <div className="text-2xl mb-1">{c.emoji}</div>
-            <div className={`text-3xl font-bold ${c.color} mb-0.5`}>{c.value}</div>
-            <div className="text-xs text-gray-600 font-medium">{c.label}</div>
-          </button>
-        ))}
-      </div>
-
-      {/* Readiness banner */}
-      <div className="card bg-gradient-to-r from-brand-600 to-brand-700 border-0 text-white">
-        <div className="flex flex-col sm:flex-row items-center gap-5">
-          <div className="text-center">
-            <p className="text-brand-200 text-sm mb-1">Platform Average Score</p>
-            <p className={`text-5xl font-extrabold ${avgScore >= 75 ? 'text-white' : avgScore >= 60 ? 'text-yellow-300' : 'text-red-300'}`}>
-              {avgScore || '—'}
-            </p>
-            {assessed.length > 0 && <p className="text-brand-200 text-xs mt-1">out of 100</p>}
-          </div>
-          <div className="flex-1 grid grid-cols-3 gap-3 w-full sm:w-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: '✅ Active',         count: activeStudents,  pct: students.length ? Math.round(activeStudents/students.length*100)  : 0 },
-              { label: '⏳ Pending',        count: pendingPayment,  pct: students.length ? Math.round(pendingPayment/students.length*100)  : 0 },
-              { label: '🚫 Suspended',      count: suspended,       pct: students.length ? Math.round(suspended/students.length*100)       : 0 },
-            ].map(s => (
-              <div key={s.label} className="bg-white/10 rounded-2xl p-3 text-center">
-                <p className="text-2xl font-bold">{s.count}</p>
-                <p className="text-brand-200 text-xs mt-0.5">{s.label}</p>
-                <p className="text-brand-300 text-xs font-semibold">{s.pct}%</p>
-              </div>
+              {
+                emoji: '📖',
+                label: 'Total Students',
+                value: students.length,
+                sub: `${activeStudents} active`,
+                color: 'text-[#1a3a2a]',
+                bg: 'bg-white hover:bg-gradient-to-br hover:from-white hover:to-[#e8f4f0]/60',
+                border: 'border-[#2d6a4f]/20',
+                iconBg: 'bg-[#e8f4f0] text-[#1a3a2a]',
+                nav: 'users_students',
+              },
+              {
+                emoji: '🧑‍🏫',
+                label: 'Active Teachers',
+                value: teachers.length,
+                sub: 'Staff accounts',
+                color: 'text-[#2d6a4f]',
+                bg: 'bg-white hover:bg-gradient-to-br hover:from-white hover:to-[#f5f0e8]/70',
+                border: 'border-[#d4a017]/30',
+                iconBg: 'bg-[#f5f0e8] text-[#936605]',
+                nav: 'users_teachers',
+              },
+              {
+                emoji: '👨‍👩‍👧',
+                label: 'Registered Parents',
+                value: parents.length,
+                sub: 'Family portals',
+                color: 'text-[#1a3a2a]',
+                bg: 'bg-white hover:bg-gradient-to-br hover:from-white hover:to-[#e8f4f0]/40',
+                border: 'border-[#1a3a2a]/15',
+                iconBg: 'bg-[#1a3a2a]/10 text-[#1a3a2a]',
+                nav: 'users_parents',
+              },
+              {
+                emoji: '📝',
+                label: 'Assessed Students',
+                value: assessed.length,
+                sub: `${students.length ? Math.round(assessed.length / students.length * 100) : 0}% completion`,
+                color: 'text-[#936605]',
+                bg: 'bg-white hover:bg-gradient-to-br hover:from-white hover:to-[#fff9e6]',
+                border: 'border-[#d4a017]/40',
+                iconBg: 'bg-[#fdf5dd] text-[#d4a017]',
+                nav: 'analytics',
+              },
+            ].map(c => (
+              <button
+                key={c.label}
+                onClick={() => onNavigate(c.nav)}
+                className={`p-5 rounded-3xl border ${c.border} ${c.bg} shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 text-left flex flex-col justify-between group cursor-pointer active:scale-98`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform ${c.iconBg}`}>
+                    {c.emoji}
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-400 group-hover:text-[#2d6a4f] transition-colors">
+                    VIEW →
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <div className={`text-3xl font-extrabold ${c.color} tracking-tight`}>{c.value}</div>
+                  <div className="text-xs font-bold text-[#1a3a2a] mt-0.5">{c.label}</div>
+                  <div className="text-[11px] text-gray-400 font-medium mt-0.5">{c.sub}</div>
+                </div>
+              </button>
             ))}
           </div>
-        </div>
-      </div>
 
-      {/* Grade chart + recently active */}
-      <div className="grid sm:grid-cols-2 gap-5">
-        <div className="card">
-          <h2 className="section-title mb-4">Avg Score by Grade</h2>
-          {gradeData.length > 0 ? <SvgBar data={gradeData} /> : <p className="text-sm text-gray-400 text-center py-8">No grade data yet</p>}
-        </div>
-        <div className="card">
-          <h2 className="section-title mb-4">Recently Active Students</h2>
-          {recentlyActive.length === 0
-            ? <p className="text-sm text-gray-400 text-center py-8">No recent activity</p>
-            : <div className="space-y-2">
-                {recentlyActive.slice(0, 6).map(s => (
-                  <div key={s.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 bg-brand-100 text-brand-700">
-                      {s.firstName[0]}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-800 truncate">{s.firstName} {s.lastName}</p>
-                      <p className="text-xs text-gray-400">Grade {s.grade.replace('GRADE_','')} · ⚡{s.xp}</p>
-                    </div>
-                    <span className="text-xs text-gray-400 flex-shrink-0">{timeAgo(s.lastActiveAt)}</span>
+          {/* Readiness banner */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a3a2a] via-[#224d38] to-[#2d6a4f] p-6 sm:p-8 text-white shadow-xl shadow-emerald-950/10 border border-[#2d6a4f]/30">
+            <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-[#d4a017]/15 blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+              <div className="text-center sm:text-left flex items-center gap-5">
+                <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md border border-[#d4a017]/40 flex flex-col items-center justify-center shadow-inner flex-shrink-0">
+                  <span className={`text-3xl font-extrabold ${avgScore >= 75 ? 'text-white' : avgScore >= 60 ? 'text-[#d4a017]' : 'text-rose-300'}`}>
+                    {avgScore || '—'}
+                  </span>
+                  <span className="text-[9px] text-[#d4a017] font-bold uppercase tracking-wider">OUT OF 100</span>
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#d4a017]/20 text-[#d4a017] mb-1">
+                    DIAGNOSTIC READINESS
+                  </div>
+                  <h2 className="text-lg font-bold text-white">Platform Average Score</h2>
+                  <p className="text-emerald-100/80 text-xs mt-0.5">Aggregated cross-grade baseline reading proficiency</p>
+                </div>
+              </div>
+
+              <div className="flex-1 grid grid-cols-3 gap-3 w-full sm:w-auto">
+                {[
+                  { label: 'Active', count: activeStudents, pct: students.length ? Math.round(activeStudents/students.length*100) : 0, color: 'text-emerald-200', bg: 'bg-[#2d6a4f]/40 border-[#2d6a4f]/60' },
+                  { label: 'Pending', count: pendingPayment, pct: students.length ? Math.round(pendingPayment/students.length*100) : 0, color: 'text-[#d4a017]', bg: 'bg-[#d4a017]/15 border-[#d4a017]/35' },
+                  { label: 'Suspended', count: suspended, pct: students.length ? Math.round(suspended/students.length*100) : 0, color: 'text-rose-300', bg: 'bg-rose-500/15 border-rose-400/30' },
+                ].map(s => (
+                  <div key={s.label} className={`rounded-2xl p-3.5 text-center border backdrop-blur-sm ${s.bg}`}>
+                    <p className="text-2xl font-extrabold text-white">{s.count}</p>
+                    <p className={`text-[11px] font-bold uppercase tracking-wider mt-0.5 ${s.color}`}>{s.label}</p>
+                    <p className="text-white/60 text-xs font-semibold">{s.pct}%</p>
                   </div>
                 ))}
               </div>
-          }
-        </div>
-      </div>
-
-      {/* Skill averages */}
-      <div className="card">
-        <h2 className="section-title mb-4">Platform Skill Averages</h2>
-        <div className="space-y-3">
-          {[
-            { label: '🔊 Phonemic',    val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.min(100, (s.score??0)+19), 0)/assessed.length) : 0, color: 'bg-purple-500' },
-            { label: '🔤 Phonics',     val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.min(100, (s.score??0)+5),  0)/assessed.length) : 0, color: 'bg-brand-500' },
-            { label: '🎤 Fluency',     val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.max(0, (s.score??0)-11),   0)/assessed.length) : 0, color: 'bg-orange-500' },
-            { label: '📚 Vocabulary',  val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.max(0, (s.score??0)-9),    0)/assessed.length) : 0, color: 'bg-green-500' },
-            { label: '🧠 Comprehension',val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.min(100, (s.score??0)+3),  0)/assessed.length) : 0, color: 'bg-indigo-500' },
-          ].map(s => (
-            <div key={s.label} className="flex items-center gap-3">
-              <span className="text-sm text-gray-600 w-28 sm:w-36 flex-shrink-0">{s.label}</span>
-              <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                <div className={`h-2.5 rounded-full ${s.color} transition-all duration-700`} style={{ width: `${s.val}%` }} />
-              </div>
-              <span className={`text-sm font-bold w-8 text-right ${s.val >= 75 ? 'text-success-600' : s.val >= 60 ? 'text-warning-600' : 'text-danger-600'}`}>
-                {s.val || '—'}
-              </span>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* Recordings + Assignments */}
-      <div className="grid sm:grid-cols-2 gap-5">
-        {/* Recent recordings */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="section-title flex items-center gap-2">
-              🎤 Fluency Recordings
-              {unreviewed.length > 0 && (
-                <span className="text-xs bg-danger-100 text-danger-700 font-bold px-2 py-0.5 rounded-full">{unreviewed.length} new</span>
+          {/* Grade chart + recently active */}
+          <div className="grid sm:grid-cols-2 gap-5">
+            <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+                  <span>📊</span> Avg Score by Grade
+                </h2>
+                <span className="text-xs text-gray-400 font-medium">Diagnostic</span>
+              </div>
+              {gradeData.length > 0 ? <SvgBar data={gradeData} /> : <p className="text-sm text-gray-400 text-center py-8">No grade data yet</p>}
+            </div>
+
+            <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+                  <span>⚡</span> Recently Active Students
+                </h2>
+                <span className="text-xs text-[#2d6a4f] font-semibold cursor-pointer" onClick={() => onNavigate('users_students')}>
+                  All students →
+                </span>
+              </div>
+              {recentlyActive.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-8">No recent activity</p>
+              ) : (
+                <div className="space-y-2">
+                  {recentlyActive.slice(0, 6).map(s => (
+                    <div key={s.id} className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-[#e8f4f0]/40 transition-colors">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 bg-[#e8f4f0] text-[#1a3a2a] border border-[#2d6a4f]/20">
+                        {s.firstName[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-[#1a3a2a] truncate">{s.firstName} {s.lastName}</p>
+                        <p className="text-[11px] text-gray-500">Grade {s.grade.replace('GRADE_','')} · ⚡{s.xp} XP</p>
+                      </div>
+                      <span className="text-[11px] font-medium text-gray-400 flex-shrink-0">{timeAgo(s.lastActiveAt)}</span>
+                    </div>
+                  ))}
+                </div>
               )}
-            </h2>
+            </div>
           </div>
-          {recordings.length === 0
-            ? <p className="text-sm text-gray-400 text-center py-6">No recordings yet</p>
-            : (
-              <div className="space-y-2">
-                {recordings.slice(0, 5).map(r => (
-                  <div key={r.id} className={`flex items-center gap-3 p-3 rounded-xl ${!r.reviewed ? 'bg-brand-50 border border-brand-200' : 'bg-gray-50'}`}>
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                      r.score >= 75 ? 'bg-success-100 text-success-700' : r.score >= 60 ? 'bg-warning-100 text-warning-700' : 'bg-danger-100 text-danger-700'
-                    }`}>{(r.studentName ?? 'S')[0]}</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-800 truncate">{r.studentName ?? 'Unknown Student'}</p>
-                      <p className="text-xs text-gray-500 truncate">📖 {r.passageTitle} · {timeAgo(r.recordedAt)}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <span className={`text-xs font-bold ${r.score >= 75 ? 'text-success-600' : r.score >= 60 ? 'text-warning-600' : 'text-danger-600'}`}>{r.score}</span>
-                      {!r.reviewed && <span className="w-2 h-2 bg-brand-500 rounded-full" />}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
-          }
-          <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-3 gap-2 text-center">
-            {[
-              { label: 'Total',    val: recordings.length,                         c: 'text-gray-800' },
-              { label: 'Reviewed', val: recordings.filter(r=>r.reviewed).length,   c: 'text-success-600' },
-              { label: 'Pending',  val: unreviewed.length,                          c: 'text-danger-600' },
-            ].map(s => (
-              <div key={s.label}>
-                <p className={`text-lg font-bold ${s.c}`}>{s.val}</p>
-                <p className="text-xs text-gray-500">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Active assignments */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="section-title">📋 Active Assignments</h2>
-            <button onClick={() => onNavigate('assignments')} className="text-xs text-brand-600 font-semibold hover:text-brand-700">Manage →</button>
+          {/* Skill averages */}
+          <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+                <span>🎯</span> Platform Skill Averages
+              </h2>
+              <span className="text-xs text-gray-400 font-medium">5 Core Reading Domains</span>
+            </div>
+            <div className="space-y-3.5">
+              {[
+                { label: '🔊 Phonemic Awareness', val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.min(100, (s.score??0)+19), 0)/assessed.length) : 0, color: 'bg-[#1a3a2a]' },
+                { label: '🔤 Phonics & Decoding',  val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.min(100, (s.score??0)+5),  0)/assessed.length) : 0, color: 'bg-[#2d6a4f]' },
+                { label: '🎤 Reading Fluency',     val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.max(0, (s.score??0)-11),   0)/assessed.length) : 0, color: 'bg-[#d4a017]' },
+                { label: '📚 Vocabulary Acq.',    val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.max(0, (s.score??0)-9),    0)/assessed.length) : 0, color: 'bg-[#347b5c]' },
+                { label: '🧠 Comprehension',       val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.min(100, (s.score??0)+3),  0)/assessed.length) : 0, color: 'bg-[#52796f]' },
+              ].map(s => (
+                <div key={s.label} className="flex items-center gap-3">
+                  <span className="text-xs sm:text-sm font-semibold text-gray-700 w-32 sm:w-44 flex-shrink-0">{s.label}</span>
+                  <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className={`h-2.5 rounded-full ${s.color} transition-all duration-700`} style={{ width: `${s.val}%` }} />
+                  </div>
+                  <span className={`text-xs sm:text-sm font-bold w-9 text-right ${s.val >= 75 ? 'text-[#2d6a4f]' : s.val >= 60 ? 'text-[#936605]' : 'text-rose-600'}`}>
+                    {s.val || '—'}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-          {assignments.length === 0
-            ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-gray-400">No active assignments</p>
-                <button onClick={() => onNavigate('assignments')} className="mt-2 text-xs text-brand-600 font-semibold hover:underline">
-                  + Assign content to students
+
+          {/* Recordings + Assignments */}
+          <div className="grid sm:grid-cols-2 gap-5">
+            {/* Recent recordings */}
+            <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+                  <span>🎙️</span> Fluency Recordings
+                  {unreviewed.length > 0 && (
+                    <span className="text-[10px] bg-rose-50 text-rose-700 font-bold px-2 py-0.5 rounded-full border border-rose-200">
+                      {unreviewed.length} pending
+                    </span>
+                  )}
+                </h2>
+                <button onClick={() => onNavigate('recordings')} className="text-xs font-bold text-[#2d6a4f] hover:text-[#1a3a2a]">
+                  Review all →
                 </button>
               </div>
-            )
-            : (
-              <div className="space-y-2">
-                {assignments.slice(0, 5).map(a => (
-                    <div key={a.id} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl">
-                      <span className="text-base flex-shrink-0">{a.contentType === 'passage' ? '📖' : '🎓'}</span>
+              {recordings.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-6">No recordings yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {recordings.slice(0, 5).map(r => (
+                    <div key={r.id} className={`flex items-center gap-3 p-3 rounded-2xl transition-all ${!r.reviewed ? 'bg-[#e8f4f0]/70 border border-[#2d6a4f]/30' : 'bg-gray-50/70 border border-gray-100'}`}>
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                        r.score >= 75 ? 'bg-[#e8f4f0] text-[#1a3a2a]' : r.score >= 60 ? 'bg-[#fef8e7] text-[#936605]' : 'bg-rose-50 text-rose-700'
+                      }`}>{(r.studentName ?? 'S')[0]}</div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-gray-800 truncate">{a.contentTitle ?? a.contentId}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs font-bold text-[#1a3a2a] truncate">{r.studentName ?? 'Unknown Student'}</p>
+                        <p className="text-[11px] text-gray-500 truncate">📖 {r.passageTitle} · {timeAgo(r.recordedAt)}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <span className={`text-xs font-bold ${r.score >= 75 ? 'text-[#2d6a4f]' : r.score >= 60 ? 'text-[#936605]' : 'text-rose-600'}`}>{r.score}</span>
+                        {!r.reviewed && <span className="w-2 h-2 bg-[#d4a017] rounded-full" />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="mt-3.5 pt-3.5 border-t border-gray-100 grid grid-cols-3 gap-2 text-center">
+                {[
+                  { label: 'Total',    val: recordings.length,                       c: 'text-[#1a3a2a]' },
+                  { label: 'Reviewed', val: recordings.filter(r=>r.reviewed).length, c: 'text-[#2d6a4f]' },
+                  { label: 'Pending',  val: unreviewed.length,                        c: 'text-amber-600' },
+                ].map(s => (
+                  <div key={s.label}>
+                    <p className={`text-lg font-extrabold ${s.c}`}>{s.val}</p>
+                    <p className="text-[11px] text-gray-400 font-medium">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Active assignments */}
+            <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+                  <span>📋</span> Active Assignments
+                </h2>
+                <button onClick={() => onNavigate('assignments')} className="text-xs font-bold text-[#2d6a4f] hover:text-[#1a3a2a]">
+                  Manage →
+                </button>
+              </div>
+              {assignments.length === 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-sm text-gray-400">No active assignments</p>
+                  <button onClick={() => onNavigate('assignments')} className="mt-2 text-xs text-[#2d6a4f] font-bold hover:underline">
+                    + Assign content to students
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {assignments.slice(0, 5).map(a => (
+                    <div key={a.id} className="flex items-center gap-3 p-3 bg-gray-50/70 border border-gray-100 rounded-2xl">
+                      <span className="text-lg flex-shrink-0">{a.contentType === 'passage' ? '📖' : '🎓'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-[#1a3a2a] truncate">{a.contentTitle ?? a.contentId}</p>
+                        <p className="text-[11px] text-gray-500">
                           {a.grade === 'ALL' ? 'All grades' : 'Grade ' + a.grade.replace('GRADE_','')}
                           {' · '}{timeAgo(a.assignedAt)}
                         </p>
                       </div>
-                      <span className="text-xs bg-success-100 text-success-700 px-2 py-0.5 rounded-full font-medium flex-shrink-0">Active</span>
+                      <span className="text-[10px] bg-[#e8f4f0] text-[#1a3a2a] border border-[#2d6a4f]/25 px-2.5 py-0.5 rounded-full font-bold flex-shrink-0">
+                        Active
+                      </span>
                     </div>
-                ))}
+                  ))}
+                </div>
+              )}
+              <div className="mt-3.5 pt-3.5 border-t border-gray-100 flex justify-between text-xs text-gray-500">
+                <span className="font-medium">{assignments.length} assignments active</span>
+                <button onClick={() => onNavigate('assignments')} className="text-[#2d6a4f] font-bold hover:underline">
+                  + Add assignment
+                </button>
               </div>
-            )
-          }
-          <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between text-xs text-gray-500">
-            <span>{assignments.length} active</span>
-            <button onClick={() => onNavigate('assignments')} className="text-brand-600 font-semibold">+ Add assignment</button>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Quick actions */}
-      <div className="card">
-        <h2 className="section-title mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { emoji: '📋', label: 'Assign Content', nav: 'assignments'    },
-            { emoji: '➕', label: 'Add Student',    nav: 'users_students' },
-            { emoji: '📖', label: 'Add Passage',    nav: 'content'        },
-            { emoji: '📈', label: 'Analytics',      nav: 'analytics'      },
-          ].map(a => (
-            <button key={a.label} onClick={() => onNavigate(a.nav)}
-              className="flex flex-col items-center gap-2 p-4 bg-gray-50 hover:bg-brand-50 hover:border-brand-200 border border-transparent rounded-2xl transition-all active:scale-95">
-              <span className="text-2xl">{a.emoji}</span>
-              <span className="text-xs font-semibold text-gray-700">{a.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+          {/* Quick actions */}
+          <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+            <h2 className="text-lg font-bold text-[#1a3a2a] mb-4 flex items-center gap-2">
+              <span>⚡</span> Management Shortcuts
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+              {[
+                { emoji: '📋', label: 'Assign Content', desc: 'Deploy tasks to grade', nav: 'assignments'    },
+                { emoji: '👥', label: 'Manage Students', desc: 'Accounts & grades',    nav: 'users_students' },
+                { emoji: '📖', label: 'Passage Library', desc: 'Upload reading text',   nav: 'content'        },
+                { emoji: '📈', label: 'Analytics Hub',   desc: 'Platform deep-dive',   nav: 'analytics'      },
+              ].map(a => (
+                <button
+                  key={a.label}
+                  onClick={() => onNavigate(a.nav)}
+                  className="flex flex-col items-start p-4 bg-gray-50/70 hover:bg-[#e8f4f0]/50 border border-gray-100 hover:border-[#2d6a4f]/30 rounded-2xl transition-all duration-200 group text-left cursor-pointer active:scale-98"
+                >
+                  <span className="text-2xl group-hover:scale-110 transition-transform mb-2">{a.emoji}</span>
+                  <span className="text-xs font-bold text-[#1a3a2a] group-hover:text-[#2d6a4f] transition-colors">{a.label}</span>
+                  <span className="text-[10px] text-gray-400 mt-0.5">{a.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </>
       )}
     </div>

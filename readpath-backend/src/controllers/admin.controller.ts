@@ -507,30 +507,37 @@ export const uploadPDFResource = async (req: AuthRequest, res: Response, next: N
       throw new AppError('No file uploaded', 400);
     }
 
-    const { title } = req.body;
+    const { title, description, category, grade, difficulty, requiredPlan, assignedGrades } = req.body;
 
-    // Upload to R2 if configured, otherwise store a placeholder
+    // Upload to R2 if configured, otherwise store as data URI for 100% cloud persistence
     const { uploadToR2, FileCategory, isR2Configured } = await import('../lib/r2storage');
     let fileKey: string;
     if (isR2Configured()) {
       const result = await uploadToR2(req.file, FileCategory.RESOURCE);
       fileKey = result.key;
     } else {
-      console.warn('[R2] Storage not configured — PDF resource upload skipped.');
-      fileKey = `__no_storage__/resources/${Date.now()}-${req.file.originalname}`;
+      const mime = req.file.mimetype || 'application/pdf';
+      const base64 = req.file.buffer.toString('base64');
+      fileKey = `data:${mime};base64,${base64}`;
     }
+
+    const targetGrade = grade || 'ALL';
+    const targetAssignedGrades = assignedGrades || (targetGrade !== 'ALL' ? JSON.stringify([targetGrade]) : null);
+
     const resource = await prisma.pDFResource.create({
       data: {
         title: title || req.file.originalname.replace(/\.(pdf|ppt|pptx|xls|xlsx|doc|docx)$/i, ''),
-        description: '',
+        description: description || '',
         fileType: req.file.originalname.match(/\.([^.]+)$/)?.[1]?.toUpperCase() || 'PDF',
         fileName: req.file.originalname,
-        fileUrl: fileKey, // Store R2 key (or placeholder)
+        fileUrl: fileKey,
         fileSize: req.file.size,
-        category: 'RESOURCE',
-        grade: 'GRADE_6',
-        difficulty: 'MEDIUM',
-        status: 'PUBLISHED', // Auto-publish for simplicity
+        category: category || 'RESOURCE',
+        grade: targetGrade,
+        difficulty: difficulty || 'MEDIUM',
+        status: 'PUBLISHED', // Auto-publish for student access
+        assignedGrades: targetAssignedGrades,
+        requiredPlan: requiredPlan || null,
         uploadedBy: req.user!.userId
       }
     });
@@ -549,22 +556,56 @@ export const getResourceDownloadUrl = async (req: AuthRequest, res: Response, ne
     if (!resource) throw new AppError('Resource not found', 404);
     if (!resource.fileUrl) throw new AppError('No file available', 404);
 
-    // If R2 not configured or file was never stored, return helpful error
-    if (resource.fileUrl.startsWith('__no_storage__/')) {
-      throw new AppError('File storage is not configured. This file was not saved. Please configure R2 and re-upload.', 503);
-    }
-
-    // Generate signed URL (valid for 1 hour)
-    const { getSignedDownloadUrl } = await import('../lib/r2storage');
-    const signedUrl = await getSignedDownloadUrl(resource.fileUrl, 3600);
-
     // Track download
     await prisma.pDFResource.update({
       where: { id },
       data: { downloadCount: { increment: 1 } }
     });
 
-    res.json({ success: true, data: { url: signedUrl } });
+    // If data URL or external web link, return directly
+    if (resource.fileUrl.startsWith('data:') || resource.fileUrl.startsWith('http://') || resource.fileUrl.startsWith('https://')) {
+      return res.json({ 
+        success: true, 
+        data: { 
+          url: resource.fileUrl, 
+          downloadUrl: resource.fileUrl, 
+          fileName: resource.fileName,
+          fileType: resource.fileType 
+        } 
+      });
+    }
+
+    // Generate signed URL if R2 is configured
+    try {
+      const { getSignedDownloadUrl, isR2Configured } = await import('../lib/r2storage');
+      if (isR2Configured()) {
+        const signedUrl = await getSignedDownloadUrl(resource.fileUrl, 3600);
+        return res.json({ 
+          success: true, 
+          data: { 
+            url: signedUrl, 
+            downloadUrl: signedUrl, 
+            fileName: resource.fileName,
+            fileType: resource.fileType 
+          } 
+        });
+      }
+    } catch (e) {
+      console.warn('[getResourceDownloadUrl] R2 error:', e);
+    }
+
+    // Local storage fallback
+    const { getLocalUrl } = await import('../lib/localStorage');
+    const localUrl = getLocalUrl(resource.fileUrl);
+    res.json({ 
+      success: true, 
+      data: { 
+        url: localUrl || resource.fileUrl, 
+        downloadUrl: localUrl || resource.fileUrl, 
+        fileName: resource.fileName,
+        fileType: resource.fileType 
+      } 
+    });
   } catch (error) {
     next(error);
   }
@@ -910,7 +951,7 @@ export const reviewRecordingSubmission = async (
     next(error);
   }
 };
-// Get signed URL for assessment submission audio
+// Get signed or direct URL for assessment submission audio
 export const getRecordingSubmissionAudioUrl = async (
   req: AuthRequest,
   res: Response,
@@ -932,15 +973,114 @@ export const getRecordingSubmissionAudioUrl = async (
       throw new AppError('No audio file available', 404);
     }
 
-    // Generate signed URL (valid for 1 hour)
-    const { getSignedDownloadUrl } = await import('../lib/r2storage');
-    const signedUrl = await getSignedDownloadUrl(submission.audioUrl, 3600);
+    // Direct playback for data URIs or public HTTP links
+    if (submission.audioUrl.startsWith('data:') || submission.audioUrl.startsWith('http://') || submission.audioUrl.startsWith('https://')) {
+      return res.json({ 
+        success: true, 
+        data: { url: submission.audioUrl } 
+      });
+    }
+
+    // Generate signed URL if R2 configured
+    try {
+      const { getSignedDownloadUrl, isR2Configured } = await import('../lib/r2storage');
+      if (isR2Configured()) {
+        const signedUrl = await getSignedDownloadUrl(submission.audioUrl, 3600);
+        return res.json({ 
+          success: true, 
+          data: { url: signedUrl } 
+        });
+      }
+    } catch (e) {
+      console.warn('[getRecordingSubmissionAudioUrl] R2 error:', e);
+    }
+
+    // Fallback to local storage URL
+    const { getLocalUrl } = await import('../lib/localStorage');
+    const localUrl = getLocalUrl(submission.audioUrl);
 
     res.json({ 
       success: true, 
-      data: { url: signedUrl } 
+      data: { url: localUrl || submission.audioUrl } 
     });
 
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── Admin Profile Management ────────────────────────────────────────────────
+export const updateAdminProfile = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { firstName, lastName, phone } = req.body;
+    const userId = req.user!.userId;
+
+    if (phone !== undefined) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { phone: String(phone).trim() }
+      });
+    }
+
+    if (firstName || lastName) {
+      await prisma.admin.upsert({
+        where: { userId },
+        update: {
+          firstName: firstName ? String(firstName).trim() : undefined,
+          lastName: lastName ? String(lastName).trim() : undefined,
+        },
+        create: {
+          userId,
+          firstName: String(firstName || 'Admin').trim(),
+          lastName: String(lastName || 'User').trim()
+        }
+      });
+    }
+
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { admin: true }
+    });
+
+    res.json({
+      success: true,
+      message: 'Admin profile updated successfully',
+      data: updatedUser
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── User Status Management (Activate / Suspend) ─────────────────────────────
+export const updateUserStatus = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['PENDING', 'PAYMENT_PENDING', 'ACTIVE', 'SUSPENDED'].includes(status)) {
+      throw new AppError('Invalid status', 400);
+    }
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { status },
+      include: { student: true, teacher: true, parent: true }
+    });
+
+    res.json({
+      success: true,
+      message: `User status updated to ${status}`,
+      data: updated
+    });
   } catch (error) {
     next(error);
   }

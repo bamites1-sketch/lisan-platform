@@ -66,7 +66,7 @@ export const getDashboard = async (
       comprehension: latestProfile.comprehensionScore,
     } : null;
 
-    const [assignmentRows, recentActivity] = await Promise.all([
+    const [assignmentRows, recentActivity, pendingAssessments] = await Promise.all([
       prisma.contentAssignment.findMany({
         where: { status: { not: 'archived' }, OR: [{ grade: student.grade }, { grade: 'ALL' }] },
         orderBy: { assignedAt: 'desc' },
@@ -77,13 +77,32 @@ export const getDashboard = async (
         orderBy: { date: 'desc' },
         take: 5,
       }),
+      prisma.assessmentSubmission.findMany({
+        where: { studentId: student.id, status: 'IN_PROGRESS' },
+        include: { assessment: true },
+        take: 3,
+        orderBy: { createdAt: 'desc' }
+      })
     ]);
-    const assignments = await Promise.all(assignmentRows.map(async assignment => {
+
+    const resolvedContent = await Promise.all(assignmentRows.map(async assignment => {
       const content = assignment.contentType === 'passage'
         ? await prisma.passage.findUnique({ where: { id: assignment.contentId }, select: { title: true } })
         : await prisma.lesson.findUnique({ where: { id: assignment.contentId }, select: { title: true } });
       return { ...assignment, contentTitle: content?.title ?? 'Assigned learning activity' };
     }));
+
+    const resolvedAssessments = pendingAssessments.map(sub => ({
+      id: sub.id,
+      contentType: 'assessment',
+      contentId: sub.assessmentId,
+      grade: sub.assessment.grade,
+      assignedAt: sub.createdAt,
+      status: 'active',
+      contentTitle: sub.assessment.title
+    }));
+
+    const assignments = [...resolvedAssessments, ...resolvedContent];
 
     res.json({
       success: true,
@@ -178,8 +197,8 @@ export const getStudentAssignments = async (req: AuthRequest, res: Response, nex
 
     const grade = user.student.grade; // e.g. "GRADE_6"
 
-    // Return assignments that match this student's grade or are sent to ALL grades
-    const assignments = await prisma.contentAssignment.findMany({
+    // 1. Fetch content assignments for student's grade or ALL grades
+    const contentAssignments = await prisma.contentAssignment.findMany({
       where: {
         status: { not: 'archived' },
         OR: [{ grade }, { grade: 'ALL' }],
@@ -187,7 +206,111 @@ export const getStudentAssignments = async (req: AuthRequest, res: Response, nex
       orderBy: { assignedAt: 'desc' },
     });
 
-    res.json({ success: true, data: assignments });
+    // 2. Fetch assigned assessments (both active submissions and assigned assessments)
+    const assignedAssessments = await prisma.assessmentSubmission.findMany({
+      where: {
+        studentId: user.student.id,
+        status: { in: ['IN_PROGRESS', 'SUBMITTED', 'REVIEWED'] }
+      },
+      include: {
+        assessment: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // 3. Resolve details for content assignments
+    const resolvedContentAssignments = await Promise.all(
+      contentAssignments.map(async item => {
+        let contentDetails: any = null;
+        let title = 'Assigned Learning Activity';
+
+        if (item.contentType === 'passage') {
+          const passage = await prisma.passage.findUnique({
+            where: { id: item.contentId },
+            select: { id: true, title: true, topic: true, difficulty: true, wordCount: true, grade: true, content: true }
+          });
+          if (passage) {
+            title = passage.title;
+            contentDetails = {
+              title: passage.title,
+              topic: passage.topic,
+              difficulty: passage.difficulty,
+              wordCount: passage.wordCount,
+              grade: passage.grade,
+              preview: passage.content.slice(0, 140) + '...'
+            };
+          }
+        } else if (item.contentType === 'lesson') {
+          const lesson = await prisma.lesson.findUnique({
+            where: { id: item.contentId },
+            select: { id: true, title: true, skillArea: true, subskill: true, difficulty: true, grade: true, explanation: true }
+          });
+          if (lesson) {
+            title = lesson.title;
+            contentDetails = {
+              title: lesson.title,
+              skillArea: lesson.skillArea,
+              subskill: lesson.subskill,
+              difficulty: lesson.difficulty,
+              grade: lesson.grade,
+              preview: lesson.explanation.slice(0, 140) + '...'
+            };
+          }
+        }
+
+        return {
+          id: item.id,
+          contentType: item.contentType,
+          contentId: item.contentId,
+          title,
+          grade: item.grade,
+          assignedAt: item.assignedAt.toISOString(),
+          dueDate: item.dueDate ? item.dueDate.toISOString() : null,
+          note: item.note,
+          status: item.status,
+          assignedBy: item.assignedBy,
+          details: contentDetails
+        };
+      })
+    );
+
+    // 4. Format assessment items to unify assignment display
+    const formattedAssessments = assignedAssessments.map(sub => {
+      let skillAreasParsed: string[] = [];
+      try {
+        skillAreasParsed = JSON.parse(sub.assessment.skillAreas || '[]');
+      } catch {
+        skillAreasParsed = [];
+      }
+
+      return {
+        id: `assessment-${sub.id}`,
+        contentType: 'assessment',
+        contentId: sub.assessmentId,
+        submissionId: sub.id,
+        title: sub.assessment.title,
+        grade: sub.assessment.grade,
+        assignedAt: sub.createdAt.toISOString(),
+        dueDate: null,
+        note: sub.assessment.description || sub.assessment.instructions,
+        status: sub.status === 'IN_PROGRESS' ? 'active' : 'completed',
+        submissionStatus: sub.status,
+        overallScore: sub.overallScore,
+        details: {
+          title: sub.assessment.title,
+          passage: sub.assessment.passage,
+          skillAreas: skillAreasParsed,
+          instructions: sub.assessment.instructions,
+          status: sub.status,
+          overallScore: sub.overallScore
+        }
+      };
+    });
+
+    res.json({
+      success: true,
+      data: [...resolvedContentAssignments, ...formattedAssessments]
+    });
   } catch (error) {
     next(error);
   }
@@ -408,6 +531,95 @@ export const getContentItem = async (req: AuthRequest, res: Response, next: Next
     res.json({
       success: true,
       data: content
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── Student Resources (Study Materials, Worksheets, Guides) ────────────────
+export const getStudentResources = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { student: true }
+    });
+
+    const studentGrade = user?.student?.grade || '';
+
+    const resources = await prisma.pDFResource.findMany({
+      where: {
+        status: 'PUBLISHED',
+        OR: [
+          { grade: 'ALL' },
+          { grade: studentGrade },
+          { assignedGrades: null },
+          { assignedGrades: { contains: studentGrade } },
+          { assignedGrades: { contains: 'ALL' } }
+        ]
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.json({ success: true, data: resources });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getStudentResourceDownloadUrl = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const resource = await prisma.pDFResource.findUnique({ where: { id } });
+    if (!resource) throw new AppError('Resource not found', 404);
+    if (!resource.fileUrl) throw new AppError('No file available', 404);
+
+    await prisma.pDFResource.update({
+      where: { id },
+      data: { downloadCount: { increment: 1 } }
+    });
+
+    if (resource.fileUrl.startsWith('data:') || resource.fileUrl.startsWith('http://') || resource.fileUrl.startsWith('https://')) {
+      return res.json({
+        success: true,
+        data: {
+          url: resource.fileUrl,
+          downloadUrl: resource.fileUrl,
+          fileName: resource.fileName,
+          fileType: resource.fileType
+        }
+      });
+    }
+
+    try {
+      const { getSignedDownloadUrl, isR2Configured } = await import('../lib/r2storage');
+      if (isR2Configured()) {
+        const signedUrl = await getSignedDownloadUrl(resource.fileUrl, 3600);
+        return res.json({
+          success: true,
+          data: {
+            url: signedUrl,
+            downloadUrl: signedUrl,
+            fileName: resource.fileName,
+            fileType: resource.fileType
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('[getStudentResourceDownloadUrl] R2 error:', e);
+    }
+
+    const { getLocalUrl } = await import('../lib/localStorage');
+    const localUrl = getLocalUrl(resource.fileUrl);
+    return res.json({
+      success: true,
+      data: {
+        url: localUrl || resource.fileUrl,
+        downloadUrl: localUrl || resource.fileUrl,
+        fileName: resource.fileName,
+        fileType: resource.fileType
+      }
     });
   } catch (error) {
     next(error);

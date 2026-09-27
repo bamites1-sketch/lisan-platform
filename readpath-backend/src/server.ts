@@ -24,6 +24,31 @@ import setupRoutes        from './routes/setup.routes';
 
 dotenv.config();
 
+// ─── Fail-fast env checks in production ──────────────────────────────────────
+if (process.env.NODE_ENV === 'production') {
+  const required: [string, string][] = [
+    ['DATABASE_URL',          'PostgreSQL connection string (from Render, Back4App, or your host)'],
+    ['JWT_SECRET',            'Signing secret for access tokens (openssl rand -base64 64)'],
+    ['JWT_REFRESH_SECRET',    'Signing secret for refresh tokens — MUST differ from JWT_SECRET'],
+  ];
+  const missing = required.filter(([k]) => !process.env[k]);
+  if (missing.length > 0) {
+    console.error('\n❌ Missing required production environment variables:');
+    for (const [k, desc] of missing) {
+      console.error(`   - ${k}  (${desc})`);
+    }
+    console.error('   Set the variables above in your host environment and redeploy.\n');
+    process.exit(1);
+  }
+} else {
+  // Dev — warn only so developers don't get stuck.
+  for (const k of ['DATABASE_URL', 'JWT_SECRET', 'JWT_REFRESH_SECRET']) {
+    if (!process.env[k]) {
+      console.warn(`[dev] Warning: env var ${k} is not set — server will fail when that feature is used.`);
+    }
+  }
+}
+
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
@@ -34,6 +59,8 @@ app.use(helmet.hsts({ maxAge: 60 * 60 * 24 * 365, includeSubDomains: true }));
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
   'https://readpath-frontend.vercel.app',
+  'https://readpath-backend.vercel.app',
+  'https://lisanplatform2-0my7f45h.b4a.run',
   'https://lisan-platform-backend.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173'
@@ -41,7 +68,10 @@ const allowedOrigins = [
 
 // Add FRONTEND_URL from env if it exists
 if (process.env.FRONTEND_URL) {
-  const envOrigins = process.env.FRONTEND_URL.split(',').map(url => url.trim());
+  const envOrigins = process.env.FRONTEND_URL
+    .split(',')
+    .map(url => url.trim())
+    .filter(url => url.length > 0);
   allowedOrigins.push(...envOrigins);
 }
 
@@ -107,6 +137,7 @@ app.get('/test-audio-player.html', (req, res) => {
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth',        authLimiter,  authRoutes);
 app.use('/api/students',    apiLimiter,   studentRoutes);
+app.use('/api/student',     apiLimiter,   studentRoutes);
 app.use('/api/assessments', apiLimiter,   assessmentRoutes);
 app.use('/api/profiles',    apiLimiter,   profileRoutes);
 app.use('/api/learning',    apiLimiter,   learningRoutes);
@@ -125,7 +156,6 @@ app.use(errorHandler);
 
 // Start the server
 if (require.main === module) {
-  const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`🚀 ReadPath API running on port ${PORT}`);
     console.log(`📂 Database: ${process.env.DATABASE_URL}`);

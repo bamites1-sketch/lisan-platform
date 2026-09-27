@@ -5,6 +5,7 @@ import {
   SearchBar, SectionHeader, RowActions, EmptyState, Th, Td
 } from './AdminShared'
 import { timeAgo } from '../../lib/utils'
+import { apiUrl } from '../../lib/apiBase'
 
 interface PDFResource {
   id: string
@@ -41,7 +42,7 @@ const BLANK_RESOURCE = {
   title: '',
   description: '',
   category: 'WORKSHEET',
-  grade: 'GRADE_6',
+  grade: 'ALL',
   difficulty: 'MEDIUM',
   requiredPlan: '',
 }
@@ -230,7 +231,7 @@ function MaterialsView() {
     setLoading(true)
     try {
       const token = localStorage.getItem('lisan_token') ?? ''
-      const response = await fetch('/api/admin/content/pdf-resources', {
+      const response = await fetch(apiUrl('/api/admin/content/pdf-resources'), {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await response.json()
@@ -251,14 +252,14 @@ function MaterialsView() {
   const handleUpload = async (formData: FormData) => {
     try {
       const token = localStorage.getItem('lisan_token') ?? ''
-      const response = await fetch('/api/admin/upload/pdf-resource', {
+      const response = await fetch(apiUrl('/api/admin/upload/pdf-resource'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
       })
       const data = await response.json()
       if (data.success) {
-        toast.success('Resource uploaded', 'Resource has been uploaded successfully')
+        toast.success('Resource uploaded', 'Resource is now available for students')
         loadResources()
       } else {
         throw new Error(data.message || 'Upload failed')
@@ -272,7 +273,7 @@ function MaterialsView() {
   const handleDelete = async (resource: PDFResource) => {
     try {
       const token = localStorage.getItem('lisan_token') ?? ''
-      const response = await fetch(`/api/admin/content/pdf-resource/${resource.id}`, {
+      const response = await fetch(apiUrl(`/api/admin/content/pdf-resource/${resource.id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -287,14 +288,35 @@ function MaterialsView() {
     }
   }
 
-  const handleDownload = (resource: PDFResource) => {
-    window.open(resource.fileUrl, '_blank')
-    // Track download
-    const token = localStorage.getItem('lisan_token') ?? ''
-    fetch(`/api/admin/content/pdf-resource/${resource.id}/download`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` }
-    }).catch(() => {}) // Silent fail for analytics
+  const handleDownload = async (resource: PDFResource) => {
+    try {
+      const token = localStorage.getItem('lisan_token') ?? ''
+      const res = await fetch(apiUrl(`/api/admin/content/pdf-resource/${resource.id}/download`), {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      const downloadUrl = data.data?.downloadUrl || data.data?.url || resource.fileUrl
+      
+      if (downloadUrl) {
+        if (downloadUrl.startsWith('data:')) {
+          const a = document.createElement('a')
+          a.href = downloadUrl
+          a.download = resource.fileName || `${resource.title}.pdf`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+        } else {
+          window.open(downloadUrl, '_blank')
+        }
+        toast.success('Opening resource', resource.title)
+      }
+    } catch {
+      if (resource.fileUrl) {
+        window.open(resource.fileUrl, '_blank')
+      } else {
+        toast.error('Download failed', 'Could not open file URL')
+      }
+    }
   }
 
   const filtered = useMemo(() => {
