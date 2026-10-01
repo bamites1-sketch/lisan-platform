@@ -212,7 +212,7 @@ function Navbar({ user }: { user: { role: string } | null }) {
 // ─── Hero ─────────────────────────────────────────────────────────
 function Hero() {
   return (
-    <section id="top" className="relative pt-16 overflow-hidden" style={{ minHeight: 520 }}>
+    <section id="top" className="relative pt-16 min-h-screen flex items-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0"
         style={{ background: `linear-gradient(135deg, ${C.light} 0%, #f0f7f4 45%, #c8dfd5 100%)` }} />
@@ -236,38 +236,38 @@ function Hero() {
       </div>
 
       {/* Hero copy */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 lg:py-16">
         <div className="lg:w-[52%]">
           <Label>WELCOME TO LISAN</Label>
-          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight mb-5"
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-5"
             style={{ color: C.dark }}>
             Better Readers<br />
             Brighter <span style={{ color: C.gold }}>Futures</span>
           </h1>
-          <p className="text-base text-gray-600 mb-8 max-w-lg leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-600 mb-8 max-w-lg leading-relaxed">
             LISAN is an intelligent reading and literacy platform that helps students
             understand their reading ability, identify areas that need support, practice
             targeted skills, and measure their growth over time.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3">
             <Link to="/register"
-              className="inline-flex items-center gap-2 text-sm font-bold px-7 py-3.5 rounded-xl text-white shadow-md transition-opacity hover:opacity-90"
+              className="inline-flex items-center justify-center gap-2 text-sm font-bold px-7 py-3.5 rounded-xl text-white shadow-md transition-opacity hover:opacity-90 text-center"
               style={{ backgroundColor: C.dark }}>
               Get Started Free →
             </Link>
             <button
               onClick={() => scrollTo('about')}
-              className="inline-flex items-center gap-2 text-sm font-semibold px-7 py-3.5 rounded-xl border-2 transition-colors hover:bg-white/50"
+              className="inline-flex items-center justify-center gap-2 text-sm font-semibold px-7 py-3.5 rounded-xl border-2 transition-colors hover:bg-white/50 text-center"
               style={{ borderColor: C.dark, color: C.dark }}>
               Learn More
             </button>
           </div>
 
           {/* Mobile photo */}
-          <div className="lg:hidden mt-8 rounded-2xl overflow-hidden shadow-xl">
+          <div className="lg:hidden mt-8 rounded-2xl overflow-hidden shadow-xl border border-white/60">
             <img src="/assets/hero-image.png" alt="Ethiopian girl reading a LISAN book"
-              className="w-full object-cover"
-              style={{ maxHeight: 260, objectPosition: '50% 18%' }}
+              className="w-full object-cover h-56 sm:h-72"
+              style={{ objectPosition: '50% 18%' }}
               onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none' }} />
           </div>
         </div>

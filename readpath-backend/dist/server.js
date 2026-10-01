@@ -63,6 +63,8 @@ const allowedOrigins = [
     'https://readpath-backend.vercel.app',
     'https://lisanplatform2-0my7f45h.b4a.run',
     'https://lisan-platform-backend.vercel.app',
+    'https://lisan-api.onrender.com',
+    'https://lisan-backend-nl8c.onrender.com',
     'http://localhost:3000',
     'http://localhost:5173'
 ];

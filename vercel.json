@@ -1,4 +1,0 @@
-{
-  "version": 2,
-  "comment": "Root-level vercel.json is intentionally minimal. The frontend is deployed as a separate project under readpath-frontend/. See readpath-frontend/vercel.json for SPA routing. The backend is deployed on Render (see render.yaml)."
-}
