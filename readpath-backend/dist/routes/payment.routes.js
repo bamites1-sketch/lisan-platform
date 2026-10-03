@@ -7,6 +7,8 @@ const express_1 = __importDefault(require("express"));
 const auth_1 = require("../middleware/auth");
 const payment_controller_1 = require("../controllers/payment.controller");
 const router = express_1.default.Router();
+// Direct receipt image route (accessible to <img> tags & preview tabs by submission UUID)
+router.get('/:id/receipt-image', payment_controller_1.getReceiptImage);
 router.use(auth_1.authenticate);
 // Student / Parent — submit and view their own submissions
 router.post('/', (0, auth_1.authorize)('STUDENT', 'PARENT'), payment_controller_1.upload.single('receipt'), payment_controller_1.submitPayment);

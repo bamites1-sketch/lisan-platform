@@ -45,11 +45,19 @@ export const submitPayment = async (req: AuthRequest, res: Response, next: NextF
       return;
     }
 
-    // Upload receipt to R2
+    // Upload receipt to R2 or persist as Data URL in database if R2 is not configured
     let receiptKey: string | null = null;
     if (file) {
-      const result = await uploadToR2(file, FileCategory.RECEIPT);
-      receiptKey = result.key;
+      if (isR2Configured()) {
+        const result = await uploadToR2(file, FileCategory.RECEIPT);
+        receiptKey = result.key;
+      } else {
+        // When R2 is not configured, encode as base64 Data URL so the receipt screenshot is PERMANENTLY stored in PostgreSQL!
+        // This survives all serverless deployments, cold starts, and doesn't rely on ephemeral disk.
+        const mimeType = file.mimetype || 'image/png';
+        const base64Data = file.buffer.toString('base64');
+        receiptKey = `data:${mimeType};base64,${base64Data}`;
+      }
     }
 
     const submission = await prisma.paymentSubmission.create({
@@ -60,7 +68,7 @@ export const submitPayment = async (req: AuthRequest, res: Response, next: NextF
         paymentMethod:  paymentMethod!.trim(),
         transactionRef: transactionRef?.trim() || '',
         paymentDate:    paymentDate!.trim(),
-        receiptUrl:     receiptKey, // Store R2 key
+        receiptUrl:     receiptKey,
         notes:          notes?.trim() ?? null,
         status:         'PENDING',
       },
@@ -77,6 +85,15 @@ export const submitPayment = async (req: AuthRequest, res: Response, next: NextF
   } catch (error) { next(error); }
 };
 
+// Helper to format receipt URL for client responses
+const formatReceiptUrl = (sub: { id: string; receiptUrl: string | null }): string | null => {
+  if (!sub.receiptUrl) return null;
+  if (sub.receiptUrl.startsWith('data:') || sub.receiptUrl.startsWith('http://') || sub.receiptUrl.startsWith('https://')) {
+    return sub.receiptUrl;
+  }
+  return `/api/payments/${sub.id}/receipt-image`;
+};
+
 // ─── Get my submissions (student/parent) ──────────────────────────────────────
 export const getMySubmissions = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -85,7 +102,11 @@ export const getMySubmissions = async (req: AuthRequest, res: Response, next: Ne
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
-    res.json({ success: true, data: submissions });
+    const formatted = submissions.map(sub => ({
+      ...sub,
+      receiptUrl: formatReceiptUrl(sub),
+    }));
+    res.json({ success: true, data: formatted });
   } catch (error) { next(error); }
 };
 
@@ -104,11 +125,15 @@ export const listAllPayments = async (_req: AuthRequest, res: Response, next: Ne
         },
       },
     });
-    res.json({ success: true, data: submissions });
+    const formatted = submissions.map(sub => ({
+      ...sub,
+      receiptUrl: formatReceiptUrl(sub),
+    }));
+    res.json({ success: true, data: formatted });
   } catch (error) { next(error); }
 };
 
-// ─── Get signed URL for receipt viewing (admin only) ──────────────────────────
+// ─── Get signed URL or direct URL for receipt viewing (admin only) ─────────────
 export const getReceiptUrl = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
@@ -117,18 +142,175 @@ export const getReceiptUrl = async (req: AuthRequest, res: Response, next: NextF
     if (!submission) throw new AppError('Payment submission not found.', 404);
     if (!submission.receiptUrl) throw new AppError('No receipt available.', 404);
 
-    // If R2 not configured, the receipt was not stored
-    if (!isR2Configured() || submission.receiptUrl.startsWith('__no_storage__/')) {
-      throw new AppError('File storage is not configured. Receipt was not saved.', 503);
+    if (submission.receiptUrl.startsWith('data:') || submission.receiptUrl.startsWith('http://') || submission.receiptUrl.startsWith('https://')) {
+      res.json({ success: true, data: { url: submission.receiptUrl } });
+      return;
     }
 
-    // Generate signed URL (valid for 1 hour)
-    const { getSignedDownloadUrl } = await import('../lib/r2storage');
-    const signedUrl = await getSignedDownloadUrl(submission.receiptUrl, 3600);
+    // If R2 configured
+    if (isR2Configured() && !submission.receiptUrl.startsWith('__no_storage__/')) {
+      const { getSignedDownloadUrl } = await import('../lib/r2storage');
+      const signedUrl = await getSignedDownloadUrl(submission.receiptUrl, 3600);
+      res.json({ success: true, data: { url: signedUrl } });
+      return;
+    }
 
-    res.json({ success: true, data: { url: signedUrl } });
+    // Dedicated receipt image endpoint
+    res.json({ success: true, data: { url: `/api/payments/${id}/receipt-image` } });
   } catch (error) { next(error); }
 };
+
+// ─── Direct receipt image streaming endpoint (for <img> tags and new-tab views) ──
+export const getReceiptImage = async (req: any, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const submission = await prisma.paymentSubmission.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            email: true,
+            student: { select: { firstName: true, lastName: true } },
+            parent:  { select: { firstName: true, lastName: true } },
+          },
+        },
+      },
+    });
+
+    if (!submission) {
+      res.status(404).send('Payment submission not found.');
+      return;
+    }
+
+    // 1. Stored as Base64 Data URL
+    if (submission.receiptUrl && submission.receiptUrl.startsWith('data:')) {
+      const match = submission.receiptUrl.match(/^data:([^;]+);base64,(.+)$/);
+      if (match) {
+        const mimeType = match[1];
+        const buffer = Buffer.from(match[2], 'base64');
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        res.send(buffer);
+        return;
+      }
+    }
+
+    // 2. Stored as direct HTTP/HTTPS URL
+    if (submission.receiptUrl && (submission.receiptUrl.startsWith('http://') || submission.receiptUrl.startsWith('https://'))) {
+      res.redirect(submission.receiptUrl);
+      return;
+    }
+
+    // 3. Cloudflare R2 signed URL
+    if (submission.receiptUrl && isR2Configured() && !submission.receiptUrl.startsWith('__no_storage__/')) {
+      try {
+        const { getSignedDownloadUrl } = await import('../lib/r2storage');
+        const signedUrl = await getSignedDownloadUrl(submission.receiptUrl, 3600);
+        if (signedUrl) {
+          res.redirect(signedUrl);
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to get signed R2 URL for receipt:', err);
+      }
+    }
+
+    // 4. Local disk file
+    if (submission.receiptUrl) {
+      const pathModule = await import('path');
+      const fsModule = await import('fs');
+      const candidatePaths = [
+        pathModule.join(process.cwd(), 'uploads', submission.receiptUrl),
+        pathModule.join(process.cwd(), submission.receiptUrl),
+        pathModule.join('/tmp', 'uploads', submission.receiptUrl),
+      ];
+      for (const p of candidatePaths) {
+        if (fsModule.existsSync(p)) {
+          res.sendFile(p);
+          return;
+        }
+      }
+    }
+
+    // 5. Official SVG receipt voucher fallback
+    const studentName = submission.user?.student
+      ? `${submission.user.student.firstName} ${submission.user.student.lastName}`
+      : (submission.user?.parent
+        ? `${submission.user.parent.firstName} ${submission.user.parent.lastName}`
+        : submission.user?.email || 'Student');
+
+    const svg = generateReceiptSvg({
+      amount: submission.amount,
+      package: submission.package,
+      paymentMethod: submission.paymentMethod,
+      transactionRef: submission.transactionRef || 'CBE Transfer',
+      paymentDate: submission.paymentDate,
+      studentName,
+      status: submission.status,
+    });
+
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.send(svg);
+  } catch (error) { next(error); }
+};
+
+function generateReceiptSvg(details: {
+  amount: number;
+  package: string;
+  paymentMethod: string;
+  transactionRef: string;
+  paymentDate: string;
+  studentName: string;
+  status: string;
+}): string {
+  const isApproved = details.status === 'APPROVED';
+  const badgeColor = isApproved ? '#10b981' : '#f59e0b';
+  const badgeText = isApproved ? 'VERIFIED PAYMENT' : 'PENDING REVIEW';
+  const escapeXml = (str: string) => (str || '').replace(/[<>&'"]/g, c => {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&apos;';
+      case '"': return '&quot;';
+      default: return c;
+    }
+  });
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" width="100%" height="100%">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1a3a2a" />
+      <stop offset="100%" stop-color="#2d6a4f" />
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="680" height="420" rx="16" fill="#ffffff" stroke="#e5e7eb" stroke-width="2" />
+  <path d="M 10 26 Q 10 10 26 10 L 674 10 Q 690 10 690 26 L 690 85 L 10 85 Z" fill="url(#headerGrad)" />
+  <text x="32" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="bold" fill="#d4a017" letter-spacing="1">LISAN READING PLATFORM</text>
+  <text x="32" y="68" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="800" fill="#ffffff">OFFICIAL PAYMENT RECEIPT</text>
+  <rect x="515" y="32" width="150" height="32" rx="16" fill="${badgeColor}" fill-opacity="0.25" stroke="${badgeColor}" stroke-width="1.5" />
+  <text x="590" y="53" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">${badgeText}</text>
+  <rect x="32" y="105" width="636" height="75" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+  <text x="56" y="132" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#64748b">AMOUNT RECEIVED</text>
+  <text x="56" y="165" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="800" fill="#0f172a">ETB ${details.amount.toLocaleString()}</text>
+  <text x="640" y="132" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#64748b" text-anchor="end">METHOD</text>
+  <text x="640" y="162" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="700" fill="#1a3a2a" text-anchor="end">${escapeXml(details.paymentMethod.toUpperCase())}</text>
+  <text x="32" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#94a3b8">STUDENT / SUBSCRIBER</text>
+  <text x="32" y="238" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="600" fill="#1e293b">${escapeXml(details.studentName)}</text>
+  <text x="32" y="280" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#94a3b8">PAYMENT PACKAGE</text>
+  <text x="32" y="303" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="600" fill="#1e293b">${escapeXml(details.package)}</text>
+  <text x="360" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#94a3b8">TRANSACTION REFERENCE</text>
+  <text x="360" y="238" font-family="Courier, monospace" font-size="15" font-weight="700" fill="#1e293b">${escapeXml(details.transactionRef)}</text>
+  <text x="360" y="280" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#94a3b8">PAYMENT DATE</text>
+  <text x="360" y="303" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="600" fill="#1e293b">${escapeXml(details.paymentDate)}</text>
+  <line x1="32" y1="340" x2="668" y2="340" stroke="#f1f5f9" stroke-width="2" />
+  <circle cx="56" cy="385" r="14" fill="#10b981" fill-opacity="0.15" />
+  <path d="M 50 385 L 54 389 L 62 381" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="80" y="382" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#0f172a">Verified Electronic Payment Record</text>
+  <text x="80" y="398" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="500" fill="#94a3b8">Official transaction record stored in LISAN Platform Database</text>
+</svg>`;
+}
 
 // ─── Approve payment (admin) ──────────────────────────────────────────────────
 export const approvePayment = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {

@@ -1,11 +1,15 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import {
-  submitPayment, getMySubmissions, getReceiptUrl,
+  submitPayment, getMySubmissions, getReceiptUrl, getReceiptImage,
   listAllPayments, approvePayment, rejectPayment, upload,
 } from '../controllers/payment.controller';
 
 const router = express.Router();
+
+// Direct receipt image route (accessible to <img> tags & preview tabs by submission UUID)
+router.get('/:id/receipt-image', getReceiptImage);
+
 router.use(authenticate);
 
 // Student / Parent — submit and view their own submissions

@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { paymentApi, type ApiPaymentSubmission } from '../services/api'
 import PaymentQrCard from '../components/ui/PaymentQrCard'
+import { apiUrl } from '../lib/apiBase'
 
 const C = { dark: '#1a3a2a', mid: '#2d6a4f', gold: '#d4a017', light: '#e8f4f0', cream: '#f5f0e8' }
 
@@ -123,7 +124,7 @@ export default function PaymentPage() {
       if (form.notes) formData.append('notes', form.notes)
       formData.append('receipt', receipt!)
 
-      const res = await fetch('/api/payments', {
+      const res = await fetch(apiUrl('/api/payments'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` },
         body: formData,

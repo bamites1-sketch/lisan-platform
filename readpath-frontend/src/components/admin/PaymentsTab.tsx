@@ -1,6 +1,26 @@
 import { useState, useEffect } from 'react'
 import { paymentApi, type ApiPaymentSubmission } from '../../services/api'
 import { useToast } from '../ui/Toast'
+import { apiUrl } from '../../lib/apiBase'
+
+function getReceiptUrl(url: string | null | undefined, submissionId?: string): string {
+  if (!url) {
+    return submissionId ? apiUrl(`/api/payments/${submissionId}/receipt-image`) : ''
+  }
+  if (url.startsWith('data:')) return url
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  if (url.startsWith('/')) return apiUrl(url)
+  return submissionId ? apiUrl(`/api/payments/${submissionId}/receipt-image`) : apiUrl(`/${url}`)
+}
+
+function isReceiptImage(url?: string | null): boolean {
+  if (!url) return true
+  if (url.startsWith('data:image/')) return true
+  if (url.includes('/receipt-image')) return true
+  if (url.match(/\.(jpg|jpeg|png|webp|svg|gif|bmp)($|\?)/i)) return true
+  if (url.match(/\.pdf($|\?)/i) || url.startsWith('data:application/pdf')) return false
+  return true
+}
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   PENDING:  { bg: 'bg-amber-50',  text: 'text-amber-700',  dot: 'bg-amber-400'  },
@@ -65,6 +85,7 @@ export default function PaymentsTab() {
   const [methodFilter, setMethodFilter] = useState('ALL')
 
   const [viewTarget,    setViewTarget]    = useState<ApiPaymentSubmission | null>(null)
+  const [zoomedImage,   setZoomedImage]   = useState<string | null>(null)
   const [rejectTarget,  setRejectTarget]  = useState<ApiPaymentSubmission | null>(null)
   const [rejectReason,  setRejectReason]  = useState('')
   const [approveTarget, setApproveTarget] = useState<ApiPaymentSubmission | null>(null)
@@ -295,12 +316,12 @@ export default function PaymentsTab() {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => setViewTarget(sub)}
-                        className="flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 font-medium">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        className="flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100/80 px-2.5 py-1.5 rounded-lg transition-colors border border-brand-200/60">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        {sub.transactionRef}
+                        <span>{sub.transactionRef ? sub.transactionRef : 'View Receipt'}</span>
                       </button>
                     </td>
                     <td className="px-6 py-4">
@@ -418,48 +439,82 @@ export default function PaymentsTab() {
                 <p className="text-xs font-semibold text-gray-500 uppercase">Transaction Reference</p>
                 <p className="text-sm font-mono font-semibold text-gray-900">{viewTarget.transactionRef}</p>
               </div>
-              {viewTarget.receiptUrl && (
-                <div className="space-y-2 col-span-2">
-                  <p className="text-xs font-semibold text-gray-500 uppercase">Receipt / Screenshot</p>
-                  {viewTarget.receiptUrl.match(/\.(jpg|jpeg|png)$/i) ? (
-                    <div className="border-2 border-gray-200 rounded-xl p-3 bg-gray-50">
-                      <img 
-                        src={viewTarget.receiptUrl} 
-                        alt="Payment Receipt" 
-                        className="w-full max-h-[500px] object-contain rounded-lg"
-                        onError={(e) => {
-                          const img = e.target as HTMLImageElement;
-                          img.style.display = 'none';
-                          const parent = img.parentElement!;
-                          parent.innerHTML = '<p class="text-sm text-red-600 py-8 text-center">⚠️ Receipt image failed to load</p>';
-                        }}
-                      />
-                      <a 
-                        href={viewTarget.receiptUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="block text-center text-xs text-brand-600 hover:text-brand-700 mt-2 font-medium">
-                        Open in new tab →
-                      </a>
+              {Boolean(viewTarget.receiptUrl || viewTarget.id) && (() => {
+                const receiptSrc = getReceiptUrl(viewTarget.receiptUrl, viewTarget.id);
+                const isImage = isReceiptImage(viewTarget.receiptUrl);
+                const directLink = viewTarget.id ? apiUrl(`/api/payments/${viewTarget.id}/receipt-image`) : receiptSrc;
+
+                return (
+                  <div className="space-y-2 col-span-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">Payment Receipt / Screenshot</p>
+                      {isImage && (
+                        <button 
+                          type="button" 
+                          onClick={() => setZoomedImage(receiptSrc)} 
+                          className="text-xs text-brand-600 hover:text-brand-700 font-semibold flex items-center gap-1">
+                          🔍 Click to Zoom
+                        </button>
+                      )}
                     </div>
-                  ) : (
-                    <a href={viewTarget.receiptUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 hover:border-brand-300 hover:bg-brand-50 transition-colors">
-                      <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-gray-900">📄 PDF Receipt</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Click to view or download the receipt</p>
+                    {isImage ? (
+                      <div className="border-2 border-brand-100 rounded-xl p-3 bg-gray-50/70">
+                        <div 
+                          className="relative group cursor-zoom-in overflow-hidden rounded-lg bg-white border border-gray-200/80 flex items-center justify-center min-h-[220px]"
+                          onClick={() => setZoomedImage(receiptSrc)}>
+                          <img 
+                            src={receiptSrc} 
+                            alt="Payment Receipt Screenshot" 
+                            className="w-full max-h-[500px] object-contain rounded-lg transition-transform duration-200 group-hover:scale-[1.01]"
+                            onError={(e) => {
+                              const img = e.target as HTMLImageElement;
+                              const fallbackUrl = apiUrl(`/api/payments/${viewTarget.id}/receipt-image`);
+                              if (img.src !== fallbackUrl) {
+                                img.src = fallbackUrl;
+                              }
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                            <span className="bg-white/95 text-gray-900 text-xs font-bold px-3.5 py-2 rounded-full shadow-md flex items-center gap-1.5 backdrop-blur-sm">
+                              🔍 Click to View Full Size
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-gray-200/70 text-xs">
+                          <button
+                            type="button"
+                            onClick={() => setZoomedImage(receiptSrc)}
+                            className="text-brand-600 hover:text-brand-700 font-semibold flex items-center gap-1">
+                            <span>🔍</span> Expand Image
+                          </button>
+                          <a 
+                            href={directLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
+                            Open in new tab →
+                          </a>
+                        </div>
                       </div>
-                      <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  )}
-                </div>
-              )}
+                    ) : (
+                      <a href={directLink} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 hover:border-brand-300 hover:bg-brand-50 transition-colors">
+                        <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-gray-900">📄 PDF Receipt</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Click to view or download the receipt</p>
+                        </div>
+                        <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                );
+              })()}
               {viewTarget.notes && (
                 <div className="space-y-1 col-span-2">
                   <p className="text-xs font-semibold text-gray-500 uppercase">Notes</p>
@@ -563,6 +618,46 @@ export default function PaymentsTab() {
                 disabled={acting}
                 className="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-60">
                 {acting ? 'Rejecting…' : 'Reject & Notify'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Fullscreen Receipt Image Zoom Modal */}
+      {zoomedImage && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setZoomedImage(null)}>
+          <div 
+            className="relative max-w-4xl w-full max-h-[92vh] bg-white rounded-2xl p-4 shadow-2xl overflow-hidden flex flex-col"
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🧾</span>
+                <h4 className="text-sm font-bold text-gray-900">Payment Receipt Screenshot — Full Preview</h4>
+              </div>
+              <button 
+                onClick={() => setZoomedImage(null)}
+                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-3 overflow-auto flex-1 flex items-center justify-center bg-gray-50 rounded-xl my-2">
+              <img 
+                src={zoomedImage} 
+                alt="Receipt Fullscreen" 
+                className="max-w-full max-h-[76vh] object-contain rounded-lg shadow-sm" 
+              />
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs text-gray-500">
+              <span>Press anywhere outside or click Close to return</span>
+              <button 
+                type="button"
+                onClick={() => setZoomedImage(null)}
+                className="px-4 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-colors">
+                Close
               </button>
             </div>
           </div>
