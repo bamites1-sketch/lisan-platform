@@ -377,13 +377,13 @@ export default function AiTutor() {
       {/* ── Floating toggle button ──────────────────────────────────── */}
       <button
         onClick={() => setOpen(p => !p)}
-        className={`fixed bottom-5 right-4 sm:right-6 z-50 text-white px-4 py-3 rounded-2xl shadow-lg flex items-center gap-2 text-sm font-bold transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 ${
-          open ? 'bg-[#005a53]' : 'bg-[#003f3a] hover:bg-[#005a53]'
+        className={`fixed bottom-20 lg:bottom-5 right-4 sm:right-6 z-40 text-white px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs sm:text-sm font-bold transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 border border-white/20 active:scale-95 ${
+          open ? 'bg-[#005a53]' : 'bg-gradient-to-r from-[#1a3a2a] to-[#2d6a4f] hover:from-[#224b37] hover:to-[#387e60]'
         }`}
         aria-label="Toggle AI Tutor"
       >
-        <span className="text-base">{open ? '✕' : '💬'}</span>
-        <span className="hidden sm:inline">{open ? 'Close' : 'Ask Lemi'}</span>
+        <span className="text-base sm:text-lg">{open ? '✕' : '💬'}</span>
+        <span className="font-semibold">{open ? 'Close' : 'Ask Lemi'}</span>
       </button>
     </>
   )

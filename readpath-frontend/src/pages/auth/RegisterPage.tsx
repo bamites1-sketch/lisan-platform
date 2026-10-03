@@ -149,16 +149,16 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row overflow-hidden"
+    <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden"
       style={{ backgroundColor: C.cream }}>
 
       <BrandPanel />
 
       {/* ── Right: form panel ── */}
-      <div className="flex-1 flex flex-col items-center justify-start lg:justify-center px-6 py-8 lg:overflow-y-auto">
+      <div className="flex-1 w-full flex flex-col items-center justify-start lg:justify-center px-4 sm:px-6 py-6 sm:py-8 overflow-y-auto">
 
         {/* Mobile logo */}
-        <div className="lg:hidden flex items-center gap-2.5 mb-6 self-start">
+        <div className="lg:hidden flex items-center gap-2.5 mb-5 self-start">
           <div className="w-9 h-9 rounded-xl overflow-hidden border-2 flex-shrink-0"
             style={{ borderColor: `${C.mid}40` }}>
             <img src="/assets/hero-image.png" alt="LISAN"
@@ -172,7 +172,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Card */}
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-md px-7 py-7">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-md p-5 sm:p-7">
 
           <h1 className="text-xl font-extrabold mb-0.5" style={{ color: C.dark }}>Create Your Account</h1>
           <p className="text-xs text-gray-500 mb-5">Start your personalised reading journey.</p>

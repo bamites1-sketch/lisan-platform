@@ -478,13 +478,13 @@ export default function KaraokeReadingCoach() {
           </div>
 
           {/* Controls Bar */}
-          <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
               {!isReading ? (
                 <button
                   type="button"
                   onClick={handleStartReading}
-                  className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg shadow-emerald-700/20 hover:scale-[1.02] transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg shadow-emerald-700/20 active:scale-98 transition-all"
                 >
                   <span className="text-lg">🎙️</span>
                   <span>Start Reading Aloud</span>
@@ -494,16 +494,16 @@ export default function KaraokeReadingCoach() {
                   <button
                     type="button"
                     onClick={() => setIsPaused(!isPaused)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl transition-colors"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl active:scale-95 transition-colors"
                   >
                     <span>{isPaused ? '▶ Resume' : '⏸ Pause'}</span>
                   </button>
                   <button
                     type="button"
                     onClick={finishSession}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm transition-colors"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm active:scale-95 transition-colors"
                   >
-                    <span>■ Finish & See Score</span>
+                    <span>■ Finish & Score</span>
                   </button>
                 </>
               )}
@@ -511,14 +511,14 @@ export default function KaraokeReadingCoach() {
               <button
                 type="button"
                 onClick={resetSession}
-                className="px-3 py-2 text-xs text-gray-400 hover:text-gray-600 hover:underline"
+                className="px-3 py-2 text-xs text-gray-400 hover:text-gray-600 hover:underline active:scale-95 ml-auto sm:ml-0"
               >
                 Reset
               </button>
             </div>
 
             {isReading && (
-              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+              <div className="flex items-center justify-center gap-2 text-xs font-semibold text-emerald-800 bg-emerald-50 px-3.5 py-2 rounded-full border border-emerald-200">
                 <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
                 <span>Listening actively to your voice…</span>
               </div>

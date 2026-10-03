@@ -258,21 +258,105 @@ function AdminDashboardInner() {
         </div>
       </aside>
 
-      {/* ── MOBILE HEADER ── */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#1a3a2a] text-white border-b border-[#2d6a4f]/30 z-30 px-4 py-3 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-gradient-to-br from-[#d4a017] to-[#b88912] text-[#1a3a2a] rounded-lg flex items-center justify-center font-bold text-sm shadow-xs">
-            ል
+      {/* ── MOBILE HEADER & QUICK TAB BAR ── */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#1a3a2a] text-white border-b border-[#2d6a4f]/30 z-30 shadow-md">
+        <div className="px-3.5 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-[#d4a017] to-[#b88912] text-[#1a3a2a] rounded-lg flex items-center justify-center font-bold text-sm shadow-xs">
+              ል
+            </div>
+            <div>
+              <span className="font-extrabold text-white text-base tracking-wide">LiSAN</span>
+              <span className="text-xs text-[#d4a017] ml-1.5 font-semibold capitalize">
+                | {MAIN_TABS.find(t => t.id === mainTab)?.label || 'Admin'}
+              </span>
+            </div>
           </div>
-          <div>
-            <span className="font-extrabold text-white text-base tracking-wide">LiSAN</span>
-            <span className="text-xs text-[#d4a017] ml-1.5 font-semibold">| Admin</span>
+          <div className="flex items-center gap-1.5">
+            <NotificationBell />
+            <button onClick={() => setSidebar(p => !p)} className="p-2 rounded-lg hover:bg-white/10 text-white" aria-label="Menu">☰</button>
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <NotificationBell />
-          <button onClick={() => setSidebar(p => !p)} className="p-2 rounded-lg hover:bg-white/10 text-white" aria-label="Menu">☰</button>
+
+        {/* Horizontal scrollable tab pills for fast mobile access */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 overflow-x-auto no-scrollbar border-t border-white/10 bg-[#142e21] touch-scroll">
+          {VISIBLE_MAIN_TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => selectMainTab(tab.id)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 active:scale-95 ${
+                mainTab === tab.id
+                  ? 'bg-[#d4a017] text-[#1a3a2a] shadow-sm font-bold'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
         </div>
+
+        {/* Subtabs horizontal bar for Payments / Assessments / Assignments / Resources on mobile */}
+        {mainTab === 'payments' && (
+          <div className="flex items-center gap-1 px-3 py-1 overflow-x-auto no-scrollbar bg-[#10241a] border-t border-white/5">
+            {PAYMENT_TABS.map(st => (
+              <button
+                key={st.id}
+                onClick={() => setPaymentSub(st.id)}
+                className={`text-[11px] px-2.5 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${
+                  paymentSubTab === st.id ? 'bg-[#d4a017]/25 text-[#d4a017] font-bold' : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {st.icon} {st.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {mainTab === 'assessments' && (
+          <div className="flex items-center gap-1 px-3 py-1 overflow-x-auto no-scrollbar bg-[#10241a] border-t border-white/5">
+            {ASSESSMENT_TABS.map(st => (
+              <button
+                key={st.id}
+                onClick={() => setAssessmentSub(st.id)}
+                className={`text-[11px] px-2.5 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${
+                  assessmentSubTab === st.id ? 'bg-[#d4a017]/25 text-[#d4a017] font-bold' : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {st.icon} {st.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {mainTab === 'assignments' && (
+          <div className="flex items-center gap-1 px-3 py-1 overflow-x-auto no-scrollbar bg-[#10241a] border-t border-white/5">
+            {ASSIGNMENT_TABS.map(st => (
+              <button
+                key={st.id}
+                onClick={() => setAssignmentSub(st.id)}
+                className={`text-[11px] px-2.5 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${
+                  assignmentSubTab === st.id ? 'bg-[#d4a017]/25 text-[#d4a017] font-bold' : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {st.icon} {st.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {mainTab === 'resources' && (
+          <div className="flex items-center gap-1 px-3 py-1 overflow-x-auto no-scrollbar bg-[#10241a] border-t border-white/5">
+            {RESOURCE_TABS.map(st => (
+              <button
+                key={st.id}
+                onClick={() => setResourceSub(st.id)}
+                className={`text-[11px] px-2.5 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${
+                  resourceSubTab === st.id ? 'bg-[#d4a017]/25 text-[#d4a017] font-bold' : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {st.icon} {st.label}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
       {/* Mobile sidebar */}
@@ -376,7 +460,9 @@ function AdminDashboardInner() {
       )}
 
       {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-h-screen bg-[#f8faf9]">
+      <main className={`flex-1 lg:ml-64 ${
+        ['payments', 'assessments', 'assignments', 'resources'].includes(mainTab) ? 'pt-28' : 'pt-24'
+      } lg:pt-0 min-h-screen bg-[#f8faf9]`}>
         {/* Top bar (desktop only) */}
         <div className="hidden lg:flex items-center justify-between px-7 py-3.5 bg-white/85 backdrop-blur-md border-b border-[#1a3a2a]/10 sticky top-0 z-10 shadow-xs">
           {/* Breadcrumb */}

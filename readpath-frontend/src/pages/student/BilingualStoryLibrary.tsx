@@ -113,12 +113,51 @@ export default function BilingualStoryLibrary() {
         {/* ── Main Layout: Story Selector + Story Viewer ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* Left Column: Story Picker (4 cols) */}
-          <div className="lg:col-span-4 space-y-3">
+          {/* Story Picker Column (Horizontal on mobile, vertical sidebar on desktop) */}
+          <div className="lg:col-span-4 space-y-2.5">
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">
-              Select Story to Read
+              Select Story to Read ({filteredStories.length})
             </h2>
-            <div className="space-y-2.5">
+
+            {/* Mobile Horizontal Carousel */}
+            <div className="lg:hidden flex gap-2.5 overflow-x-auto no-scrollbar pb-2 touch-scroll">
+              {filteredStories.map((story) => {
+                const isSelected = story.id === selectedStory.id
+                return (
+                  <div
+                    key={story.id}
+                    onClick={() => {
+                      setSelectedStory(story)
+                      setActiveWordData(null)
+                      setSelectedRawWord(null)
+                    }}
+                    className={`min-w-[240px] max-w-[260px] flex-shrink-0 p-3.5 rounded-2xl border cursor-pointer transition-all duration-150 active:scale-98 ${
+                      isSelected
+                        ? 'bg-emerald-950 text-white border-emerald-800 shadow-md ring-2 ring-[#d4a017]/40'
+                        : 'bg-white border-gray-200 hover:border-emerald-300 text-gray-800 shadow-xs'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span
+                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                          isSelected ? 'bg-[#d4a017] text-[#1a3a2a]' : 'bg-emerald-100 text-emerald-800'
+                        }`}
+                      >
+                        {story.gradeLevel}
+                      </span>
+                      <span className={`text-[10px] ${isSelected ? 'text-emerald-200' : 'text-gray-400'}`}>
+                        ⏱️ {story.readTimeMin}m
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-xs mt-1.5 line-clamp-1">{story.titleEn}</h3>
+                    <p className={`text-[11px] font-serif line-clamp-1 ${isSelected ? 'text-[#f3ca52]' : 'text-emerald-800'}`}>{story.titleAm}</p>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Desktop Vertical List */}
+            <div className="hidden lg:block space-y-2.5">
               {filteredStories.map((story) => {
                 const isSelected = story.id === selectedStory.id
                 return (
@@ -167,7 +206,7 @@ export default function BilingualStoryLibrary() {
 
           {/* Right Column: Story Reading Canvas (8 cols) */}
           <div className="lg:col-span-8 space-y-4">
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-sm">
               
               {/* Story Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">

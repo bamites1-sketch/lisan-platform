@@ -257,8 +257,102 @@ export default function PaymentsTab() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-          <table className="w-full">
+        {/* Mobile View: Cards */}
+        <div className="md:hidden space-y-3">
+          {loading ? (
+            <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
+              <div className="w-10 h-10 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mx-auto" />
+              <p className="text-xs text-gray-500 mt-3">Loading payments…</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
+              <p className="text-sm text-gray-400">No payments found</p>
+            </div>
+          ) : (
+            filtered.map((sub, idx) => (
+              <div key={sub.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-xs space-y-3">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 ${getAvatarColor(sub.userId)}`}>
+                      {getInitials(getName(sub))}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-gray-900 truncate">{getName(sub)}</p>
+                      <p className="text-xs text-gray-500">{getGrade(sub)} · {getParentName(sub)}</p>
+                    </div>
+                  </div>
+                  <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${STATUS_COLORS[sub.status]?.bg} ${STATUS_COLORS[sub.status]?.text}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${STATUS_COLORS[sub.status]?.dot}`} />
+                    {sub.status}
+                  </span>
+                </div>
+
+                {/* Amount, Method, Date */}
+                <div className="flex items-center justify-between text-xs py-2 px-3 bg-gray-50/80 rounded-xl">
+                  <div>
+                    <span className="text-gray-400 block text-[10px] uppercase font-bold">Amount</span>
+                    <span className="text-sm font-extrabold text-gray-900">ETB {sub.amount.toLocaleString()}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-gray-400 block text-[10px] uppercase font-bold">Method</span>
+                    <span className={`inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full text-[11px] ${METHOD_COLORS[sub.paymentMethod] || METHOD_COLORS.Other}`}>
+                      {sub.paymentMethod === 'CBE' && '🏦'}
+                      {sub.paymentMethod === 'Telebirr' && '📱'}
+                      {sub.paymentMethod === 'Abyssinia' && '🏛️'}
+                      {sub.paymentMethod}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Receipt button & Actions */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-1 border-t border-gray-50">
+                  <button
+                    type="button"
+                    onClick={() => setViewTarget(sub)}
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold border border-brand-200/80 flex items-center justify-center gap-1.5 active:scale-98 transition-all"
+                  >
+                    <span>🖼️</span>
+                    <span className="truncate">{sub.transactionRef ? `Ref: ${sub.transactionRef}` : 'View Receipt'}</span>
+                  </button>
+
+                  {sub.status === 'PENDING' ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setViewTarget(sub); setApproveTarget(sub) }}
+                        className="flex-1 sm:flex-none py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all"
+                        title="Approve Payment"
+                      >
+                        ✓ Approve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setRejectTarget(sub); setRejectReason('') }}
+                        className="flex-1 sm:flex-none py-2.5 px-3.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1 active:scale-95 transition-all"
+                        title="Reject Payment"
+                      >
+                        ✕ Reject
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setViewTarget(sub)}
+                      className="py-2.5 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center justify-center gap-1 active:scale-98 transition-all"
+                    >
+                      Details
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table */}
+        <div className="hidden md:block bg-white rounded-2xl border border-gray-100 overflow-x-auto shadow-sm">
+          <table className="w-full min-w-[760px]">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>

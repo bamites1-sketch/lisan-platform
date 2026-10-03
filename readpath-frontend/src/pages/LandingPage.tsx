@@ -178,27 +178,33 @@ function Navbar({ user }: { user: { role: string } | null }) {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu backdrop & drawer */}
       {open && (
-        <div className="md:hidden border-t border-white/10 px-4 pb-5 pt-3 space-y-1"
+        <div
+          className="md:hidden fixed inset-0 top-16 z-40 bg-black/60 backdrop-blur-xs"
+          onClick={() => setOpen(false)}
+        />
+      )}
+      {open && (
+        <div className="md:hidden relative z-50 border-t border-white/10 px-4 pb-6 pt-3 space-y-1 shadow-2xl safe-bottom"
           style={{ backgroundColor: C.dark }}>
           {NAV_ITEMS.map(item => (
             <button key={item.id} onClick={() => handleNavClick(item.id)}
-              className="w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors"
+              className="w-full text-left px-3.5 py-3 rounded-xl text-sm font-semibold transition-all touch-target"
               style={{
-                color: active === item.id ? C.gold : 'rgba(255,255,255,0.82)',
-                backgroundColor: active === item.id ? 'rgba(255,255,255,0.07)' : 'transparent',
+                color: active === item.id ? C.gold : 'rgba(255,255,255,0.85)',
+                backgroundColor: active === item.id ? 'rgba(255,255,255,0.1)' : 'transparent',
               }}>
               {item.label}
             </button>
           ))}
-          <div className="flex gap-2 pt-3 border-t border-white/10">
+          <div className="flex gap-2.5 pt-3 border-t border-white/10">
             <Link to="/login" onClick={() => setOpen(false)}
-              className="flex-1 text-center text-sm font-semibold text-white border border-white/25 px-4 py-2.5 rounded-xl transition-colors hover:bg-white/10">
+              className="flex-1 text-center text-sm font-semibold text-white border border-white/25 px-4 py-3 rounded-xl transition-colors hover:bg-white/10 active:scale-98">
               Login
             </Link>
             <Link to="/register" onClick={() => setOpen(false)}
-              className="flex-1 text-center text-sm font-semibold text-white px-4 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+              className="flex-1 text-center text-sm font-semibold text-white px-4 py-3 rounded-xl transition-opacity hover:opacity-90 active:scale-98"
               style={{ backgroundColor: C.mid }}>
               Get Started
             </Link>
@@ -218,11 +224,11 @@ function Hero() {
         style={{ background: `linear-gradient(135deg, ${C.light} 0%, #f0f7f4 45%, #c8dfd5 100%)` }} />
 
       {/* Corner patterns */}
-      <EthPattern className="absolute top-20 left-0 w-20 h-20 opacity-25" style={{ color: C.gold }} />
-      <EthPattern className="absolute top-20 right-0 w-20 h-20 opacity-25" style={{ color: C.gold }} />
+      <EthPattern className="absolute top-20 left-0 w-20 h-20 opacity-25 pointer-events-none" style={{ color: C.gold }} />
+      <EthPattern className="absolute top-20 right-0 w-20 h-20 opacity-25 pointer-events-none" style={{ color: C.gold }} />
 
       {/* Photo — right half desktop */}
-      <div className="absolute right-0 top-16 bottom-0 w-1/2 hidden lg:block overflow-hidden">
+      <div className="absolute right-0 top-16 bottom-0 w-1/2 hidden lg:block overflow-hidden pointer-events-none">
         <img
           src="/assets/hero-image.png"
           alt="Ethiopian girl reading a LISAN book with Axum obelisk in the background"
@@ -236,28 +242,28 @@ function Hero() {
       </div>
 
       {/* Hero copy */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 lg:py-16">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-10 sm:py-12 lg:py-16">
         <div className="lg:w-[52%]">
           <Label>WELCOME TO LISAN</Label>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-5"
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 sm:mb-5 tracking-tight"
             style={{ color: C.dark }}>
             Better Readers<br />
             Brighter <span style={{ color: C.gold }}>Futures</span>
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 mb-8 max-w-lg leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-lg leading-relaxed">
             LISAN is an intelligent reading and literacy platform that helps students
             understand their reading ability, identify areas that need support, practice
             targeted skills, and measure their growth over time.
           </p>
           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
             <Link to="/register"
-              className="inline-flex items-center justify-center gap-2 text-sm font-bold px-7 py-3.5 rounded-xl text-white shadow-md transition-opacity hover:opacity-90 text-center"
+              className="inline-flex items-center justify-center gap-2 text-sm font-bold px-7 py-3.5 rounded-xl text-white shadow-md transition-opacity hover:opacity-90 text-center w-full sm:w-auto active:scale-98"
               style={{ backgroundColor: C.dark }}>
               Get Started Free →
             </Link>
             <button
               onClick={() => scrollTo('about')}
-              className="inline-flex items-center justify-center gap-2 text-sm font-semibold px-7 py-3.5 rounded-xl border-2 transition-colors hover:bg-white/50 text-center"
+              className="inline-flex items-center justify-center gap-2 text-sm font-semibold px-7 py-3.5 rounded-xl border-2 transition-colors hover:bg-white/50 text-center w-full sm:w-auto active:scale-98"
               style={{ borderColor: C.dark, color: C.dark }}>
               Learn More
             </button>
@@ -266,7 +272,7 @@ function Hero() {
           {/* Mobile photo */}
           <div className="lg:hidden mt-8 rounded-2xl overflow-hidden shadow-xl border border-white/60">
             <img src="/assets/hero-image.png" alt="Ethiopian girl reading a LISAN book"
-              className="w-full object-cover h-56 sm:h-72"
+              className="w-full object-cover h-52 sm:h-72"
               style={{ objectPosition: '50% 18%' }}
               onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none' }} />
           </div>

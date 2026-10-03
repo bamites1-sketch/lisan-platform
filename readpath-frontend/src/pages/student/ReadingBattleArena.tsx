@@ -265,9 +265,9 @@ export default function ReadingBattleArena() {
 
             {/* Feedback & Next Button */}
             {isAnswered && (
-              <div className="p-5 bg-white border border-gray-200 rounded-3xl shadow-md flex items-center justify-between gap-4 animate-in">
+              <div className="p-4 sm:p-5 bg-white border border-gray-200 rounded-3xl shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in">
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">
+                  <span className="text-3xl flex-shrink-0">
                     {selectedAnswer === activeQ.correctIndex ? '🎉' : '💭'}
                   </span>
                   <div>
@@ -287,7 +287,7 @@ export default function ReadingBattleArena() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors whitespace-nowrap"
+                  className="w-full sm:w-auto px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors whitespace-nowrap active:scale-98 text-center"
                 >
                   {currentQIndex + 1 < ARENA_QUESTIONS.length ? 'Next Question →' : 'See Battle Results 🏆'}
                 </button>

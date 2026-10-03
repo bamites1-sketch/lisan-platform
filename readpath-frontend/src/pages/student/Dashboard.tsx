@@ -81,39 +81,39 @@ export default function StudentDashboard() {
     <StudentLayout>
       <div className="space-y-6 animate-in">
         {/* Brand Greeting Hero Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a3a2a] via-[#224d38] to-[#2d6a4f] p-6 sm:p-8 text-white shadow-xl shadow-emerald-950/10 border border-[#2d6a4f]/30">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a3a2a] via-[#224d38] to-[#2d6a4f] p-5 sm:p-7 lg:p-8 text-white shadow-xl shadow-emerald-950/10 border border-[#2d6a4f]/30">
           {/* Decorative ambient blurs */}
           <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-[#d4a017]/15 blur-3xl pointer-events-none" />
           <div className="absolute -left-10 -bottom-10 w-48 h-48 rounded-full bg-[#e8f4f0]/10 blur-2xl pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-5">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#d4a017]/20 text-[#d4a017] border border-[#d4a017]/35 mb-3 tracking-wide">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#d4a017]/20 text-[#d4a017] border border-[#d4a017]/35 mb-2.5 tracking-wide">
                 <span>ል</span> GRADE {profile?.grade?.replace('GRADE_', '') || '1'} · STUDENT DASHBOARD
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white">
                 Hi, {profile?.firstName || 'Learner'} 👋
               </h1>
-              <p className="text-emerald-100/80 text-sm sm:text-base mt-1.5 max-w-xl leading-relaxed">
+              <p className="text-emerald-100/80 text-xs sm:text-base mt-1 max-w-xl leading-relaxed">
                 {profile?.streakDays > 0
                   ? `You're on a ${profile.streakDays}-day streak! Keep your daily momentum going 🔥`
                   : `Welcome to Lisan! Let's discover how you read and unlock your full potential.`}
               </p>
             </div>
 
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <div className="px-4 py-2.5 bg-black/25 backdrop-blur-md border border-[#d4a017]/40 rounded-2xl flex items-center gap-2.5 shadow-sm">
-                <span className="w-8 h-8 rounded-xl bg-[#d4a017]/25 text-[#d4a017] flex items-center justify-center font-bold text-sm">⚡</span>
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 flex-shrink-0">
+              <div className="flex-1 sm:flex-none px-3.5 py-2 sm:px-4 sm:py-2.5 bg-black/25 backdrop-blur-md border border-[#d4a017]/40 rounded-2xl flex items-center gap-2.5 shadow-sm">
+                <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#d4a017]/25 text-[#d4a017] flex items-center justify-center font-bold text-xs sm:text-sm">⚡</span>
                 <div>
-                  <span className="block text-[10px] text-[#d4a017] font-bold tracking-wider leading-none">TOTAL XP</span>
-                  <span className="text-base font-extrabold text-white">{profile?.xp ?? 0}</span>
+                  <span className="block text-[9px] sm:text-[10px] text-[#d4a017] font-bold tracking-wider leading-none">TOTAL XP</span>
+                  <span className="text-sm sm:text-base font-extrabold text-white">{profile?.xp ?? 0}</span>
                 </div>
               </div>
-              <div className="px-4 py-2.5 bg-black/25 backdrop-blur-md border border-amber-400/40 rounded-2xl flex items-center gap-2.5 shadow-sm">
-                <span className="w-8 h-8 rounded-xl bg-amber-500/25 text-amber-300 flex items-center justify-center font-bold text-sm">🔥</span>
+              <div className="flex-1 sm:flex-none px-3.5 py-2 sm:px-4 sm:py-2.5 bg-black/25 backdrop-blur-md border border-amber-400/40 rounded-2xl flex items-center gap-2.5 shadow-sm">
+                <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/25 text-amber-300 flex items-center justify-center font-bold text-xs sm:text-sm">🔥</span>
                 <div>
-                  <span className="block text-[10px] text-amber-300 font-bold tracking-wider leading-none">STREAK</span>
-                  <span className="text-base font-extrabold text-white">{profile?.streakDays ?? 0} Days</span>
+                  <span className="block text-[9px] sm:text-[10px] text-amber-300 font-bold tracking-wider leading-none">STREAK</span>
+                  <span className="text-sm sm:text-base font-extrabold text-white">{profile?.streakDays ?? 0} Days</span>
                 </div>
               </div>
             </div>

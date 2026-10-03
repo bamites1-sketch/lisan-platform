@@ -260,32 +260,7 @@ export default function PaymentPage() {
                   {errors.package && <p className="text-red-500 text-xs mt-1">{errors.package}</p>}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Amount */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
-                      Amount Paid (ETB) <span className="text-red-400">*</span>
-                    </label>
-                    <input type="number" value={form.amount} onChange={e => set('amount', e.target.value)}
-                      placeholder="e.g. 1000" min="1" className={inputClass('amount')} />
-                    {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
-                  </div>
-
-                  {/* Payment method */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">
-                      Payment Method <span className="text-red-400">*</span>
-                    </label>
-                    <select value={form.paymentMethod} onChange={e => set('paymentMethod', e.target.value)}
-                      className={inputClass('paymentMethod')}>
-                      <option value="">— Select —</option>
-                      {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-                    </select>
-                    {errors.paymentMethod && <p className="text-red-500 text-xs mt-1">{errors.paymentMethod}</p>}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Amount */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">
