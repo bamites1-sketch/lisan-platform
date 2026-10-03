@@ -6,10 +6,14 @@ import type { StudentProfile } from '../../types'
 import AiTutor from '../AiTutor'
 import LangSwitcher from './LangSwitcherSidebar'
 import NotificationBell from '../ui/NotificationBell'
+import OfflinePwaBanner from '../ui/OfflinePwaBanner'
 import { apiUrl } from '../../lib/apiBase'
 
 const NAV_ITEMS = [
   { label: 'Dashboard',        icon: '⌂',  path: '/student/dashboard' },
+  { label: '🎙️ Live AI Coach',  icon: '🎙️', path: '/student/karaoke-coach' },
+  { label: '📖 Bilingual Stories', icon: '📖', path: '/student/bilingual-library' },
+  { label: '🏆 Reading Battle',icon: '🏆', path: '/student/reading-battle' },
   { label: 'My Lessons',       icon: '▤',  path: '/student/plan' },
   { label: 'Reading Passages', icon: '▣',  path: '/student/reading-practice' },
   { label: 'Assignments',      icon: '☑',  path: '/student/assignments' },
@@ -205,6 +209,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
       {/* Main content */}
       <main className="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+        <OfflinePwaBanner />
         <div className="hidden lg:flex h-16 items-center gap-4 px-6 bg-white/85 backdrop-blur-md border-b border-[#1a3a2a]/10 sticky top-0 z-10 shadow-xs">
           <div className="relative flex-1 max-w-xl">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">⌕</span>

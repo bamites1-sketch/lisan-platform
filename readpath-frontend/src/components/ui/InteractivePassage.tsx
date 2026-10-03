@@ -1,92 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-
-// ─── Ethiopian & common vocabulary dictionary for instant definitions ─────────
-const BUILT_IN_DICTIONARY: Record<string, { definition: string; pos: string; amharic: string; example: string }> = {
-  magnificent: {
-    definition: 'Extremely beautiful, elaborate, or impressive.',
-    pos: 'adjective',
-    amharic: 'ድንቅ፣ ግሩም፣ እጅግ የሚያምር',
-    example: 'The magnificent mountains of Simien were covered in morning mist.',
-  },
-  ancient: {
-    definition: 'Belonging to the very distant past and no longer in existence.',
-    pos: 'adjective',
-    amharic: 'ጥንታዊ፣ የቀደመ',
-    example: 'Lalibela is famous for its ancient rock-hewn churches.',
-  },
-  harvest: {
-    definition: 'The process or period of gathering in crops.',
-    pos: 'noun / verb',
-    amharic: 'መከር፣ እህል መሰብሰብ',
-    example: 'Farmers celebrate with singing after a successful teff harvest.',
-  },
-  journey: {
-    definition: 'An act of travelling from one place to another.',
-    pos: 'noun',
-    amharic: 'ጉዞ፣ መንገደኝነት',
-    example: 'The journey across the Rift Valley took three days.',
-  },
-  courage: {
-    definition: 'The ability to do something that frightens one; bravery.',
-    pos: 'noun',
-    amharic: 'ድፍረት፣ ጀግንነት፣ ወኔ',
-    example: 'She showed great courage when speaking in front of the school.',
-  },
-  whisper: {
-    definition: 'Speak very softly using one\'s breath rather than one\'s throat.',
-    pos: 'verb / noun',
-    amharic: 'ሹክሹክታ፣ በዝግታ መናገር',
-    example: 'The wind seemed to whisper through the eucalyptus leaves.',
-  },
-  curiosity: {
-    definition: 'A strong desire to know or learn something.',
-    pos: 'noun',
-    amharic: 'ማወቅ መፈለግ፣ የማወቅ ጉጉት',
-    example: 'His curiosity about stars made him read books every night.',
-  },
-  flourish: {
-    definition: 'Grow or develop in a healthy or vigorous way.',
-    pos: 'verb',
-    amharic: 'ለምለም መሆን፣ መበልጸግ፣ መጎልበት',
-    example: 'With good rain and fertile soil, the crops began to flourish.',
-  },
-  discover: {
-    definition: 'Find unexpectedly or in the course of a search.',
-    pos: 'verb',
-    amharic: 'ማግኘት፣ ማወቅ፣ መፈለግ',
-    example: 'Scientists continue to discover new species of animals.',
-  },
-  protect: {
-    definition: 'Keep safe from harm or injury.',
-    pos: 'verb',
-    amharic: 'መጠበቅ፣ መከላከል',
-    example: 'Trees protect the soil from heavy rains and wind erosion.',
-  },
-  community: {
-    definition: 'A group of people living in the same place or having a particular characteristic in common.',
-    pos: 'noun',
-    amharic: 'ማህበረሰብ፣ ህብረተሰብ',
-    example: 'The entire community gathered to celebrate the holiday.',
-  },
-  stream: {
-    definition: 'A small, narrow river.',
-    pos: 'noun',
-    amharic: 'ወራጅ ወንዝ፣ ጅረት',
-    example: 'Fresh water flowed peacefully down the mountain stream.',
-  },
-  eager: {
-    definition: 'Strongly wanting to do or have something.',
-    pos: 'adjective',
-    amharic: 'የጓጓ፣ በጣም የሚፈልግ',
-    example: 'The students were eager to start their reading lesson.',
-  },
-  patience: {
-    definition: 'The capacity to accept or tolerate delay, trouble, or suffering without getting angry.',
-    pos: 'noun',
-    amharic: 'ትዕግሥት',
-    example: 'Learning to read well takes daily practice and patience.',
-  },
-}
+import { lookupBilingualWord, type BilingualWord } from '../../lib/bilingualDictionary'
 
 interface InteractivePassageProps {
   title?: string
@@ -278,7 +191,24 @@ export default function InteractivePassage({
   }, [selectedWord])
 
   // Word definition lookup
-  const wordInfo = selectedWord ? BUILT_IN_DICTIONARY[selectedWord] : null
+  const wordInfo = selectedWord ? lookupBilingualWord(selectedWord) : null
+  const [savedWords, setSavedWords] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('lisan_saved_vocab') || '[]')
+    } catch {
+      return []
+    }
+  })
+
+  const toggleSaveWord = (word: string) => {
+    const next = savedWords.includes(word)
+      ? savedWords.filter(w => w !== word)
+      : [...savedWords, word]
+    setSavedWords(next)
+    try {
+      localStorage.setItem('lisan_saved_vocab', JSON.stringify(next))
+    } catch {}
+  }
 
   return (
     <div ref={containerRef} className={`relative p-5 bg-white border border-gray-200 rounded-2xl shadow-sm ${className}`}>
@@ -455,18 +385,50 @@ export default function InteractivePassage({
                   <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">English Definition</span>
                   <p className="leading-snug text-gray-800">{wordInfo.definition}</p>
                 </div>
+
                 {wordInfo.amharic && (
-                  <div className="bg-amber-50 p-2 rounded-xl border border-amber-100">
-                    <span className="text-[10px] uppercase font-bold text-amber-800 block mb-0.5">የአማርኛ ትርጉም (Amharic)</span>
-                    <p className="font-semibold text-amber-950 text-sm">{wordInfo.amharic}</p>
+                  <div className="bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-200">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] uppercase font-bold text-emerald-800">የአማርኛ ትርጉም (Amharic)</span>
+                      <span className="text-[10px] text-emerald-600 font-mono italic">{wordInfo.amharicPhonetic}</span>
+                    </div>
+                    <p className="font-bold text-emerald-950 text-sm">{wordInfo.amharic}</p>
+                    {wordInfo.exampleAm && (
+                      <p className="text-[11px] text-emerald-800/80 mt-1 italic font-serif">"{wordInfo.exampleAm}"</p>
+                    )}
                   </div>
                 )}
-                {wordInfo.example && (
+
+                {wordInfo.exampleEn && (
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Example</span>
-                    <p className="italic text-gray-600">"{wordInfo.example}"</p>
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">English Example</span>
+                    <p className="italic text-gray-600">"{wordInfo.exampleEn}"</p>
                   </div>
                 )}
+
+                {wordInfo.culturalNote && (
+                  <div className="text-[11px] bg-amber-50 text-amber-800 p-2 rounded-lg border border-amber-200">
+                    🇪🇹 <strong>Ethiopian Context:</strong> {wordInfo.culturalNote}
+                  </div>
+                )}
+
+                <div className="pt-1 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => toggleSaveWord(selectedWord)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                      savedWords.includes(selectedWord)
+                        ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <span>{savedWords.includes(selectedWord) ? '★' : '☆'}</span>
+                    <span>{savedWords.includes(selectedWord) ? 'Saved in Word Bank' : 'Save to Word Bank'}</span>
+                  </button>
+                  <span className="text-[11px] text-gray-400">
+                    {savedWords.length} saved
+                  </span>
+                </div>
               </>
             ) : (
               <div className="py-1">
@@ -475,6 +437,15 @@ export default function InteractivePassage({
                 </p>
                 <div className="mt-2 p-2 bg-brand-50 rounded-xl text-brand-800 text-[11px]">
                   💡 <strong>Reading Tip:</strong> Break "{selectedWord}" into syllables or sound chunks.
+                </div>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleSaveWord(selectedWord)}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-700"
+                  >
+                    <span>{savedWords.includes(selectedWord) ? '★ Saved' : '☆ Save Word'}</span>
+                  </button>
                 </div>
               </div>
             )}

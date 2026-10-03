@@ -33,6 +33,9 @@ import TeacherDashboard from './pages/teacher/Dashboard'
 import AdminDashboard from './pages/admin/Dashboard'
 import AssessmentSubmissionsPage from './pages/admin/AssessmentSubmissionsPage'
 import CreateAssignmentPage from './components/admin/CreateAssignmentPage'
+import KaraokeReadingCoach from './pages/student/KaraokeReadingCoach'
+import BilingualStoryLibrary from './pages/student/BilingualStoryLibrary'
+import ReadingBattleArena from './pages/student/ReadingBattleArena'
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { user, isLoading } = useAuth()
@@ -98,6 +101,9 @@ export default function App() {
           <Route path="/student/practice/:skill" element={<ProtectedRoute roles={['STUDENT']}><PracticePage /></ProtectedRoute>} />
           <Route path="/student/progress" element={<ProtectedRoute roles={['STUDENT']}><ProgressPage /></ProtectedRoute>} />
           <Route path="/student/reading-practice" element={<ProtectedRoute roles={['STUDENT']}><ReadingPracticePage /></ProtectedRoute>} />
+          <Route path="/student/karaoke-coach" element={<ProtectedRoute roles={['STUDENT']}><KaraokeReadingCoach /></ProtectedRoute>} />
+          <Route path="/student/bilingual-library" element={<ProtectedRoute roles={['STUDENT']}><BilingualStoryLibrary /></ProtectedRoute>} />
+          <Route path="/student/reading-battle" element={<ProtectedRoute roles={['STUDENT']}><ReadingBattleArena /></ProtectedRoute>} />
           <Route path="/student/assignments" element={<ProtectedRoute roles={['STUDENT']}><AssignmentsPage /></ProtectedRoute>} />
           <Route path="/student/classes" element={<ProtectedRoute roles={['STUDENT']}><ClassesPage /></ProtectedRoute>} />
           <Route path="/student/resources" element={<ProtectedRoute roles={['STUDENT']}><ResourcesPage /></ProtectedRoute>} />

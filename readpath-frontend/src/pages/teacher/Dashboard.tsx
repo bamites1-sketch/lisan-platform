@@ -6,6 +6,7 @@ import NotificationBell from '../../components/ui/NotificationBell'
 import LangSwitcher from '../../components/ui/LangSwitcher'
 import { recordingApi, type ApiRecording } from '../../services/api'
 import { timeAgo } from '../../lib/utils'
+import LiveReadingBattleHost from '../../components/teacher/LiveReadingBattleHost'
 
 type FluencyRecording = ApiRecording & {
   studentName: string
@@ -26,7 +27,7 @@ type TeacherStudent = {
   lastActive: string
 }
 
-type Tab = 'overview' | 'students' | 'recordings' | 'assignments'
+type Tab = 'overview' | 'students' | 'recordings' | 'assignments' | 'battles'
 
 // ─── Rating stars ─────────────────────────────────────────────────────────────
 function Stars({ value, onChange }: { value?: number; onChange?: (n: number) => void }) {
@@ -697,6 +698,7 @@ export default function TeacherDashboard() {
 
   const TABS = [
     { id: 'overview'     as Tab, label: 'Overview',     icon: '📊' },
+    { id: 'battles'      as Tab, label: 'Live Battles', icon: '🏆' },
     { id: 'students'     as Tab, label: 'Students',     icon: '👥' },
     { id: 'recordings'   as Tab, label: 'Recordings',   icon: '🎤',
       badge: unreviewedCount > 0 ? unreviewedCount : undefined },
@@ -1017,6 +1019,13 @@ export default function TeacherDashboard() {
               </p>
             </div>
             <AssignmentsView recordings={recordings} onReviewRecording={() => setTab('recordings')} />
+          </div>
+        )}
+
+        {/* ── LIVE BATTLES ── */}
+        {tab === 'battles' && (
+          <div className="space-y-5 animate-in">
+            <LiveReadingBattleHost />
           </div>
         )}
       </main>

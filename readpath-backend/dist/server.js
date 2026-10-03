@@ -54,6 +54,8 @@ else {
 }
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
+// Trust Vercel / reverse proxy headers for rate limiting and IP detection
+app.set('trust proxy', 1);
 // ─── Security Headers ─────────────────────────────────────────────────────────
 app.use((0, helmet_1.default)());
 app.use(helmet_1.default.hsts({ maxAge: 60 * 60 * 24 * 365, includeSubDomains: true }));
@@ -79,9 +81,8 @@ if (process.env.FRONTEND_URL) {
 console.log('🌐 Allowed CORS origins:', allowedOrigins);
 app.use((0, cors_1.default)({
     origin: (origin, cb) => {
-        console.log('CORS check - Origin:', origin, 'Allowed:', !origin || allowedOrigins.includes(origin));
-        // Allow server-to-server calls (no origin) or whitelisted origins
-        if (!origin || allowedOrigins.includes(origin))
+        // Allow server-to-server calls (no origin), whitelisted origins, or any Vercel deployment
+        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app'))
             return cb(null, true);
         console.log('CORS rejected origin:', origin);
         cb(new Error('CORS: origin not allowed'));
@@ -101,6 +102,7 @@ const authLimiter = (0, express_rate_limit_1.default)({
     max: 20, // 20 attempts per window per IP
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false, default: false },
     message: { success: false, message: 'Too many requests. Please try again in 15 minutes.' },
     skipSuccessfulRequests: false,
 });
@@ -110,6 +112,7 @@ const apiLimiter = (0, express_rate_limit_1.default)({
     max: 300,
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false, default: false },
     message: { success: false, message: 'Too many requests. Please try again later.' },
     skipSuccessfulRequests: true,
 });

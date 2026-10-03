@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="16" fill="#1a3a2a"/>
+  <!-- Gold accent ring/glow -->
+  <rect x="2" y="2" width="60" height="60" rx="14" stroke="#d4a017" stroke-width="2" stroke-opacity="0.4"/>
+  <!-- Open book pages -->
+  <path d="M16 46C20 44 26 43 32 45C38 43 44 44 48 46V22C44 20 38 19 32 21C26 19 20 20 16 22V46Z" fill="#24513b" stroke="#d4a017" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Center spine -->
+  <line x1="32" y1="21" x2="32" y2="45" stroke="#f3ca52" stroke-width="2" stroke-linecap="round"/>
+  <!-- Amharic 'ል' stylized / bookmark emblem -->
+  <path d="M32 15L35 21L32 23L29 21L32 15Z" fill="#f3ca52"/>
+</svg>

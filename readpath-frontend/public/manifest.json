@@ -1,0 +1,26 @@
+{
+  "name": "Lisan | ልሳን — Reading Diagnostic & Learning Platform",
+  "short_name": "Lisan ልሳን",
+  "description": "An Intelligent Reading Diagnostic & Literacy Platform for Ethiopian Students.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1a3a2a",
+  "theme_color": "#1a3a2a",
+  "icons": [
+    {
+      "src": "/founder.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/founder.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "books", "productivity"],
+  "lang": "en"
+}
