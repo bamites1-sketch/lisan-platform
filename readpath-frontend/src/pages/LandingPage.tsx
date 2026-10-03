@@ -983,7 +983,7 @@ function Contact() {
       }
     } catch {
       setStatus('error')
-      setMsg('Could not reach the server. Please email HABTAMUGEBREKIDAN@GMAIL.COM directly.')
+      setMsg('Could not reach the server. Please email habtamug2011@gmail.com directly.')
     }
   }, [form, status])
 
@@ -1039,9 +1039,9 @@ function Contact() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-white/50 mb-0.5">Email</p>
-                    <a href="mailto:HABTAMUGEBREKIDAN@GMAIL.COM"
+                    <a href="mailto:habtamug2011@gmail.com"
                       className="text-sm text-white/85 hover:text-white transition-colors break-all">
-                      HABTAMUGEBREKIDAN@GMAIL.COM
+                      habtamug2011@gmail.com
                     </a>
                   </div>
                 </div>
@@ -1293,9 +1293,9 @@ function Footer() {
             <ul className="space-y-3">
               <li className="text-sm text-white/65 font-medium">Dr. Habtamu</li>
               <li>
-                <a href="mailto:HABTAMUGEBREKIDAN@GMAIL.COM"
+                <a href="mailto:habtamug2011@gmail.com"
                   className="text-xs text-white/55 hover:text-white transition-colors break-all leading-relaxed">
-                  HABTAMUGEBREKIDAN@GMAIL.COM
+                  habtamug2011@gmail.com
                 </a>
               </li>
               <li>
