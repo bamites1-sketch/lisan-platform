@@ -24,7 +24,7 @@ export function Modal({
   const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm pt-6 px-4 pb-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm pt-[calc(1.5rem+env(safe-area-inset-top))] px-3 sm:px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] overflow-y-auto">
       <div
         ref={ref}
         className={`w-full ${widths[size]} bg-white rounded-3xl shadow-2xl animate-in`}
@@ -212,7 +212,7 @@ export function RowActions({ onEdit, onDelete, onView }: {
   onEdit?: () => void; onDelete?: () => void; onView?: () => void
 }) {
   return (
-    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+    <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
       {onView && (
         <button onClick={onView} className="text-xs text-gray-500 hover:text-brand-600 font-medium px-2.5 py-1.5 rounded-lg hover:bg-brand-50 transition-colors">
           View
@@ -267,18 +267,18 @@ export function SectionHeader({
   title: string; subtitle?: string; count?: number; onAdd?: () => void; addLabel?: string
 }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+        <h1 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
           {title}
           {count !== undefined && (
-            <span className="text-sm font-semibold text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">{count}</span>
+            <span className="text-xs sm:text-sm font-semibold text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">{count}</span>
           )}
         </h1>
-        {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+        {subtitle && <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{subtitle}</p>}
       </div>
       {onAdd && (
-        <button onClick={onAdd} className="btn-primary text-sm py-2.5 px-4">
+        <button onClick={onAdd} className="btn-primary text-sm py-2 px-3.5 sm:py-2.5 sm:px-4 self-start sm:self-auto">
           {addLabel}
         </button>
       )}

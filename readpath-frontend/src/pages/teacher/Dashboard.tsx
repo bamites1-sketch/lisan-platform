@@ -708,10 +708,10 @@ export default function TeacherDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 px-4 sm:px-6 py-3.5 flex items-center justify-between sticky top-0 z-20">
+      <header className="bg-white border-b border-gray-100 px-4 sm:px-6 py-3.5 flex items-center justify-between sticky top-0 z-20 pt-[calc(0.875rem+env(safe-area-inset-top))]">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-brand-600 rounded-xl flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-sm">ል</span>
+          <div className="w-8 h-8 rounded-xl overflow-hidden bg-white shadow-xs border border-gray-200 p-0.5 flex items-center justify-center">
+            <img src="/icon-192.png" alt="LiSAN" className="w-full h-full object-contain" />
           </div>
           <span className="font-bold text-gray-900">{t.appName}</span>
           <span className="text-gray-300 mx-1 hidden sm:block">·</span>
@@ -729,7 +729,7 @@ export default function TeacherDashboard() {
       </header>
 
       {/* Tabs */}
-      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 sticky top-[57px] z-10 overflow-x-auto">
+      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-10 overflow-x-auto touch-scroll">
         <div className="max-w-5xl mx-auto flex gap-1 min-w-max sm:min-w-0">
           {TABS.map(tabItem => (
             <button key={tabItem.id} onClick={() => setTab(tabItem.id)}

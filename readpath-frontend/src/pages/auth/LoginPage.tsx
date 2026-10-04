@@ -71,12 +71,11 @@ function BrandPanel() {
       {/* Top Header: Logo */}
       <div className="relative z-10">
         <Link to="/" className="inline-flex items-center gap-3 group focus:outline-none">
-          <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-[#d4a017]/40 bg-white/10 shadow-sm transition-transform group-hover:scale-105 flex-shrink-0">
+          <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-[#d4a017]/40 bg-white shadow-sm transition-transform group-hover:scale-105 flex-shrink-0 p-1 flex items-center justify-center">
             <img
-              src="/assets/hero-image.png"
+              src="/icon-192.png"
               alt="LISAN"
-              className="w-full h-full object-cover object-top"
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+              className="w-full h-full object-contain"
             />
           </div>
           <div>
@@ -209,17 +208,16 @@ export default function LoginPage() {
       <BrandPanel />
 
       {/* ── Form panel ── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-10 lg:py-8 lg:overflow-y-auto relative">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] lg:py-8 lg:overflow-y-auto relative">
         
         {/* Mobile Header Branding */}
         <div className="lg:hidden flex flex-col items-center mb-8 text-center">
           <Link to="/" className="flex items-center gap-2.5 mb-2 focus:outline-none">
-            <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-[#d4a017]/40 bg-white/20 shadow-md">
+            <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-[#d4a017]/40 bg-white shadow-md p-1 flex items-center justify-center">
               <img
-                src="/assets/hero-image.png"
+                src="/icon-192.png"
                 alt="LISAN"
-                className="w-full h-full object-cover object-top"
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                className="w-full h-full object-contain"
               />
             </div>
             <div className="text-left">

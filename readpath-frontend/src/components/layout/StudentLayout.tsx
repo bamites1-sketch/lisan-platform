@@ -223,7 +223,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       </aside>
 
       {/* ── MOBILE HEADER (Phone & Tablet) ── */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#1a3a2a] text-white border-b border-[#2d6a4f]/30 z-30 px-4 py-2.5 flex items-center justify-between shadow-md">
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#1a3a2a] text-white border-b border-[#2d6a4f]/30 z-30 px-4 pt-[max(0.6rem,env(safe-area-inset-top))] pb-2.5 flex items-center justify-between shadow-md">
         <Link to="/student/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center shadow-xs p-0.5 flex-shrink-0">
             <img src="/icon-192.png" alt="LiSAN" className="w-full h-full object-contain" />
@@ -262,7 +262,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         />
       )}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed top-0 right-0 bottom-0 w-[min(320px,calc(100vw-36px))] bg-[#1a3a2a] text-white z-50 shadow-2xl p-5 pt-16 overflow-y-auto border-l border-[#2d6a4f]/30 flex flex-col justify-between animate-in slide-in-from-right duration-200">
+        <div className="lg:hidden fixed top-0 right-0 bottom-0 w-[min(320px,calc(100vw-36px))] bg-[#1a3a2a] text-white z-50 shadow-2xl p-5 pt-[calc(4.5rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] overflow-y-auto border-l border-[#2d6a4f]/30 flex flex-col justify-between animate-in slide-in-from-right duration-200">
           <div>
             <div className="mb-4 p-3.5 bg-white/10 border border-white/10 rounded-2xl">
               <p className="font-bold text-white text-sm">{profile?.firstName} {profile?.lastName}</p>
@@ -371,7 +371,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       </nav>
 
       {/* ── MAIN CONTENT WORKSPACE ── */}
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 pb-24 lg:pb-8 min-h-screen flex flex-col">
+      <main className="flex-1 lg:ml-64 pt-[calc(3.75rem+env(safe-area-inset-top))] lg:pt-0 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-8 min-h-screen flex flex-col px-3.5 sm:px-6">
         <OfflinePwaBanner />
 
         {/* Desktop Top Header Bar */}

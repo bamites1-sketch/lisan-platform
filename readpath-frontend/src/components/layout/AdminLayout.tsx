@@ -192,7 +192,7 @@ export default function AdminLayout({
       </aside>
 
       {/* ── MOBILE TOP BAR & QUICK NAV ── */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#1a3a2a] text-white border-b border-[#2d6a4f]/30 z-40 shadow-md">
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#1a3a2a] text-white border-b border-[#2d6a4f]/30 z-40 shadow-md pt-[env(safe-area-inset-top)]">
         <div className="px-4 py-2.5 flex items-center justify-between">
           <Link to="/admin/dashboard" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-[#d4a017] to-[#b88912] text-[#1a3a2a] rounded-lg flex items-center justify-center font-black text-sm shadow-xs">
@@ -246,7 +246,7 @@ export default function AdminLayout({
             className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="lg:hidden fixed top-0 left-0 bottom-0 w-[min(300px,calc(100vw-40px))] bg-[#1a3a2a] text-white z-50 shadow-2xl flex flex-col border-r border-[#2d6a4f]/30 animate-in slide-in-from-left duration-200">
+          <div className="lg:hidden fixed top-0 left-0 bottom-0 w-[min(300px,calc(100vw-40px))] bg-[#1a3a2a] text-white z-50 shadow-2xl flex flex-col border-r border-[#2d6a4f]/30 animate-in slide-in-from-left duration-200 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
             <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 bg-gradient-to-br from-[#d4a017] to-[#b88912] text-[#1a3a2a] rounded-lg flex items-center justify-center font-bold text-sm">
@@ -315,7 +315,7 @@ export default function AdminLayout({
       )}
 
       {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 lg:ml-64 pt-20 lg:pt-0 min-h-screen bg-[#f8faf9] flex flex-col">
+      <main className="flex-1 lg:ml-64 pt-[calc(5.75rem+env(safe-area-inset-top))] lg:pt-0 min-h-screen bg-[#f8faf9] flex flex-col">
         {/* Top bar (Desktop) */}
         <div className="hidden lg:flex items-center justify-between px-7 py-3 bg-white/85 backdrop-blur-md border-b border-[#1a3a2a]/10 sticky top-0 z-20 shadow-xs flex-shrink-0">
           {/* Breadcrumb */}

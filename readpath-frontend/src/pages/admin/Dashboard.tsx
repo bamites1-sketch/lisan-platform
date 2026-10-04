@@ -332,7 +332,7 @@ function AdminDashboardInner() {
       </aside>
 
       {/* ── MOBILE HEADER & QUICK TAB BAR ── */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#1a3a2a] text-white border-b border-[#2d6a4f]/30 z-30 shadow-md">
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#1a3a2a] text-white border-b border-[#2d6a4f]/30 z-30 shadow-md pt-[env(safe-area-inset-top)]">
         <div className="px-3.5 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center shadow-xs p-0.5 flex-shrink-0">
@@ -436,7 +436,7 @@ function AdminDashboardInner() {
       {sidebarOpen && (
         <>
           <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-xs" onClick={() => setSidebar(false)} />
-          <div className="lg:hidden fixed top-0 left-0 bottom-0 w-[min(300px,calc(100vw-40px))] bg-[#1a3a2a] text-white z-50 shadow-2xl flex flex-col border-r border-[#2d6a4f]/30">
+          <div className="lg:hidden fixed top-0 left-0 bottom-0 w-[min(300px,calc(100vw-40px))] bg-[#1a3a2a] text-white z-50 shadow-2xl flex flex-col border-r border-[#2d6a4f]/30 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
             <div className="px-5 py-5 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 bg-gradient-to-br from-[#d4a017] to-[#b88912] text-[#1a3a2a] rounded-lg flex items-center justify-center font-bold text-sm">
@@ -570,7 +570,9 @@ function AdminDashboardInner() {
 
       {/* ── MAIN CONTENT ── */}
       <main className={`flex-1 lg:ml-64 ${
-        ['payments', 'assessments', 'assignments', 'resources'].includes(mainTab) ? 'pt-28' : 'pt-24'
+        ['payments', 'assessments', 'assignments', 'resources'].includes(mainTab)
+          ? 'pt-[calc(7.75rem+env(safe-area-inset-top))]'
+          : 'pt-[calc(6rem+env(safe-area-inset-top))]'
       } lg:pt-0 min-h-screen bg-[#f8faf9]`}>
         {/* Top bar (desktop only) */}
         <div className="hidden lg:flex items-center justify-between px-7 py-3.5 bg-white/85 backdrop-blur-md border-b border-[#1a3a2a]/10 sticky top-0 z-10 shadow-xs">
@@ -610,7 +612,7 @@ function AdminDashboardInner() {
         </div>
 
         {/* Page content */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
+        <div className="max-w-6xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 lg:py-8 pb-16 lg:pb-8">
           {mainTab === 'dashboard' && <OverviewTab onNavigate={handleNavigate} />}
           {mainTab === 'students' && <StudentsTab />}
           {mainTab === 'student-chat' && <StudentChatTab />}

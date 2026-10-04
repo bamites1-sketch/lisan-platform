@@ -125,12 +125,12 @@ export default function ParentFeedbackPage() {
   return (
     <div className="min-h-screen bg-[#f8faf9] flex flex-col antialiased text-gray-900">
       {/* ── TOP HEADER ── */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-xs">
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-xs pt-[env(safe-area-inset-top)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/parent/dashboard" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1a3a2a] to-[#2d6a4f] text-[#d4a017] flex items-center justify-center font-black text-sm shadow-xs group-hover:scale-105 transition-transform">
-                ል
+              <div className="w-9 h-9 rounded-xl overflow-hidden bg-white flex items-center justify-center p-0.5 shadow-xs border border-gray-200 group-hover:scale-105 transition-transform flex-shrink-0">
+                <img src="/icon-192.png" alt="LiSAN Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <span className="font-extrabold text-gray-900 tracking-wide text-base block leading-tight">LiSAN</span>

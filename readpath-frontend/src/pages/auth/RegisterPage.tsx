@@ -30,15 +30,9 @@ function BrandPanel() {
       {/* Logo */}
       <div className="relative z-10">
         <div className="flex items-center gap-3 mb-10">
-          <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-white/25 flex-shrink-0">
-            <img src="/assets/hero-image.png" alt="LISAN"
-              className="w-full h-full object-cover object-top"
-              onError={e => {
-                const el = e.target as HTMLImageElement
-                el.style.display = 'none'
-                el.parentElement!.style.background = C.mid
-                el.parentElement!.innerHTML = '<span style="color:white;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;height:100%">L</span>'
-              }} />
+          <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-white/25 flex-shrink-0 bg-white p-1 flex items-center justify-center">
+            <img src="/icon-192.png" alt="LISAN"
+              className="w-full h-full object-contain" />
           </div>
           <div>
             <p className="font-extrabold text-white text-lg leading-none tracking-wide">LiSAN</p>
@@ -155,15 +149,14 @@ export default function RegisterPage() {
       <BrandPanel />
 
       {/* ── Right: form panel ── */}
-      <div className="flex-1 w-full flex flex-col items-center justify-start lg:justify-center px-4 sm:px-6 py-6 sm:py-8 overflow-y-auto">
+      <div className="flex-1 w-full flex flex-col items-center justify-start lg:justify-center px-4 sm:px-6 pt-[calc(1.5rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:py-8 overflow-y-auto">
 
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2.5 mb-5 self-start">
-          <div className="w-9 h-9 rounded-xl overflow-hidden border-2 flex-shrink-0"
+          <div className="w-9 h-9 rounded-xl overflow-hidden border-2 flex-shrink-0 bg-white p-0.5 flex items-center justify-center"
             style={{ borderColor: `${C.mid}40` }}>
-            <img src="/assets/hero-image.png" alt="LISAN"
-              className="w-full h-full object-cover object-top"
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+            <img src="/icon-192.png" alt="LISAN"
+              className="w-full h-full object-contain" />
           </div>
           <div>
             <p className="font-extrabold text-base leading-none" style={{ color: C.dark }}>LiSAN</p>

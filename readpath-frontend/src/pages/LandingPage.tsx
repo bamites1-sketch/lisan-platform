@@ -104,7 +104,7 @@ function Navbar({ user, onOpenInstall }: { user: { role: string } | null; onOpen
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-shadow duration-300 ${scrolled ? 'shadow-xl' : ''}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-shadow duration-300 pt-[env(safe-area-inset-top)] ${scrolled ? 'shadow-xl' : ''}`}
       style={{ backgroundColor: C.dark }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -199,12 +199,12 @@ function Navbar({ user, onOpenInstall }: { user: { role: string } | null; onOpen
       {/* Mobile menu backdrop & drawer */}
       {open && (
         <div
-          className="md:hidden fixed inset-0 top-16 z-40 bg-black/60 backdrop-blur-xs"
+          className="md:hidden fixed inset-0 top-[calc(4rem+env(safe-area-inset-top))] z-40 bg-black/60 backdrop-blur-xs"
           onClick={() => setOpen(false)}
         />
       )}
       {open && (
-        <div className="md:hidden relative z-50 border-t border-white/10 px-4 pb-6 pt-3 space-y-1 shadow-2xl safe-bottom"
+        <div className="md:hidden relative z-50 border-t border-white/10 px-4 pb-6 pt-3 space-y-1 shadow-2xl safe-bottom max-h-[calc(100dvh-4.5rem-env(safe-area-inset-top))] overflow-y-auto"
           style={{ backgroundColor: C.dark }}>
           
           <button
@@ -249,7 +249,7 @@ function Navbar({ user, onOpenInstall }: { user: { role: string } | null; onOpen
 // ─── Hero ─────────────────────────────────────────────────────────
 function Hero({ onOpenInstall }: { onOpenInstall?: () => void }) {
   return (
-    <section id="top" className="relative pt-16 min-h-screen flex items-center overflow-hidden">
+    <section id="top" className="relative pt-[calc(4.5rem+env(safe-area-inset-top))] min-h-screen flex items-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0"
         style={{ background: `linear-gradient(135deg, ${C.light} 0%, #f0f7f4 45%, #c8dfd5 100%)` }} />
