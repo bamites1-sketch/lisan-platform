@@ -176,4 +176,45 @@ router.post('/create-admin', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/reset-admin', async (req: Request, res: Response) => {
+  try {
+    if (!checkSetupKey(req, res)) return;
+    const { email, password, firstName, lastName } = req.body;
+    const targetEmail = String(email || 'admin@lisan.com').trim().toLowerCase();
+    const targetPass = String(password || 'password123').trim();
+    const hashed = await bcrypt.hash(targetPass, 12);
+
+    const user = await prisma.user.upsert({
+      where: { email: targetEmail },
+      update: {
+        password: hashed,
+        role: 'ADMIN',
+        status: 'ACTIVE',
+      },
+      create: {
+        email: targetEmail,
+        password: hashed,
+        role: 'ADMIN',
+        status: 'ACTIVE',
+        admin: {
+          create: {
+            firstName: firstName || 'Super',
+            lastName: lastName || 'Admin',
+          },
+        },
+      },
+      include: { admin: true },
+    });
+
+    res.json({
+      success: true,
+      message: `Admin ${targetEmail} ready with provided password`,
+      email: user.email,
+    });
+  } catch (error: any) {
+    console.error('Reset admin error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
