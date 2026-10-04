@@ -1,5 +1,5 @@
 // ─── LiSAN Progressive Web App Service Worker ───────────────────────────────
-const CACHE_NAME = 'lisan-pwa-v2.1.0';
+const CACHE_NAME = 'lisan-pwa-v2.2.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -10,6 +10,9 @@ const STATIC_ASSETS = [
   '/icon-maskable-192.png',
   '/icon-maskable-512.png',
   '/apple-touch-icon.png',
+  '/apple-touch-icon-180x180.png',
+  '/apple-touch-icon-precomposed.png',
+  '/logo.png',
   '/manifest.json'
 ];
 
