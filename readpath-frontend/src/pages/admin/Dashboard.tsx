@@ -401,22 +401,22 @@ function AdminDashboardInner() {
           </div>
         )}
         {mainTab === 'assignments' && (
-          <div className="flex items-center gap-1 px-3 py-1 overflow-x-auto no-scrollbar bg-[#10241a] border-t border-white/5">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 overflow-x-auto no-scrollbar bg-[#10241a] border-t border-white/5 touch-scroll">
             {ASSIGNMENT_TABS.map(st => (
               <button
                 key={st.id}
                 onClick={() => setAssignmentSub(st.id)}
-                className={`text-[11px] px-2.5 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${
-                  assignmentSubTab === st.id ? 'bg-[#d4a017]/25 text-[#d4a017] font-bold' : 'text-white/60 hover:text-white'
+                className={`text-xs px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 active:scale-95 ${
+                  assignmentSubTab === st.id ? 'bg-[#d4a017] text-[#1a3a2a] font-bold shadow-xs' : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
-                {st.icon} {st.label}
+                <span>{st.icon}</span> <span>{st.label}</span>
               </button>
             ))}
           </div>
         )}
         {mainTab === 'resources' && (
-          <div className="flex items-center gap-1 px-3 py-1 overflow-x-auto no-scrollbar bg-[#10241a] border-t border-white/5">
+          <div className="flex items-center gap-1 px-3 py-1 overflow-x-auto no-scrollbar bg-[#10241a] border-t border-white/5 touch-scroll">
             {RESOURCE_TABS.map(st => (
               <button
                 key={st.id}
@@ -612,7 +612,7 @@ function AdminDashboardInner() {
         </div>
 
         {/* Page content */}
-        <div className="max-w-6xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 lg:py-8 pb-16 lg:pb-8">
+        <div className="max-w-6xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 lg:py-8 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-8">
           {mainTab === 'dashboard' && <OverviewTab onNavigate={handleNavigate} />}
           {mainTab === 'students' && <StudentsTab />}
           {mainTab === 'student-chat' && <StudentChatTab />}

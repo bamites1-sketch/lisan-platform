@@ -121,7 +121,7 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
       {!loading && (
         <>
           {/* KPI cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
             {[
               {
                 emoji: '📖',
@@ -171,55 +171,55 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
               <button
                 key={c.label}
                 onClick={() => onNavigate(c.nav)}
-                className={`p-5 rounded-3xl border ${c.border} ${c.bg} shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 text-left flex flex-col justify-between group cursor-pointer active:scale-98`}
+                className={`p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border ${c.border} ${c.bg} shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 text-left flex flex-col justify-between group cursor-pointer active:scale-98`}
               >
                 <div className="flex items-center justify-between">
-                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform ${c.iconBg}`}>
+                  <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center text-lg sm:text-xl shadow-xs group-hover:scale-110 transition-transform ${c.iconBg}`}>
                     {c.emoji}
                   </div>
-                  <span className="text-[10px] font-bold text-gray-400 group-hover:text-[#2d6a4f] transition-colors">
+                  <span className="text-[9px] sm:text-[10px] font-bold text-gray-400 group-hover:text-[#2d6a4f] transition-colors">
                     VIEW →
                   </span>
                 </div>
-                <div className="mt-4">
-                  <div className={`text-3xl font-extrabold ${c.color} tracking-tight`}>{c.value}</div>
-                  <div className="text-xs font-bold text-[#1a3a2a] mt-0.5">{c.label}</div>
-                  <div className="text-[11px] text-gray-400 font-medium mt-0.5">{c.sub}</div>
+                <div className="mt-3 sm:mt-4">
+                  <div className={`text-2xl sm:text-3xl font-extrabold ${c.color} tracking-tight`}>{c.value}</div>
+                  <div className="text-xs font-bold text-[#1a3a2a] mt-0.5 line-clamp-1">{c.label}</div>
+                  <div className="text-[10px] sm:text-[11px] text-gray-400 font-medium mt-0.5 truncate">{c.sub}</div>
                 </div>
               </button>
             ))}
           </div>
 
           {/* Readiness banner */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a3a2a] via-[#224d38] to-[#2d6a4f] p-6 sm:p-8 text-white shadow-xl shadow-emerald-950/10 border border-[#2d6a4f]/30">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#1a3a2a] via-[#224d38] to-[#2d6a4f] p-4 sm:p-8 text-white shadow-xl shadow-emerald-950/10 border border-[#2d6a4f]/30">
             <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-[#d4a017]/15 blur-3xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-              <div className="text-center sm:text-left flex items-center gap-5">
-                <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md border border-[#d4a017]/40 flex flex-col items-center justify-center shadow-inner flex-shrink-0">
-                  <span className={`text-3xl font-extrabold ${avgScore >= 75 ? 'text-white' : avgScore >= 60 ? 'text-[#d4a017]' : 'text-rose-300'}`}>
+            <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
+              <div className="text-center sm:text-left flex items-center gap-3.5 sm:gap-5 w-full sm:w-auto">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-md border border-[#d4a017]/40 flex flex-col items-center justify-center shadow-inner shrink-0">
+                  <span className={`text-2xl sm:text-3xl font-extrabold ${avgScore >= 75 ? 'text-white' : avgScore >= 60 ? 'text-[#d4a017]' : 'text-rose-300'}`}>
                     {avgScore || '—'}
                   </span>
-                  <span className="text-[9px] text-[#d4a017] font-bold uppercase tracking-wider">OUT OF 100</span>
+                  <span className="text-[8px] sm:text-[9px] text-[#d4a017] font-bold uppercase tracking-wider">OUT OF 100</span>
                 </div>
-                <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#d4a017]/20 text-[#d4a017] mb-1">
+                <div className="min-w-0 flex-1">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#d4a017]/20 text-[#d4a017] mb-1">
                     DIAGNOSTIC READINESS
                   </div>
-                  <h2 className="text-lg font-bold text-white">Platform Average Score</h2>
-                  <p className="text-emerald-100/80 text-xs mt-0.5">Aggregated cross-grade baseline reading proficiency</p>
+                  <h2 className="text-base sm:text-lg font-bold text-white truncate">Platform Average Score</h2>
+                  <p className="text-emerald-100/80 text-[11px] sm:text-xs mt-0.5 line-clamp-1 sm:line-clamp-none">Aggregated cross-grade baseline reading proficiency</p>
                 </div>
               </div>
 
-              <div className="flex-1 grid grid-cols-3 gap-3 w-full sm:w-auto">
+              <div className="flex-1 grid grid-cols-3 gap-2 sm:gap-3 w-full sm:w-auto">
                 {[
                   { label: 'Active', count: activeStudents, pct: students.length ? Math.round(activeStudents/students.length*100) : 0, color: 'text-emerald-200', bg: 'bg-[#2d6a4f]/40 border-[#2d6a4f]/60' },
                   { label: 'Pending', count: pendingPayment, pct: students.length ? Math.round(pendingPayment/students.length*100) : 0, color: 'text-[#d4a017]', bg: 'bg-[#d4a017]/15 border-[#d4a017]/35' },
                   { label: 'Suspended', count: suspended, pct: students.length ? Math.round(suspended/students.length*100) : 0, color: 'text-rose-300', bg: 'bg-rose-500/15 border-rose-400/30' },
                 ].map(s => (
-                  <div key={s.label} className={`rounded-2xl p-3.5 text-center border backdrop-blur-sm ${s.bg}`}>
-                    <p className="text-2xl font-extrabold text-white">{s.count}</p>
-                    <p className={`text-[11px] font-bold uppercase tracking-wider mt-0.5 ${s.color}`}>{s.label}</p>
-                    <p className="text-white/60 text-xs font-semibold">{s.pct}%</p>
+                  <div key={s.label} className={`rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center border backdrop-blur-sm ${s.bg}`}>
+                    <p className="text-xl sm:text-2xl font-extrabold text-white">{s.count}</p>
+                    <p className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mt-0.5 ${s.color}`}>{s.label}</p>
+                    <p className="text-white/60 text-[10px] sm:text-xs font-semibold">{s.pct}%</p>
                   </div>
                 ))}
               </div>
@@ -227,10 +227,10 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
           </div>
 
           {/* Grade chart + recently active */}
-          <div className="grid sm:grid-cols-2 gap-5">
-            <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+          <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#1a3a2a]/10 p-4 sm:p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
                   <span>📊</span> Avg Score by Grade
                 </h2>
                 <span className="text-xs text-gray-400 font-medium">Diagnostic</span>
@@ -238,9 +238,9 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
               {gradeData.length > 0 ? <SvgBar data={gradeData} /> : <p className="text-sm text-gray-400 text-center py-8">No grade data yet</p>}
             </div>
 
-            <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#1a3a2a]/10 p-4 sm:p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
                   <span>⚡</span> Recently Active Students
                 </h2>
                 <span className="text-xs text-[#2d6a4f] font-semibold cursor-pointer" onClick={() => onNavigate('users_students')}>
@@ -252,15 +252,15 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
               ) : (
                 <div className="space-y-2">
                   {recentlyActive.slice(0, 6).map(s => (
-                    <div key={s.id} className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-[#e8f4f0]/40 transition-colors">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 bg-[#e8f4f0] text-[#1a3a2a] border border-[#2d6a4f]/20">
+                    <div key={s.id} className="flex items-center gap-2.5 sm:gap-3 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl hover:bg-[#e8f4f0]/40 transition-colors">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 bg-[#e8f4f0] text-[#1a3a2a] border border-[#2d6a4f]/20">
                         {s.firstName[0]}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-[#1a3a2a] truncate">{s.firstName} {s.lastName}</p>
-                        <p className="text-[11px] text-gray-500">Grade {s.grade.replace('GRADE_','')} · ⚡{s.xp} XP</p>
+                        <p className="text-[11px] text-gray-500 truncate">Grade {s.grade.replace('GRADE_','')} · ⚡{s.xp} XP</p>
                       </div>
-                      <span className="text-[11px] font-medium text-gray-400 flex-shrink-0">{timeAgo(s.lastActiveAt)}</span>
+                      <span className="text-[10px] sm:text-[11px] font-medium text-gray-400 shrink-0">{timeAgo(s.lastActiveAt)}</span>
                     </div>
                   ))}
                 </div>
@@ -269,14 +269,14 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
           </div>
 
           {/* Skill averages */}
-          <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#1a3a2a]/10 p-4 sm:p-6 shadow-xs">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
                 <span>🎯</span> Platform Skill Averages
               </h2>
               <span className="text-xs text-gray-400 font-medium">5 Core Reading Domains</span>
             </div>
-            <div className="space-y-3.5">
+            <div className="space-y-3 sm:space-y-3.5">
               {[
                 { label: '🔊 Phonemic Awareness', val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.min(100, (s.score??0)+19), 0)/assessed.length) : 0, color: 'bg-[#1a3a2a]' },
                 { label: '🔤 Phonics & Decoding',  val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.min(100, (s.score??0)+5),  0)/assessed.length) : 0, color: 'bg-[#2d6a4f]' },
@@ -284,12 +284,12 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                 { label: '📚 Vocabulary Acq.',    val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.max(0, (s.score??0)-9),    0)/assessed.length) : 0, color: 'bg-[#347b5c]' },
                 { label: '🧠 Comprehension',       val: assessed.length > 0 ? Math.round(assessed.reduce((a,s) => a + Math.min(100, (s.score??0)+3),  0)/assessed.length) : 0, color: 'bg-[#52796f]' },
               ].map(s => (
-                <div key={s.label} className="flex items-center gap-3">
-                  <span className="text-xs sm:text-sm font-semibold text-gray-700 w-32 sm:w-44 flex-shrink-0">{s.label}</span>
+                <div key={s.label} className="flex items-center gap-2.5 sm:gap-3">
+                  <span className="text-xs sm:text-sm font-semibold text-gray-700 w-28 sm:w-44 shrink-0 truncate" title={s.label}>{s.label}</span>
                   <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div className={`h-2.5 rounded-full ${s.color} transition-all duration-700`} style={{ width: `${s.val}%` }} />
                   </div>
-                  <span className={`text-xs sm:text-sm font-bold w-9 text-right ${s.val >= 75 ? 'text-[#2d6a4f]' : s.val >= 60 ? 'text-[#936605]' : 'text-rose-600'}`}>
+                  <span className={`text-xs sm:text-sm font-bold w-9 text-right shrink-0 ${s.val >= 75 ? 'text-[#2d6a4f]' : s.val >= 60 ? 'text-[#936605]' : 'text-rose-600'}`}>
                     {s.val || '—'}
                   </span>
                 </div>
@@ -298,11 +298,11 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
           </div>
 
           {/* Recordings + Assignments */}
-          <div className="grid sm:grid-cols-2 gap-5">
+          <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
             {/* Recent recordings */}
-            <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#1a3a2a]/10 p-4 sm:p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
                   <span>🎙️</span> Fluency Recordings
                   {unreviewed.length > 0 && (
                     <span className="text-[10px] bg-rose-50 text-rose-700 font-bold px-2 py-0.5 rounded-full border border-rose-200">
@@ -310,7 +310,7 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                     </span>
                   )}
                 </h2>
-                <button onClick={() => onNavigate('recordings')} className="text-xs font-bold text-[#2d6a4f] hover:text-[#1a3a2a]">
+                <button onClick={() => onNavigate('recordings')} className="text-xs font-bold text-[#2d6a4f] hover:text-[#1a3a2a] p-1">
                   Review all →
                 </button>
               </div>
@@ -319,15 +319,15 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
               ) : (
                 <div className="space-y-2">
                   {recordings.slice(0, 5).map(r => (
-                    <div key={r.id} className={`flex items-center gap-3 p-3 rounded-2xl transition-all ${!r.reviewed ? 'bg-[#e8f4f0]/70 border border-[#2d6a4f]/30' : 'bg-gray-50/70 border border-gray-100'}`}>
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                    <div key={r.id} className={`flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl transition-all ${!r.reviewed ? 'bg-[#e8f4f0]/70 border border-[#2d6a4f]/30' : 'bg-gray-50/70 border border-gray-100'}`}>
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${
                         r.score >= 75 ? 'bg-[#e8f4f0] text-[#1a3a2a]' : r.score >= 60 ? 'bg-[#fef8e7] text-[#936605]' : 'bg-rose-50 text-rose-700'
                       }`}>{(r.studentName ?? 'S')[0]}</div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-[#1a3a2a] truncate">{r.studentName ?? 'Unknown Student'}</p>
                         <p className="text-[11px] text-gray-500 truncate">📖 {r.passageTitle} · {timeAgo(r.recordedAt)}</p>
                       </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <span className={`text-xs font-bold ${r.score >= 75 ? 'text-[#2d6a4f]' : r.score >= 60 ? 'text-[#936605]' : 'text-rose-600'}`}>{r.score}</span>
                         {!r.reviewed && <span className="w-2 h-2 bg-[#d4a017] rounded-full" />}
                       </div>
@@ -342,20 +342,20 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                   { label: 'Pending',  val: unreviewed.length,                        c: 'text-amber-600' },
                 ].map(s => (
                   <div key={s.label}>
-                    <p className={`text-lg font-extrabold ${s.c}`}>{s.val}</p>
-                    <p className="text-[11px] text-gray-400 font-medium">{s.label}</p>
+                    <p className={`text-base sm:text-lg font-extrabold ${s.c}`}>{s.val}</p>
+                    <p className="text-[10px] sm:text-[11px] text-gray-400 font-medium">{s.label}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Active assignments */}
-            <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#1a3a2a]/10 p-4 sm:p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
                   <span>📋</span> Active Assignments
                 </h2>
-                <button onClick={() => onNavigate('assignments')} className="text-xs font-bold text-[#2d6a4f] hover:text-[#1a3a2a]">
+                <button onClick={() => onNavigate('assignments')} className="text-xs font-bold text-[#2d6a4f] hover:text-[#1a3a2a] p-1">
                   Manage →
                 </button>
               </div>
@@ -369,25 +369,25 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
               ) : (
                 <div className="space-y-2">
                   {assignments.slice(0, 5).map(a => (
-                    <div key={a.id} className="flex items-center gap-3 p-3 bg-gray-50/70 border border-gray-100 rounded-2xl">
-                      <span className="text-lg flex-shrink-0">{a.contentType === 'passage' ? '📖' : '🎓'}</span>
+                    <div key={a.id} className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-gray-50/70 border border-gray-100 rounded-xl sm:rounded-2xl">
+                      <span className="text-base sm:text-lg shrink-0">{a.contentType === 'passage' ? '📖' : '🎓'}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-[#1a3a2a] truncate">{a.contentTitle ?? a.contentId}</p>
-                        <p className="text-[11px] text-gray-500">
+                        <p className="text-[11px] text-gray-500 truncate">
                           {a.grade === 'ALL' ? 'All grades' : 'Grade ' + a.grade.replace('GRADE_','')}
                           {' · '}{timeAgo(a.assignedAt)}
                         </p>
                       </div>
-                      <span className="text-[10px] bg-[#e8f4f0] text-[#1a3a2a] border border-[#2d6a4f]/25 px-2.5 py-0.5 rounded-full font-bold flex-shrink-0">
+                      <span className="text-[10px] bg-[#e8f4f0] text-[#1a3a2a] border border-[#2d6a4f]/25 px-2 py-0.5 rounded-full font-bold shrink-0">
                         Active
                       </span>
                     </div>
                   ))}
                 </div>
               )}
-              <div className="mt-3.5 pt-3.5 border-t border-gray-100 flex justify-between text-xs text-gray-500">
-                <span className="font-medium">{assignments.length} assignments active</span>
-                <button onClick={() => onNavigate('assignments')} className="text-[#2d6a4f] font-bold hover:underline">
+              <div className="mt-3.5 pt-3.5 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                <span className="font-medium text-[11px] sm:text-xs">{assignments.length} assignments active</span>
+                <button onClick={() => onNavigate('assignments')} className="text-[#2d6a4f] font-bold hover:underline text-[11px] sm:text-xs">
                   + Add assignment
                 </button>
               </div>
@@ -395,25 +395,25 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
           </div>
 
           {/* ── FEEDBACK & COMMUNICATION SUITE ── */}
-          <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#1a3a2a]/10 p-4 sm:p-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 mb-4">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase tracking-wide">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wide">
                   <span>✨</span> NEW COMMUNICATION MODULES
                 </div>
-                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2 mt-1">
+                <h2 className="text-base sm:text-lg font-bold text-[#1a3a2a] flex items-center gap-2 mt-1">
                   <span>💬</span> Feedback & Communication Operations
                 </h2>
               </div>
               <span className="text-xs text-gray-500 font-medium">Real-time Learner & Parent Channels</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
               {/* Student Chat */}
-              <div className="p-4 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-[#f0f9f5] to-white flex flex-col justify-between group hover:shadow-md transition-all">
+              <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-[#f0f9f5] to-white flex flex-col justify-between group hover:shadow-md transition-all">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-10 h-10 rounded-xl bg-[#2d6a4f] text-[#d4a017] flex items-center justify-center text-xl shadow-xs">
+                    <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#2d6a4f] text-[#d4a017] flex items-center justify-center text-lg sm:text-xl shadow-xs">
                       💬
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-200/60 text-emerald-900 text-[10px] font-bold">
@@ -427,7 +427,7 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                     Direct real-time messaging with individual learners, timestamps, quick replies, and message history.
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-emerald-100 flex items-center justify-between gap-2">
+                <div className="mt-3.5 pt-3 border-t border-emerald-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => onNavigate('student-chat')}
                     className="text-xs font-bold text-[#2d6a4f] hover:underline"
@@ -436,7 +436,7 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                   </button>
                   <a
                     href="/admin/chat"
-                    className="px-2.5 py-1 rounded-lg bg-[#2d6a4f] text-white text-[11px] font-bold hover:bg-[#1a3a2a] transition-colors"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#2d6a4f] text-white text-[11px] font-bold hover:bg-[#1a3a2a] transition-colors"
                   >
                     Full Page ↗
                   </a>
@@ -444,10 +444,10 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
               </div>
 
               {/* Parent Feedback */}
-              <div className="p-4 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-[#fefbf0] to-white flex flex-col justify-between group hover:shadow-md transition-all">
+              <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-200/80 bg-gradient-to-br from-[#fefbf0] to-white flex flex-col justify-between group hover:shadow-md transition-all">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-10 h-10 rounded-xl bg-[#d4a017] text-[#1a3a2a] flex items-center justify-center text-xl shadow-xs">
+                    <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#d4a017] text-[#1a3a2a] flex items-center justify-center text-lg sm:text-xl shadow-xs">
                       📬
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-amber-200/60 text-amber-900 text-[10px] font-bold">
@@ -461,7 +461,7 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                     Review parent submissions regarding progress, concerns, and suggestions. Submit official admin replies.
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between gap-2">
+                <div className="mt-3.5 pt-3 border-t border-amber-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => onNavigate('parent-feedback')}
                     className="text-xs font-bold text-[#936605] hover:underline"
@@ -470,7 +470,7 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                   </button>
                   <a
                     href="/admin/parent-feedback"
-                    className="px-2.5 py-1 rounded-lg bg-[#d4a017] text-[#1a3a2a] text-[11px] font-bold hover:brightness-95 transition-colors"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#d4a017] text-[#1a3a2a] text-[11px] font-bold hover:brightness-95 transition-colors"
                   >
                     Full Page ↗
                   </a>
@@ -478,10 +478,10 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
               </div>
 
               {/* Assessment Feedback */}
-              <div className="p-4 rounded-2xl border border-blue-200/80 bg-gradient-to-br from-[#f0f6ff] to-white flex flex-col justify-between group hover:shadow-md transition-all">
+              <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-blue-200/80 bg-gradient-to-br from-[#f0f6ff] to-white flex flex-col justify-between group hover:shadow-md transition-all">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-xs">
+                    <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg sm:text-xl shadow-xs">
                       📝
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-blue-200/60 text-blue-900 text-[10px] font-bold">
@@ -495,7 +495,7 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                     Publish diagnostic evaluations, identify skill problem areas, and provide actionable recommendations for students.
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-blue-100 flex items-center justify-between gap-2">
+                <div className="mt-3.5 pt-3 border-t border-blue-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => onNavigate('assessment-feedback')}
                     className="text-xs font-bold text-blue-700 hover:underline"
@@ -504,7 +504,7 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                   </button>
                   <a
                     href="/admin/assessment-feedback"
-                    className="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors"
+                    className="px-2.5 py-1.5 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors"
                   >
                     Full Page ↗
                   </a>
@@ -514,11 +514,11 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
           </div>
 
           {/* Quick actions */}
-          <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
-            <h2 className="text-lg font-bold text-[#1a3a2a] mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#1a3a2a]/10 p-4 sm:p-6 shadow-xs">
+            <h2 className="text-base sm:text-lg font-bold text-[#1a3a2a] mb-4 flex items-center gap-2">
               <span>⚡</span> Management Shortcuts
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
               {[
                 { emoji: '📋', label: 'Assign Content', desc: 'Deploy tasks to grade', nav: 'assignments' },
                 { emoji: '👥', label: 'Manage Students', desc: 'Accounts & grades',    nav: 'students' },
@@ -528,11 +528,11 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
                 <button
                   key={a.label}
                   onClick={() => onNavigate(a.nav)}
-                  className="flex flex-col items-start p-4 bg-gray-50/70 hover:bg-[#e8f4f0]/50 border border-gray-100 hover:border-[#2d6a4f]/30 rounded-2xl transition-all duration-200 group text-left cursor-pointer active:scale-98"
+                  className="flex flex-col items-start p-3 sm:p-4 bg-gray-50/70 hover:bg-[#e8f4f0]/50 border border-gray-100 hover:border-[#2d6a4f]/30 rounded-xl sm:rounded-2xl transition-all duration-200 group text-left cursor-pointer active:scale-98"
                 >
-                  <span className="text-2xl group-hover:scale-110 transition-transform mb-2">{a.emoji}</span>
+                  <span className="text-xl sm:text-2xl group-hover:scale-110 transition-transform mb-1.5 sm:mb-2">{a.emoji}</span>
                   <span className="text-xs font-bold text-[#1a3a2a] group-hover:text-[#2d6a4f] transition-colors">{a.label}</span>
-                  <span className="text-[10px] text-gray-400 mt-0.5">{a.desc}</span>
+                  <span className="text-[10px] text-gray-400 mt-0.5 line-clamp-1">{a.desc}</span>
                 </button>
               ))}
             </div>

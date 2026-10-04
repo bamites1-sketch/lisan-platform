@@ -688,7 +688,7 @@ function AssignLessonPage({ onBack, onDone }: { onBack: () => void; onDone: () =
 
           {/* Step 3 — Assignment Settings */}
           <SectionCard step={3} title="Assignment Settings">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {/* Start date */}
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-gray-700">
@@ -777,43 +777,44 @@ function AssignLessonPage({ onBack, onDone }: { onBack: () => void; onDone: () =
           </SectionCard>
 
           {/* Bottom action bar */}
-          <div className="bg-white rounded-2xl border border-gray-200 px-5 py-4 flex items-center justify-between">
+          <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:px-5 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Student count indicator */}
-            <div className="flex items-center gap-2 text-sm font-medium text-brand-700">
-              <div className="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-brand-700">
+              <div className="w-5 h-5 bg-brand-100 rounded-full flex items-center justify-center shrink-0">
                 <svg className="w-3 h-3 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              {!form.lessonId
-                ? 'Select a lesson above to continue'
-                : needsStudentPick && form.studentIds.length === 0
-                  ? 'Select at least one student above'
-                  : targetStudents.length > 0
-                    ? `${targetStudents.length} student${targetStudents.length !== 1 ? 's' : ''} will receive this lesson`
-                    : 'Ready to assign to all matching students'}
+              <span>
+                {!form.lessonId
+                  ? 'Select a lesson above to continue'
+                  : needsStudentPick && form.studentIds.length === 0
+                    ? 'Select at least one student above'
+                    : targetStudents.length > 0
+                      ? `${targetStudents.length} student${targetStudents.length !== 1 ? 's' : ''} will receive this lesson`
+                      : 'Ready to assign to all matching students'}
+              </span>
             </div>
 
             {/* Buttons */}
-            <div className="flex items-center gap-3">
-              <button type="button" onClick={onBack} className="btn-secondary px-6">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <button type="button" onClick={onBack} className="btn-secondary flex-1 sm:flex-none justify-center px-4 sm:px-6 text-xs sm:text-sm py-2.5">
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleAssign}
                 disabled={!canSubmit}
-                className="btn-primary px-6 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary flex-1 sm:flex-none justify-center px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin flex-shrink-0" />
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
                     Assigning…
                   </>
                 ) : (
                   <>
-                    {/* Paper-plane send icon */}
-                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                     </svg>
                     Assign Lesson
@@ -825,7 +826,7 @@ function AssignLessonPage({ onBack, onDone }: { onBack: () => void; onDone: () =
         </div>
 
         {/* ── Right column: preview ── */}
-        <div className="w-72 flex-shrink-0 hidden xl:block">
+        <div className="w-72 shrink-0 hidden xl:block">
           <AssignmentPreview
             form={form}
             lesson={selectedLesson}
@@ -893,41 +894,41 @@ export default function LessonAssignmentsTab() {
 
   return (
     <>
-      <div className="space-y-5">
+      <div className="space-y-4 sm:space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Assignment Center</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Manage lesson assignments for your students</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Manage lesson assignments for your students</p>
           </div>
           <button
             type="button"
             onClick={() => setView('assign')}
-            className="btn-primary flex items-center gap-2 px-5"
+            className="btn-primary flex items-center justify-center gap-2 px-5 py-2.5 w-full sm:w-auto text-xs sm:text-sm"
           >
             <span>🎓</span> Assign Lesson
           </button>
         </div>
 
         {/* Stat cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
           {statCards.map(s => (
-            <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3">
-              <div className={`w-10 h-10 ${s.bg} rounded-xl flex items-center justify-center text-lg flex-shrink-0`}>
+            <div key={s.label} className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
+              <div className={`w-9 h-9 sm:w-10 sm:h-10 ${s.bg} rounded-xl flex items-center justify-center text-base sm:text-lg shrink-0`}>
                 {s.icon}
               </div>
-              <div>
-                <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-                <p className="text-xs text-gray-500">{s.label}</p>
+              <div className="min-w-0">
+                <p className={`text-lg sm:text-xl font-bold ${s.color}`}>{s.value}</p>
+                <p className="text-[11px] sm:text-xs text-gray-500 truncate">{s.label}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-gray-100 bg-gray-50">
-            <p className="text-sm font-semibold text-gray-700">All Lesson Assignments</p>
+        {/* Table / List */}
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 overflow-hidden shadow-xs">
+          <div className="px-4 py-3 sm:px-5 sm:py-3.5 border-b border-gray-100 bg-gray-50/80">
+            <p className="text-xs sm:text-sm font-semibold text-gray-700">All Lesson Assignments</p>
           </div>
 
           {loading ? (
@@ -935,13 +936,13 @@ export default function LessonAssignmentsTab() {
               <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
             </div>
           ) : assignments.length === 0 ? (
-            <div className="py-16 flex flex-col items-center gap-3 text-center px-6">
-              <div className="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center text-3xl">🎓</div>
-              <p className="font-semibold text-gray-700">No lesson assignments yet</p>
-              <p className="text-sm text-gray-400 max-w-xs">
+            <div className="py-12 sm:py-16 flex flex-col items-center gap-3 text-center px-4 sm:px-6">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-brand-50 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl">🎓</div>
+              <p className="font-semibold text-gray-700 text-sm sm:text-base">No lesson assignments yet</p>
+              <p className="text-xs sm:text-sm text-gray-400 max-w-xs">
                 Assign a lesson to a grade group and students will see it on their dashboard
               </p>
-              <button type="button" onClick={() => setView('assign')} className="btn-primary mt-1 px-5">
+              <button type="button" onClick={() => setView('assign')} className="btn-primary mt-1 px-5 py-2 text-xs sm:text-sm">
                 + Assign Lesson
               </button>
             </div>
@@ -951,15 +952,15 @@ export default function LessonAssignmentsTab() {
                 const lesson = lessons.find(l => l.id === a.contentId)
                 const meta   = lesson ? SKILL_META[lesson.skillArea] : null
                 return (
-                  <div key={a.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0 border ${
+                  <div key={a.id} className="flex items-center gap-3 sm:gap-4 px-3.5 py-3 sm:px-5 sm:py-3.5 hover:bg-gray-50 transition-colors group">
+                    <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-sm sm:text-base shrink-0 border ${
                       meta ? `${meta.bg} ${meta.border}` : 'bg-green-50 border-green-200'
                     }`}>
                       {meta?.icon ?? '🎓'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">{lesson?.title ?? a.contentId}</p>
-                      <div className="flex items-center gap-2 mt-0.5 flex-wrap text-xs text-gray-500">
+                      <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{lesson?.title ?? a.contentId}</p>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 flex-wrap text-[11px] sm:text-xs text-gray-500">
                         {meta && <span className={`font-medium ${meta.color}`}>{meta.label}</span>}
                         <span>·</span>
                         <span>👥 {a.grade === 'ALL' ? 'All grades' : 'Grade ' + a.grade.replace('GRADE_', '')}</span>
@@ -971,7 +972,7 @@ export default function LessonAssignmentsTab() {
                     <button
                       type="button"
                       onClick={() => setDelTgt(a)}
-                      className="text-xs text-danger-600 font-medium px-2.5 py-1.5 rounded-lg hover:bg-danger-50 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                      className="text-xs text-danger-600 font-semibold px-2.5 py-1.5 rounded-lg bg-danger-50 sm:bg-transparent hover:bg-danger-100/80 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all shrink-0 active:scale-95"
                     >
                       Remove
                     </button>
