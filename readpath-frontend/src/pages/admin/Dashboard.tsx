@@ -173,8 +173,8 @@ function AdminDashboardInner() {
         {/* Logo */}
         <div className="p-5 border-b border-white/10">
           <div className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#d4a017] to-[#b88912] text-[#1a3a2a] flex items-center justify-center text-xl font-black shadow-md shadow-black/20 group-hover:scale-105 transition-transform">
-              ል
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-white shadow-md shadow-black/20 group-hover:scale-105 transition-transform flex-shrink-0 p-1 flex items-center justify-center">
+              <img src="/icon-192.png" alt="LiSAN Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <span className="text-xl font-extrabold tracking-wide text-white">LiSAN</span>
@@ -335,8 +335,8 @@ function AdminDashboardInner() {
       <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#1a3a2a] text-white border-b border-[#2d6a4f]/30 z-30 shadow-md">
         <div className="px-3.5 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#d4a017] to-[#b88912] text-[#1a3a2a] rounded-lg flex items-center justify-center font-bold text-sm shadow-xs">
-              ል
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center shadow-xs p-0.5 flex-shrink-0">
+              <img src="/icon-192.png" alt="LiSAN Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <span className="font-extrabold text-white text-base tracking-wide">LiSAN</span>

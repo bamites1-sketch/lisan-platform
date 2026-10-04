@@ -29,104 +29,90 @@ export function InstallAppModal({ isOpen, onClose }: InstallAppModalProps) {
       setSuccess(true);
       setTimeout(() => {
         onClose();
-      }, 2000);
+      }, 1500);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
       <div 
-        className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-gray-100 overflow-hidden relative"
+        className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-gray-100 overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with Emerald Gradient */}
-        <div className="bg-gradient-to-r from-[#1a3a2a] via-[#24513b] to-[#1a3a2a] p-6 text-white relative">
+        {/* Header with Brand Gradient & Uploaded Logo */}
+        <div className="bg-gradient-to-r from-[#123c2d] via-[#1a4a38] to-[#123c2d] p-5 text-white relative">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center transition-colors text-sm"
+            className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center transition-colors text-sm cursor-pointer"
             aria-label="Close"
           >
             ✕
           </button>
 
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#d4a017] to-[#b88912] p-0.5 shadow-lg flex-shrink-0">
+          <div className="flex items-center gap-3.5">
+            <div className="w-14 h-14 rounded-2xl bg-white p-1 shadow-md flex-shrink-0 flex items-center justify-center border border-white/20">
               <img 
                 src="/icon-192.png" 
-                alt="LiSAN Icon" 
-                className="w-full h-full object-cover rounded-[14px]"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
+                alt="LiSAN Logo" 
+                className="w-full h-full object-contain"
               />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#d4a017]/25 text-[#f3ca52] text-[10px] font-extrabold uppercase tracking-wider mb-1 border border-[#d4a017]/30">
-                <span>✦ Official Web App</span>
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#d4a017]/25 text-[#f3ca52] text-[10px] font-extrabold uppercase tracking-wider mb-1 border border-[#d4a017]/30">
+                ✦ Easy 1-Step Install
               </div>
-              <h2 className="text-xl font-black tracking-tight text-white">Download LiSAN</h2>
+              <h2 className="text-xl font-black tracking-tight text-white leading-tight">Install LiSAN App</h2>
               <p className="text-xs text-emerald-100/80 mt-0.5">
-                Install on any Phone, Tablet, or Desktop without an app store
+                Works offline on any iPhone, Android, or PC
               </p>
             </div>
           </div>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 space-y-5">
-          {/* Key Advantages */}
-          <div className="grid grid-cols-3 gap-2 py-1">
-            <div className="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-2.5 text-center">
-              <span className="text-lg block mb-1">⚡</span>
-              <p className="text-[11px] font-bold text-[#1a3a2a]">Fast & Light</p>
-              <p className="text-[9px] text-gray-500">Takes under 1 MB</p>
+        <div className="p-5 space-y-4">
+          {/* Quick Perks */}
+          <div className="flex items-center justify-around bg-[#faf7f2] border border-amber-900/10 rounded-2xl p-2 text-center text-xs">
+            <div className="flex items-center gap-1.5 font-bold text-[#123c2d]">
+              <span className="text-base">⚡</span> No App Store needed
             </div>
-            <div className="bg-amber-50/70 border border-amber-100 rounded-2xl p-2.5 text-center">
-              <span className="text-lg block mb-1">📡</span>
-              <p className="text-[11px] font-bold text-amber-900">Works Offline</p>
-              <p className="text-[9px] text-gray-500">Read & record voice</p>
-            </div>
-            <div className="bg-blue-50/70 border border-blue-100 rounded-2xl p-2.5 text-center">
-              <span className="text-lg block mb-1">📱</span>
-              <p className="text-[11px] font-bold text-blue-900">Full Screen</p>
-              <p className="text-[9px] text-gray-500">Native app feel</p>
+            <span className="text-gray-300">|</span>
+            <div className="flex items-center gap-1.5 font-bold text-[#123c2d]">
+              <span className="text-base">📡</span> Reads Offline
             </div>
           </div>
 
           {/* If already running in standalone mode */}
           {isInstalled ? (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center space-y-1">
-              <span className="text-2xl">🎉</span>
-              <h4 className="text-sm font-bold text-emerald-900">LiSAN is Already Installed!</h4>
-              <p className="text-xs text-emerald-700">
-                You are currently running the full standalone app version with offline reading support.
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-center space-y-2">
+              <span className="text-3xl block">🎉</span>
+              <h4 className="text-base font-extrabold text-emerald-950">LiSAN is Already Installed!</h4>
+              <p className="text-xs text-emerald-800">
+                You are currently running the full app on your device with offline support enabled.
               </p>
             </div>
           ) : (
             <>
-              {/* Direct 1-Click Install Button if browser supports it */}
+              {/* 1-Click Fast Button (shown when browser supports prompt) */}
               {canPrompt && (
-                <div className="bg-gradient-to-r from-emerald-50 to-amber-50/40 border border-emerald-200 rounded-2xl p-4 text-center space-y-2.5">
-                  <p className="text-xs font-semibold text-gray-700">
-                    Your browser supports 1-click instant installation:
-                  </p>
-                  <button
-                    onClick={handle1ClickInstall}
-                    disabled={installing}
-                    className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-[#1a3a2a] via-[#24513b] to-[#1a3a2a] hover:from-[#24513b] hover:to-[#2d6a4f] text-white font-extrabold text-sm shadow-lg shadow-emerald-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50"
-                  >
-                    <span>{installing ? '⏳ Setting up...' : success ? '✓ Installed!' : '📲 Install LiSAN App Now'}</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={handle1ClickInstall}
+                  disabled={installing}
+                  className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#123c2d] to-[#1e5842] hover:from-[#1a4a38] hover:to-[#256c52] text-white font-black text-sm shadow-lg shadow-emerald-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50"
+                >
+                  <span className="text-lg">📲</span>
+                  <span>{installing ? 'Setting up…' : success ? '✓ Installed!' : 'Tap Here to Install App (1 Tap)'}</span>
+                </button>
               )}
 
-              {/* Platform Selector Tabs */}
-              <div>
-                <p className="text-xs font-bold text-gray-700 mb-2">Device Installation Guide:</p>
+              {/* Simple Device Switcher */}
+              <div className="pt-1">
                 <div className="flex rounded-xl bg-gray-100 p-1 text-xs font-bold">
                   <button
+                    type="button"
                     onClick={() => setSelectedPlatform('ios')}
-                    className={`flex-1 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       selectedPlatform === 'ios'
                         ? 'bg-white text-gray-900 shadow-xs'
                         : 'text-gray-500 hover:text-gray-900'
@@ -135,8 +121,9 @@ export function InstallAppModal({ isOpen, onClose }: InstallAppModalProps) {
                     <span>🍏</span> iPhone / iPad
                   </button>
                   <button
+                    type="button"
                     onClick={() => setSelectedPlatform('android')}
-                    className={`flex-1 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       selectedPlatform === 'android'
                         ? 'bg-white text-gray-900 shadow-xs'
                         : 'text-gray-500 hover:text-gray-900'
@@ -145,8 +132,9 @@ export function InstallAppModal({ isOpen, onClose }: InstallAppModalProps) {
                     <span>🤖</span> Android
                   </button>
                   <button
+                    type="button"
                     onClick={() => setSelectedPlatform('desktop')}
-                    className={`flex-1 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       selectedPlatform === 'desktop'
                         ? 'bg-white text-gray-900 shadow-xs'
                         : 'text-gray-500 hover:text-gray-900'
@@ -157,104 +145,106 @@ export function InstallAppModal({ isOpen, onClose }: InstallAppModalProps) {
                 </div>
               </div>
 
-              {/* Instructions by Platform */}
+              {/* ── IPHONE INSTRUCTIONS ── */}
               {selectedPlatform === 'ios' && (
-                <div className="bg-gray-50/80 border border-gray-200/80 rounded-2xl p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#1a3a2a] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="bg-emerald-50/50 border border-emerald-200/80 rounded-2xl p-4 space-y-3">
+                  <p className="text-[11px] font-black uppercase tracking-wider text-[#123c2d]">
+                    Takes only 5 seconds on iPhone:
+                  </p>
+
+                  <div className="flex items-start gap-3 bg-white p-2.5 rounded-xl border border-gray-100 shadow-xs">
+                    <span className="w-6 h-6 rounded-full bg-[#123c2d] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
                       1
                     </span>
-                    <div className="text-xs text-gray-700">
-                      Open this website in <strong>Safari</strong> on your iPhone or iPad, then tap the <strong className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-gray-200 text-gray-900">Share button ⎋</strong> at the bottom of the screen.
+                    <div className="text-xs text-gray-800 leading-snug">
+                      In <strong>Safari</strong>, tap the <strong className="inline-flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded text-gray-900 border border-gray-200">Share button ⎋</strong> at the bottom.
                     </div>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#1a3a2a] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+
+                  <div className="flex items-start gap-3 bg-white p-2.5 rounded-xl border border-gray-100 shadow-xs">
+                    <span className="w-6 h-6 rounded-full bg-[#123c2d] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
                       2
                     </span>
-                    <div className="text-xs text-gray-700">
-                      Scroll down the menu and tap <strong className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-gray-200 text-gray-900">Add to Home Screen ⊞</strong>.
+                    <div className="text-xs text-gray-800 leading-snug">
+                      Scroll down and tap <strong className="inline-flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded text-gray-900 border border-gray-200">Add to Home Screen ⊞</strong>.
                     </div>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#1a3a2a] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+
+                  <div className="flex items-start gap-3 bg-white p-2.5 rounded-xl border border-gray-100 shadow-xs">
+                    <span className="w-6 h-6 rounded-full bg-[#123c2d] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
                       3
                     </span>
-                    <div className="text-xs text-gray-700">
-                      Tap <strong className="text-emerald-700 font-bold">Add</strong> in the top right. LiSAN will appear on your home screen with its own app icon!
+                    <div className="text-xs text-gray-800 leading-snug">
+                      Tap <strong className="text-emerald-700 font-bold">Add</strong> (top right). LiSAN is now on your home screen!
                     </div>
                   </div>
                 </div>
               )}
 
+              {/* ── ANDROID INSTRUCTIONS ── */}
               {selectedPlatform === 'android' && (
-                <div className="bg-gray-50/80 border border-gray-200/80 rounded-2xl p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#1a3a2a] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
-                      1
-                    </span>
-                    <div className="text-xs text-gray-700">
-                      Open in <strong>Chrome</strong>, <strong>Samsung Internet</strong>, or <strong>Edge</strong>.
+                <div className="bg-emerald-50/50 border border-emerald-200/80 rounded-2xl p-4 space-y-3">
+                  <p className="text-[11px] font-black uppercase tracking-wider text-[#123c2d]">
+                    Quick Android Install:
+                  </p>
+
+                  {canPrompt ? (
+                    <button
+                      type="button"
+                      onClick={handle1ClickInstall}
+                      className="w-full py-3 px-4 rounded-xl bg-[#123c2d] hover:bg-[#1a4a38] text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                    >
+                      <span>📲</span> Tap to Add to Home Screen
+                    </button>
+                  ) : (
+                    <div className="space-y-2 text-xs text-gray-700">
+                      <div className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-gray-100 shadow-xs">
+                        <span className="font-bold text-[#123c2d]">1.</span>
+                        <span>Tap the <strong>⋮ Menu (three dots)</strong> in Chrome at the top right.</span>
+                      </div>
+                      <div className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-gray-100 shadow-xs">
+                        <span className="font-bold text-[#123c2d]">2.</span>
+                        <span>Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#1a3a2a] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
-                      2
-                    </span>
-                    <div className="text-xs text-gray-700">
-                      Tap the <strong className="bg-white px-1.5 py-0.5 rounded border border-gray-200">⋮ Menu (three dots)</strong> in the top right corner.
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#1a3a2a] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
-                      3
-                    </span>
-                    <div className="text-xs text-gray-700">
-                      Select <strong className="text-emerald-700 font-bold">"Install app"</strong> or <strong className="text-emerald-700 font-bold">"Add to Home screen"</strong>.
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
 
+              {/* ── DESKTOP INSTRUCTIONS ── */}
               {selectedPlatform === 'desktop' && (
-                <div className="bg-gray-50/80 border border-gray-200/80 rounded-2xl p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#1a3a2a] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
-                      1
-                    </span>
-                    <div className="text-xs text-gray-700">
-                      In <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>, look at the right end of the address bar.
+                <div className="bg-emerald-50/50 border border-emerald-200/80 rounded-2xl p-4 space-y-3">
+                  <p className="text-[11px] font-black uppercase tracking-wider text-[#123c2d]">
+                    Computer App:
+                  </p>
+
+                  {canPrompt ? (
+                    <button
+                      type="button"
+                      onClick={handle1ClickInstall}
+                      className="w-full py-3 px-4 rounded-xl bg-[#123c2d] hover:bg-[#1a4a38] text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                    >
+                      <span>💻</span> Install LiSAN on PC / Mac
+                    </button>
+                  ) : (
+                    <div className="text-xs text-gray-700 bg-white p-3 rounded-xl border border-gray-100 shadow-xs space-y-1">
+                      <p>In Chrome or Edge, click the <strong>Install icon ⊕ / 💻</strong> in your address bar.</p>
+                      <p className="text-gray-500 text-[11px]">LiSAN opens in its own window pinned to your taskbar.</p>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#1a3a2a] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
-                      2
-                    </span>
-                    <div className="text-xs text-gray-700">
-                      Click the <strong className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-gray-200 text-gray-900">Install icon ⊕ / 💻</strong> in the address bar.
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#1a3a2a] text-[#d4a017] text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
-                      3
-                    </span>
-                    <div className="text-xs text-gray-700">
-                      Confirm <strong className="text-emerald-700 font-bold">"Install"</strong>. LiSAN launches in its own dedicated, clean window pinned to your taskbar or dock!
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
             </>
           )}
 
-          {/* Footer close button */}
-          <div className="pt-2 flex items-center justify-between">
-            <span className="text-[11px] text-gray-400">Version 2.1.0 • PWA Standard</span>
+          {/* Footer close */}
+          <div className="pt-2 flex items-center justify-end">
             <button
+              type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 transition-colors"
+              className="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 transition-colors cursor-pointer"
             >
-              Done
+              Close
             </button>
           </div>
         </div>
@@ -275,7 +265,7 @@ export function FloatingInstallPill() {
     const item = localStorage.getItem('lisan_install_pill_dismissed');
     if (!item) return false;
     const time = parseInt(item, 10);
-    return Date.now() - time < 24 * 60 * 60 * 1000; // 24 hours
+    return Date.now() - time < 24 * 60 * 60 * 1000;
   });
 
   if (isInstalled || dismissed) return null;
@@ -288,28 +278,27 @@ export function FloatingInstallPill() {
 
   return (
     <>
-      <div 
-        className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-40 animate-in fade-in slide-in-from-bottom-4 duration-300"
-      >
+      <div className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-40 animate-in fade-in slide-in-from-bottom-4 duration-300">
         <div 
           onClick={() => setModalOpen(true)}
-          className="group flex items-center gap-2.5 bg-gradient-to-r from-[#1a3a2a] to-[#24513b] text-white pl-3.5 pr-2.5 py-2.5 rounded-full shadow-xl border border-[#d4a017]/40 hover:border-[#d4a017] transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
+          className="group flex items-center gap-2.5 bg-gradient-to-r from-[#123c2d] to-[#1a4a38] text-white pl-3 pr-2 py-2 rounded-full shadow-xl border border-[#d4a017]/40 hover:border-[#d4a017] transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
         >
-          <div className="w-6 h-6 rounded-full bg-[#d4a017] text-[#1a3a2a] flex items-center justify-center text-xs font-black shadow-xs group-hover:rotate-12 transition-transform">
-            📲
+          <div className="w-7 h-7 rounded-full bg-white p-0.5 flex items-center justify-center flex-shrink-0 shadow-xs">
+            <img src="/icon-192.png" alt="LiSAN" className="w-full h-full object-contain" />
           </div>
           <div className="text-left pr-1">
             <p className="text-[11px] font-black tracking-wide leading-none text-white">
-              {isIOS ? 'Add to Home Screen' : canPrompt ? 'Install LiSAN App' : 'Download App'}
+              {isIOS ? 'Install on iPhone' : canPrompt ? 'Install LiSAN' : 'Download App'}
             </p>
             <p className="text-[9px] text-[#f3ca52] leading-tight font-medium mt-0.5">
-              Works offline on any device
+              1-tap simple install
             </p>
           </div>
           <button
+            type="button"
             onClick={handleDismiss}
-            className="w-5 h-5 rounded-full hover:bg-white/20 text-white/60 hover:text-white flex items-center justify-center text-[10px] ml-1 transition-colors"
-            title="Hide for 24h"
+            className="w-5 h-5 rounded-full hover:bg-white/20 text-white/60 hover:text-white flex items-center justify-center text-[10px] ml-1 transition-colors cursor-pointer"
+            title="Dismiss"
           >
             ✕
           </button>

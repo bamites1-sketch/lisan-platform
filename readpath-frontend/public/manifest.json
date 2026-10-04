@@ -9,19 +9,13 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui", "browser"],
   "orientation": "any",
-  "background_color": "#1a3a2a",
-  "theme_color": "#1a3a2a",
+  "background_color": "#faf7f2",
+  "theme_color": "#123c2d",
   "categories": ["education", "books", "productivity"],
   "lang": "en",
   "dir": "ltr",
   "prefer_related_applications": false,
   "icons": [
-    {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",

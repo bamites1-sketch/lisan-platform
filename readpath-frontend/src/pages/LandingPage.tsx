@@ -112,10 +112,9 @@ function Navbar({ user, onOpenInstall }: { user: { role: string } | null; onOpen
 
           {/* Logo */}
           <button onClick={handleLogo} className="flex items-center gap-2.5 flex-shrink-0 focus:outline-none">
-            <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border-2 border-white/20 bg-white/10">
-              <img src="/assets/hero-image.png" alt="LISAN"
-                className="w-full h-full object-cover object-top"
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+            <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-white/20 bg-white shadow-sm flex items-center justify-center p-1">
+              <img src="/icon-192.png" alt="LiSAN Logo"
+                className="w-full h-full object-contain" />
             </div>
             <div className="leading-tight">
               <p className="font-bold text-white text-lg leading-none tracking-wide">LISAN</p>
