@@ -2,27 +2,63 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
-    <meta name="description" content="Lisan | ልሳን – Discover how you read. Learn exactly what you need. Watch yourself grow." />
-    <title>Lisan | ልሳን — Reading Diagnostic & Learning Platform</title>
+    
+    <!-- Primary Meta -->
+    <title>LiSAN | ልሳን — Reading Diagnostic & Literacy Platform</title>
+    <meta name="title" content="LiSAN | ልሳን — Reading Diagnostic & Literacy Platform" />
+    <meta name="description" content="Discover how you read. Learn exactly what you need. Watch yourself grow with LiSAN — Ethiopia's premier intelligent reading diagnostic & learning platform." />
+    
+    <!-- PWA & Web App Meta -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#1a3a2a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="LiSAN" />
+    <meta name="application-name" content="LiSAN" />
+    <meta name="msapplication-TileColor" content="#1a3a2a" />
+    <meta name="msapplication-TileImage" content="/icon-512.png" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="LiSAN | ልሳን — Reading Diagnostic Platform" />
+    <meta property="og:description" content="Intelligent reading diagnostic assessments, AI reading coach, and personalized literacy plan for every student." />
+    <meta property="og:image" content="/icon-512.png" />
+
+    <!-- Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   </head>
-  <body>
+  <body class="bg-[#f8faf9] text-gray-900 selection:bg-[#d4a017]/30 selection:text-[#1a3a2a]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
+      // Professional Service Worker registration with instant update handling
       if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
+          navigator.serviceWorker.register('/sw.js').then((registration) => {
+            // Check for updates periodically
+            registration.addEventListener('updatefound', () => {
+              const installingWorker = registration.installing;
+              if (installingWorker) {
+                installingWorker.addEventListener('statechange', () => {
+                  if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('LiSAN: New version available.');
+                  }
+                });
+              }
+            });
+          }).catch((err) => {
+            console.warn('LiSAN ServiceWorker registration skipped:', err);
+          });
         });
       }
     </script>

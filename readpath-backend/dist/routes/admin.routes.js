@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const auth_1 = require("../middleware/auth");
 const admin_controller_1 = require("../controllers/admin.controller");
 const assessment_controller_1 = require("../controllers/assessment.controller");
+const feedback_controller_1 = require("../controllers/feedback.controller");
 const router = express_1.default.Router();
 router.use(auth_1.authenticate);
 router.use((0, auth_1.authorize)('ADMIN'));
@@ -66,5 +67,9 @@ router.get('/recordings', admin_controller_1.getAllRecordingSubmissions);
 router.post('/recordings/:id/review', admin_controller_1.reviewRecordingSubmission);
 // Get audio URL for recording submission
 router.get('/recordings/:id/audio', admin_controller_1.getRecordingSubmissionAudioUrl);
+// Parent Feedbacks Management
+router.get('/parent-feedbacks', feedback_controller_1.getAdminParentFeedbacks);
+router.post('/parent-feedbacks/:id/respond', feedback_controller_1.respondToParentFeedback);
+router.delete('/parent-feedbacks/:id', feedback_controller_1.deleteParentFeedback);
 exports.default = router;
 //# sourceMappingURL=admin.routes.js.map

@@ -56,6 +56,9 @@ model Student {
   badges          StudentBadge[]
   progressLogs    ProgressLog[]
   classMemberships ClassMembership[]
+  parentFeedbacks ParentFeedback[]
+  adminMessages   StudentAdminMessage[]
+  assessmentFeedbacks AssessmentFeedback[]
 
   @@map("students")
 }
@@ -69,7 +72,8 @@ model Parent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  children Student[]
+  children  Student[]
+  feedbacks ParentFeedback[]
 
   @@map("parents")
 }
@@ -592,3 +596,72 @@ model PaymentSubmission {
 
   @@map("payment_submissions")
 }
+
+model ParentFeedback {
+  id             String    @id @default(uuid())
+  parentId       String
+  parent         Parent    @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  studentId      String?
+  student        Student?  @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  category       String    @default("GENERAL") // PROGRESS | CONCERN | SUGGESTION | GENERAL
+  rating         Int?      // 1 to 5
+  title          String?
+  progressNotes  String?   // Feedback about student's progress and overall experience
+  areasOfConcern String?   // Reported areas of concern or problems
+  suggestions    String?   // Future suggestions and recommendations
+  status         String    @default("PENDING") // PENDING | REVIEWED | RESOLVED
+  adminResponse  String?   // Admin's response
+  respondedAt    DateTime?
+  respondedBy    String?   // Admin name or ID
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([parentId])
+  @@index([studentId])
+  @@index([status])
+  @@map("parent_feedbacks")
+}
+
+model StudentAdminMessage {
+  id            String    @id @default(uuid())
+  studentId     String
+  student       Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  senderId      String    // User ID
+  senderRole    String    // STUDENT | ADMIN
+  senderName    String?
+  message       String
+  attachmentUrl String?
+  isRead        Boolean   @default(false)
+  readAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([studentId, createdAt])
+  @@index([studentId, isRead])
+  @@map("student_admin_messages")
+}
+
+model AssessmentFeedback {
+  id                String    @id @default(uuid())
+  studentId         String
+  student           Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  assessmentId      String?
+  assessmentTitle   String
+  submissionId      String?
+  overallScore      Int?
+  skillScores       String?   // JSON { fluency: 85, phonics: 70, accuracy: 90, ... }
+  problemAreas      String?   // JSON string array e.g. ["Phonics: Vowel blends", "Fluency: Pauses"]
+  weaknessesSummary String?   // Detailed diagnostic notes
+  feedback          String    // Admin commentary
+  recommendations   String?   // JSON string array e.g. ["15 mins daily paired reading", ...]
+  recommendedLevel  String?   // Next level
+  actionPlan        String?   // Actionable plan
+  createdByAdminId  String?
+  adminName         String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([studentId])
+  @@index([createdAt])
+  @@map("assessment_feedbacks")
+}
+

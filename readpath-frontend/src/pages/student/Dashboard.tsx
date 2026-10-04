@@ -120,72 +120,164 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* 4 Quick Actions */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {[
-            {
-              label: 'Continue Learning',
-              detail: 'Resume your plan',
-              icon: '📖',
-              href: '/student/plan',
-              badge: 'Lessons',
-              tone: 'hover:border-[#2d6a4f]/50 hover:bg-gradient-to-br hover:from-white hover:to-[#e8f4f0]/50',
-              iconBg: 'bg-[#e8f4f0] text-[#1a3a2a]',
-            },
-            {
-              label: 'View Assignments',
-              detail: 'Check your tasks',
-              icon: '📄',
-              href: '/student/assignments',
-              badge: 'Tasks',
-              tone: 'hover:border-[#d4a017]/50 hover:bg-gradient-to-br hover:from-white hover:to-[#f5f0e8]/60',
-              iconBg: 'bg-[#f5f0e8] text-[#936605]',
-            },
-            {
-              label: 'Take Assessment',
-              detail: data?.hasCompletedAssessment ? 'View your results' : 'Show what you know',
-              icon: '♢',
-              href: data?.hasCompletedAssessment ? '/student/assessments' : '/student/assessment',
-              badge: data?.hasCompletedAssessment ? 'Completed' : 'New',
-              tone: 'hover:border-[#1a3a2a]/40 hover:bg-gradient-to-br hover:from-white hover:to-[#e8f4f0]/40',
-              iconBg: 'bg-[#1a3a2a]/10 text-[#1a3a2a]',
-            },
-            {
-              label: 'Record Reading',
-              detail: 'Practice your fluency',
-              icon: '🎙️',
-              href: '/student/reading-practice',
-              badge: 'Voice AI',
-              tone: 'hover:border-amber-400/60 hover:bg-gradient-to-br hover:from-white hover:to-amber-50/50',
-              iconBg: 'bg-amber-100 text-amber-800',
-            },
-          ].map(action => (
-            <Link
-              key={action.label}
-              to={action.href}
-              className={`bg-white rounded-2xl border border-[#1a3a2a]/10 p-4 sm:p-5 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group ${action.tone}`}
-            >
-              <div className="flex items-center justify-between">
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl font-bold shadow-xs group-hover:scale-110 transition-transform ${action.iconBg}`}>
-                  {action.icon}
+        {/* Today's Guided Focus / Next Step (When Assessment Complete) */}
+        {data?.hasCompletedAssessment && (
+          <div className="bg-gradient-to-r from-[#e8f4f0] via-white to-[#f5f0e8] rounded-3xl border border-[#2d6a4f]/25 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#1a3a2a] text-[#d4a017] flex items-center justify-center text-2xl font-bold shadow-xs flex-shrink-0">
+                🎯
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#2d6a4f]/15 text-[#1a3a2a] mb-1">
+                  TODAY'S GUIDED FOCUS
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 group-hover:text-[#2d6a4f] transition-colors">
-                  {action.badge}
-                </span>
+                <h2 className="text-base sm:text-lg font-bold text-[#1a3a2a]">
+                  {data?.learningPlan ? `Continue: ${data.learningPlan.title}` : 'Practice Your Daily Reading Fluency'}
+                </h2>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  Spend 10–15 minutes daily with your reading exercises to keep your streak active.
+                </p>
               </div>
-              <div className="mt-4">
-                <span className="block text-sm font-bold text-[#1a3a2a] group-hover:text-[#2d6a4f] transition-colors">
-                  {action.label}
-                </span>
-                <span className="block mt-0.5 text-xs text-gray-500 font-medium">
-                  {action.detail}
-                </span>
+            </div>
+            <div className="flex items-center gap-2.5 flex-shrink-0 w-full sm:w-auto">
+              <Link
+                to="/student/plan"
+                className="flex-1 sm:flex-none text-center bg-gradient-to-r from-[#1a3a2a] to-[#2d6a4f] hover:brightness-110 text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all"
+              >
+                Continue Lesson →
+              </Link>
+              <Link
+                to="/student/assignments"
+                className="flex-1 sm:flex-none text-center bg-white hover:bg-gray-50 text-[#1a3a2a] border border-gray-200 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-xs transition-all"
+              >
+                Assignments ({data?.assignments?.length || 0})
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* 4 Flagship Learning Activities */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base sm:text-lg font-bold text-[#1a3a2a] flex items-center gap-2">
+              <span>🚀</span> Learning Activities
+            </h2>
+            <span className="text-xs text-gray-500 font-medium hidden sm:inline">
+              Interactive reading, storytelling, and speech practice
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {[
+              {
+                title: 'Live Voice AI Coach',
+                desc: 'Karaoke-style live pronunciation & real-time speech scoring',
+                icon: '🎙️',
+                href: '/student/karaoke-coach',
+                badge: 'VOICE AI',
+                tone: 'hover:border-emerald-500/50 hover:bg-gradient-to-br hover:from-white hover:to-emerald-50/50',
+                iconBg: 'bg-[#e8f4f0] text-[#1a3a2a]',
+              },
+              {
+                title: 'Bilingual Stories',
+                desc: 'Explore rich Amharic & English illustrated tales with narration',
+                icon: '📚',
+                href: '/student/bilingual-library',
+                badge: 'LIBRARY',
+                tone: 'hover:border-amber-400/50 hover:bg-gradient-to-br hover:from-white hover:to-amber-50/50',
+                iconBg: 'bg-amber-100/70 text-amber-900',
+              },
+              {
+                title: 'Reading Battle Arena',
+                desc: 'Challenge peers and test your reading speed & accuracy',
+                icon: '🏆',
+                href: '/student/reading-battle',
+                badge: 'COMPETE',
+                tone: 'hover:border-purple-400/50 hover:bg-gradient-to-br hover:from-white hover:to-purple-50/50',
+                iconBg: 'bg-purple-100 text-purple-900',
+              },
+              {
+                title: 'My Learning Plan',
+                desc: 'Structured weekly roadmap tailored to your diagnostic level',
+                icon: '📖',
+                href: '/student/plan',
+                badge: 'LESSONS',
+                tone: 'hover:border-[#1a3a2a]/40 hover:bg-gradient-to-br hover:from-white hover:to-[#e8f4f0]/40',
+                iconBg: 'bg-[#1a3a2a]/10 text-[#1a3a2a]',
+              },
+            ].map(item => (
+              <Link
+                key={item.title}
+                to={item.href}
+                className={`bg-white rounded-2xl border border-gray-200/90 p-4 sm:p-5 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group ${item.tone}`}
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl font-bold shadow-xs group-hover:scale-110 transition-transform ${item.iconBg}`}>
+                      {item.icon}
+                    </div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 group-hover:text-[#2d6a4f] transition-colors">
+                      {item.badge}
+                    </span>
+                  </div>
+                  <div className="mt-4">
+                    <h3 className="text-sm font-bold text-[#1a3a2a] group-hover:text-[#2d6a4f] transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-gray-500 font-medium leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center justify-end text-xs font-bold text-[#2d6a4f] opacity-80 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+                  Open →
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* ── FEEDBACK & COMMUNICATION MODULE CARDS ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link
+            to="/student/chat"
+            className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a3a2a] to-[#2d6a4f] p-5 sm:p-6 text-white shadow-card hover:shadow-lg transition-all duration-200 border border-[#2d6a4f]/40 flex items-center justify-between"
+          >
+            <div className="space-y-1.5 z-10">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-emerald-200 text-[10px] font-bold tracking-wide">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                TELEGRAM-STYLE SECURE CHAT
               </div>
-              <div className="mt-3 flex items-center justify-end text-xs font-bold text-[#2d6a4f] opacity-80 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
-                Explore →
+              <h3 className="text-base sm:text-lg font-extrabold text-white group-hover:text-emerald-200 transition-colors">
+                Chat Directly with Admin 💬
+              </h3>
+              <p className="text-xs text-emerald-100/75 max-w-sm">
+                Ask questions, report issues, or get direct guidance from Lisan administration in real-time.
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-[#d4a017] group-hover:text-[#1a3a2a] text-white flex items-center justify-center text-xl font-bold transition-all shadow-xs flex-shrink-0 ml-3">
+              →
+            </div>
+          </Link>
+
+          <Link
+            to="/student/assessment-feedback"
+            className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#142e21] via-[#1a3a2a] to-[#224835] p-5 sm:p-6 text-white shadow-card hover:shadow-lg transition-all duration-200 border border-[#2d6a4f]/40 flex items-center justify-between"
+          >
+            <div className="space-y-1.5 z-10">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#d4a017]/20 text-[#d4a017] text-[10px] font-bold tracking-wide">
+                <span>📋</span> DIAGNOSTIC FINDINGS
               </div>
-            </Link>
-          ))}
+              <h3 className="text-base sm:text-lg font-extrabold text-white group-hover:text-amber-200 transition-colors">
+                Assessment Feedback & Growth 🎯
+              </h3>
+              <p className="text-xs text-emerald-100/75 max-w-sm">
+                View identified problem areas, admin commentary, and personalized improvement roadmap.
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-[#d4a017] group-hover:text-[#1a3a2a] text-white flex items-center justify-center text-xl font-bold transition-all shadow-xs flex-shrink-0 ml-3">
+              →
+            </div>
+          </Link>
         </div>
 
         {/* No assessment yet */}
@@ -518,24 +610,6 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* My Assessments */}
-        <div className="rounded-3xl bg-gradient-to-r from-[#e8f4f0] via-[#f5f0e8] to-white border border-[#2d6a4f]/25 p-6 shadow-xs">
-          <div className="flex flex-col xs:flex-row items-start xs:items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-white border border-[#2d6a4f]/20 flex items-center justify-center text-2xl shadow-xs flex-shrink-0">
-              📝
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-[#1a3a2a] text-base">My Reading Assessments</h3>
-              <p className="text-xs sm:text-sm text-gray-600 mt-0.5">View assigned assessments, record your voice reading, and monitor diagnostic scores.</p>
-            </div>
-            <Link
-              to="/student/assessments"
-              className="bg-gradient-to-r from-[#1a3a2a] to-[#2d6a4f] hover:from-[#24523b] hover:to-[#1a3a2a] text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex-shrink-0 self-start xs:self-auto shadow-xs transition-all"
-            >
-              View Assessments
-            </Link>
-          </div>
-        </div>
 
         {/* Assigned content from admin/teacher */}
         <AssignedContent />

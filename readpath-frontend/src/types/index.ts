@@ -219,3 +219,102 @@ export interface StudentDashboardData {
     metadata?: string | null
   }[]
 }
+
+// ─── Feedback & Communication Module Types ──────────────────────────────────
+
+export interface ParentFeedback {
+  id: string
+  parentId: string
+  parent?: {
+    id: string
+    firstName: string
+    lastName: string
+    user?: { email: string; phone?: string | null }
+  }
+  studentId?: string | null
+  student?: {
+    id: string
+    firstName: string
+    lastName: string
+    grade: string
+  } | null
+  category: 'PROGRESS' | 'CONCERN' | 'SUGGESTION' | 'GENERAL'
+  rating?: number | null
+  title?: string | null
+  progressNotes?: string | null
+  areasOfConcern?: string | null
+  suggestions?: string | null
+  status: 'PENDING' | 'REVIEWED' | 'RESOLVED'
+  adminResponse?: string | null
+  respondedAt?: string | null
+  respondedBy?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DirectChatMessage {
+  id: string
+  studentId: string
+  senderId: string
+  senderRole: 'STUDENT' | 'ADMIN'
+  senderName?: string | null
+  message: string
+  attachmentUrl?: string | null
+  isRead: boolean
+  readAt?: string | null
+  createdAt: string
+}
+
+export interface DirectChatConversation {
+  studentId: string
+  firstName: string
+  lastName: string
+  grade: string
+  email: string
+  status?: string
+  lastMessage?: {
+    id: string
+    message: string
+    senderRole: 'STUDENT' | 'ADMIN'
+    createdAt: string
+    isRead: boolean
+  } | null
+  unreadCount: number
+}
+
+export interface AssessmentFeedbackItem {
+  id: string
+  studentId: string
+  student?: {
+    id: string
+    firstName: string
+    lastName: string
+    grade: string
+    user?: { email: string }
+  }
+  assessmentId?: string | null
+  assessmentTitle: string
+  submissionId?: string | null
+  overallScore?: number | null
+  skillScores?: Record<string, number> | null
+  problemAreas: string[]
+  weaknessesSummary?: string | null
+  feedback: string
+  recommendations: string[]
+  recommendedLevel?: string | null
+  actionPlan?: string | null
+  createdByAdminId?: string | null
+  adminName?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AssessmentFeedbackStats {
+  totalAssessments: number
+  averageScore: number | null
+  problemAreasCount: number
+  recommendationsCount: number
+  allProblemAreas: string[]
+  allRecommendations: string[]
+}
+

@@ -26,6 +26,8 @@ const notification_routes_1 = __importDefault(require("./routes/notification.rou
 const contact_routes_1 = __importDefault(require("./routes/contact.routes"));
 const payment_routes_1 = __importDefault(require("./routes/payment.routes"));
 const setup_routes_1 = __importDefault(require("./routes/setup.routes"));
+const directChat_routes_1 = __importDefault(require("./routes/directChat.routes"));
+const assessmentFeedback_routes_1 = __importDefault(require("./routes/assessmentFeedback.routes"));
 dotenv_1.default.config();
 // ─── Fail-fast env checks in production ──────────────────────────────────────
 if (process.env.NODE_ENV === 'production') {
@@ -146,6 +148,8 @@ app.use('/api/recordings', apiLimiter, recording_routes_1.default);
 app.use('/api/notifications', apiLimiter, notification_routes_1.default);
 app.use('/api/contact', apiLimiter, contact_routes_1.default); // public — no auth
 app.use('/api/payments', apiLimiter, payment_routes_1.default);
+app.use('/api/direct-chat', apiLimiter, directChat_routes_1.default);
+app.use('/api/assessment-feedback', apiLimiter, assessmentFeedback_routes_1.default);
 app.use('/api/setup', setup_routes_1.default); // ONE-TIME admin creation
 app.use(errorHandler_1.errorHandler);
 // Start the server

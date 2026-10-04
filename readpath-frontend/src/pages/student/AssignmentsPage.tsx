@@ -31,6 +31,13 @@ export interface AssignmentItem {
     instructions?: string
     status?: string
     overallScore?: number | null
+    fluencyScore?: number | null
+    accuracyScore?: number | null
+    comprehensionScore?: number | null
+    feedback?: string | null
+    strengths?: string[] | string
+    weaknesses?: string[] | string
+    recommendations?: string[] | string
   }
 }
 
@@ -396,10 +403,47 @@ export default function AssignmentsPage() {
                       </div>
                     ) : null}
 
-                    {/* Score pill if completed assessment */}
+                    {/* Score & Valuation Pill if completed assessment */}
                     {item.overallScore !== undefined && item.overallScore !== null && (
-                      <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
-                        <span>🏆</span> Score: {item.overallScore}% ({item.submissionStatus || 'Completed'})
+                      <div className="mt-3.5 p-3.5 bg-gradient-to-r from-emerald-50 via-white to-emerald-50/40 rounded-2xl border border-emerald-200">
+                        <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-600 text-white text-xs font-black shadow-2xs">
+                            <span>🏆</span> Result: {item.overallScore} / 100
+                          </span>
+                          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-full border border-emerald-200">
+                            {item.overallScore >= 90 ? 'Advanced Reader' : item.overallScore >= 75 ? 'Proficient' : item.overallScore >= 60 ? 'Developing' : 'Needs Support'}
+                          </span>
+                        </div>
+
+                        {/* Subskills if present */}
+                        {(item.details?.fluencyScore !== undefined || item.details?.accuracyScore !== undefined || item.details?.comprehensionScore !== undefined) && (
+                          <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-emerald-100 text-center">
+                            {item.details?.fluencyScore !== undefined && (
+                              <div className="bg-white/80 p-1.5 rounded-xl border border-emerald-100">
+                                <span className="block text-[9px] font-bold text-gray-400 uppercase">Fluency</span>
+                                <span className="text-xs font-extrabold text-[#1a3a2a]">{item.details.fluencyScore}%</span>
+                              </div>
+                            )}
+                            {item.details?.accuracyScore !== undefined && (
+                              <div className="bg-white/80 p-1.5 rounded-xl border border-emerald-100">
+                                <span className="block text-[9px] font-bold text-gray-400 uppercase">Accuracy</span>
+                                <span className="text-xs font-extrabold text-blue-700">{item.details.accuracyScore}%</span>
+                              </div>
+                            )}
+                            {item.details?.comprehensionScore !== undefined && (
+                              <div className="bg-white/80 p-1.5 rounded-xl border border-emerald-100">
+                                <span className="block text-[9px] font-bold text-gray-400 uppercase">Comprehension</span>
+                                <span className="text-xs font-extrabold text-purple-700">{item.details.comprehensionScore}%</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {item.details?.feedback && (
+                          <p className="mt-2 text-xs text-gray-600 italic leading-relaxed border-l-2 border-emerald-500 pl-2">
+                            "{item.details.feedback}"
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -426,24 +470,41 @@ export default function AssignmentsPage() {
                       </Link>
                     ) : (
                       /* Assessment */
-                      <button
-                        onClick={() => {
-                          if (item.contentId) {
-                            navigate(`/student/assessments/${item.contentId}`)
-                          } else {
-                            navigate('/student/assessment')
-                          }
-                        }}
-                        className={`w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-xs group-hover:shadow-sm ${
-                          isCompleted
-                            ? 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
-                            : 'bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white'
-                        }`}
-                      >
-                        <span>📋</span>
-                        <span>{isCompleted ? 'Review Assessment Recording' : 'Take Reading Assessment'}</span>
-                        <span>→</span>
-                      </button>
+                      isCompleted ? (
+                        <div className="flex items-center gap-2">
+                          <Link
+                            to="/student/assessment-feedback"
+                            className="flex-1 py-2.5 px-3 rounded-xl bg-[#1a3a2a] hover:bg-[#2d6a4f] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs text-center"
+                          >
+                            <span>📋</span>
+                            <span>View Valuation & Feedback</span>
+                          </Link>
+                          {item.contentId && (
+                            <Link
+                              to={`/student/assessments/${item.contentId}`}
+                              className="py-2.5 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold flex items-center justify-center gap-1 transition-colors text-center"
+                            >
+                              <span>🎧</span>
+                              <span>Review</span>
+                            </Link>
+                          )}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            if (item.contentId) {
+                              navigate(`/student/assessments/${item.contentId}`)
+                            } else {
+                              navigate('/student/assessment')
+                            }
+                          }}
+                          className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-xs group-hover:shadow-sm bg-gradient-to-r from-[#1a3a2a] to-[#2d6a4f] hover:brightness-110 text-white"
+                        >
+                          <span>📋</span>
+                          <span>Take Reading Assessment</span>
+                          <span>→</span>
+                        </button>
+                      )
                     )}
                   </div>
                 </div>

@@ -223,7 +223,28 @@ const getStudentAssignments = async (req, res, next) => {
             },
             orderBy: { assignedAt: 'desc' },
         });
-        // 2. Fetch assigned assessments (both active submissions and assigned assessments)
+        // 2. Auto-sync published assessments matching student grade or ALL
+        const publishedGradeAssessments = await prisma_1.default.assessment.findMany({
+            where: {
+                status: 'PUBLISHED',
+                OR: [{ grade }, { grade: 'ALL' }]
+            }
+        });
+        for (const asm of publishedGradeAssessments) {
+            const existing = await prisma_1.default.assessmentSubmission.findFirst({
+                where: { assessmentId: asm.id, studentId: user.student.id }
+            });
+            if (!existing) {
+                await prisma_1.default.assessmentSubmission.create({
+                    data: {
+                        assessmentId: asm.id,
+                        studentId: user.student.id,
+                        status: 'IN_PROGRESS'
+                    }
+                });
+            }
+        }
+        // 3. Fetch assigned assessment submissions
         const assignedAssessments = await prisma_1.default.assessmentSubmission.findMany({
             where: {
                 studentId: user.student.id,
@@ -234,7 +255,7 @@ const getStudentAssignments = async (req, res, next) => {
             },
             orderBy: { createdAt: 'desc' }
         });
-        // 3. Resolve details for content assignments
+        // 4. Resolve details for content assignments
         const resolvedContentAssignments = await Promise.all(contentAssignments.map(async (item) => {
             let contentDetails = null;
             let title = 'Assigned Learning Activity';
@@ -286,7 +307,7 @@ const getStudentAssignments = async (req, res, next) => {
                 details: contentDetails
             };
         }));
-        // 4. Format assessment items to unify assignment display
+        // 5. Format assessment items with complete valuation metadata
         const formattedAssessments = assignedAssessments.map(sub => {
             let skillAreasParsed = [];
             try {
@@ -308,13 +329,24 @@ const getStudentAssignments = async (req, res, next) => {
                 status: sub.status === 'IN_PROGRESS' ? 'active' : 'completed',
                 submissionStatus: sub.status,
                 overallScore: sub.overallScore,
+                reviewedAt: sub.reviewedAt ? sub.reviewedAt.toISOString() : null,
+                feedback: sub.feedback,
                 details: {
                     title: sub.assessment.title,
                     passage: sub.assessment.passage,
                     skillAreas: skillAreasParsed,
                     instructions: sub.assessment.instructions,
                     status: sub.status,
-                    overallScore: sub.overallScore
+                    overallScore: sub.overallScore,
+                    fluencyScore: sub.fluencyScore,
+                    accuracyScore: sub.accuracyScore,
+                    phonicsScore: sub.phonicsDecodingScore,
+                    comprehensionScore: sub.comprehensionScore,
+                    strengths: sub.strengths,
+                    weaknesses: sub.weaknesses,
+                    recommendations: sub.recommendations,
+                    recommendedNextLevel: sub.recommendedNextLevel,
+                    feedback: sub.feedback
                 }
             };
         });

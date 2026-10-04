@@ -1,41 +1,63 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import StudentLayout from '../../components/layout/StudentLayout';
 
-interface AssessmentSubmission {
+export interface AssessmentSubmission {
   id: string;
   status: 'IN_PROGRESS' | 'SUBMITTED' | 'REVIEWED';
   submittedAt?: string;
   reviewedAt?: string;
   overallScore?: number;
+  fluencyScore?: number;
+  accuracyScore?: number;
+  phonemicAwarenessScore?: number;
+  phonicsDecodingScore?: number;
+  vocabularyScore?: number;
+  comprehensionScore?: number;
+  wordsPerMinute?: number;
+  correctWordsPerMinute?: number;
+  strengths?: string[];
+  weaknesses?: string[];
+  feedback?: string;
+  recommendations?: string[];
+  recommendedNextLevel?: string;
+  intervention?: string;
   assessment: {
     id: string;
     title: string;
     description?: string;
+    passage?: string;
     grade: string;
     skillAreas: string[] | string;
+    instructions?: string;
     createdAt: string;
   };
-  _count: {
+  _count?: {
     responses: number;
   };
 }
 
 function parseSkillAreas(value: string[] | string): string[] {
-  if (Array.isArray(value)) return value
-  try { return JSON.parse(value || '[]') as string[] } catch { return [] }
+  if (Array.isArray(value)) return value;
+  try { return JSON.parse(value || '[]') as string[]; } catch { return []; }
 }
 
-const MyAssessmentsPage = () => {
+export default function MyAssessmentsPage() {
   const { user } = useAuth();
-  const [assessments, setAssessments] = useState<{ all: AssessmentSubmission[], grouped: any, counts: any }>({
+  const navigate = useNavigate();
+  const [assessments, setAssessments] = useState<{
+    all: AssessmentSubmission[];
+    grouped: { pending: AssessmentSubmission[]; submitted: AssessmentSubmission[]; reviewed: AssessmentSubmission[] };
+    counts: { pending: number; submitted: number; reviewed: number; total: number };
+  }>({
     all: [],
     grouped: { pending: [], submitted: [], reviewed: [] },
     counts: { pending: 0, submitted: 0, reviewed: 0, total: 0 }
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'pending' | 'submitted' | 'reviewed'>('pending');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadAssessments();
@@ -56,42 +78,24 @@ const MyAssessmentsPage = () => {
 
       const data = await response.json();
       
-      // Parse skill areas for each assessment
-      const processedData = {
-        ...data.data,
-        all: data.data.all.map((submission: AssessmentSubmission) => ({
-          ...submission,
+      const sanitizeList = (list: AssessmentSubmission[] = []) =>
+        list.map(sub => ({
+          ...sub,
           assessment: {
-            ...submission.assessment,
-            skillAreas: parseSkillAreas(submission.assessment.skillAreas)
+            ...sub.assessment,
+            skillAreas: parseSkillAreas(sub.assessment?.skillAreas || [])
           }
-        })),
+        }));
+
+      setAssessments({
+        all: sanitizeList(data.data?.all || []),
         grouped: {
-          pending: data.data.grouped.pending.map((submission: AssessmentSubmission) => ({
-            ...submission,
-            assessment: {
-              ...submission.assessment,
-              skillAreas: parseSkillAreas(submission.assessment.skillAreas)
-            }
-          })),
-          submitted: data.data.grouped.submitted.map((submission: AssessmentSubmission) => ({
-            ...submission,
-            assessment: {
-              ...submission.assessment,
-              skillAreas: parseSkillAreas(submission.assessment.skillAreas)
-            }
-          })),
-          reviewed: data.data.grouped.reviewed.map((submission: AssessmentSubmission) => ({
-            ...submission,
-            assessment: {
-              ...submission.assessment,
-              skillAreas: parseSkillAreas(submission.assessment.skillAreas)
-            }
-          }))
-        }
-      };
-      
-      setAssessments(processedData);
+          pending: sanitizeList(data.data?.grouped?.pending || []),
+          submitted: sanitizeList(data.data?.grouped?.submitted || []),
+          reviewed: sanitizeList(data.data?.grouped?.reviewed || [])
+        },
+        counts: data.data?.counts || { pending: 0, submitted: 0, reviewed: 0, total: 0 }
+      });
     } catch (error) {
       console.error('Failed to load assessments:', error);
     } finally {
@@ -99,33 +103,8 @@ const MyAssessmentsPage = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'IN_PROGRESS':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'SUBMITTED':
-        return 'bg-blue-100 text-blue-800';
-      case 'REVIEWED':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'IN_PROGRESS':
-        return 'Not Started';
-      case 'SUBMITTED':
-        return 'Under Review';
-      case 'REVIEWED':
-        return 'Completed';
-      default:
-        return status;
-    }
-  };
-
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '—';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -133,159 +112,352 @@ const MyAssessmentsPage = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <StudentLayout>
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        </div>
-      </StudentLayout>
-    );
-  }
+  const getTier = (score?: number) => {
+    if (score === undefined || score === null) return { label: 'Under Evaluation', color: 'bg-gray-100 text-gray-700 border-gray-200', icon: '⏳' };
+    if (score >= 90) return { label: 'Advanced Reader / Mastery', color: 'bg-emerald-100 text-emerald-900 border-emerald-300', icon: '🏆' };
+    if (score >= 75) return { label: 'Proficient Reader', color: 'bg-[#e8f4f0] text-[#1a3a2a] border-[#2d6a4f]/30', icon: '🌿' };
+    if (score >= 60) return { label: 'Developing Reader', color: 'bg-amber-100 text-amber-900 border-amber-300', icon: '📈' };
+    return { label: 'Needs Support & Practice', color: 'bg-rose-100 text-rose-900 border-rose-300', icon: '🎯' };
+  };
 
-  const currentAssessments = assessments.grouped[activeTab] || [];
+  const currentAssessments = (assessments.grouped[activeTab] || []).filter(sub => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      sub.assessment.title.toLowerCase().includes(q) ||
+      (sub.assessment.description && sub.assessment.description.toLowerCase().includes(q))
+    );
+  });
+
   return (
     <StudentLayout>
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Assessments</h1>
-          <p className="text-gray-600">View and complete your assigned reading assessments</p>
+      <div className="max-w-5xl mx-auto space-y-6 pb-12 animate-in">
+        {/* Header Hero Banner */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a3a2a] via-[#224d38] to-[#2d6a4f] p-6 sm:p-8 text-white shadow-xl border border-[#2d6a4f]/40">
+          <div className="absolute -right-8 -top-8 w-52 h-52 rounded-full bg-[#d4a017]/20 blur-2xl pointer-events-none" />
+          <div className="absolute -left-8 -bottom-8 w-44 h-44 rounded-full bg-emerald-400/10 blur-xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#d4a017]/20 text-[#d4a017] border border-[#d4a017]/40 mb-3 tracking-wide">
+                <span>ል</span> OFFICIAL READING EVALUATIONS
+              </div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white">
+                Reading Assessments & Valuations
+              </h1>
+              <p className="text-emerald-100/80 text-sm sm:text-base mt-2 max-w-xl leading-relaxed">
+                Take assigned reading diagnostics, record your voice reading, and receive comprehensive evaluations graded out of 100 with actionable feedback from Lisan academic administrators.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <Link
+                to="/student/assessment-feedback"
+                className="px-4 py-2.5 bg-gradient-to-r from-[#d4a017] to-[#b88912] hover:brightness-105 text-[#1a3a2a] text-xs font-extrabold rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+              >
+                <span>📋</span> Diagnostic Roadmap
+              </Link>
+              <Link
+                to="/student/chat"
+                className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5"
+              >
+                <span>💬</span> Admin Chat
+              </Link>
+            </div>
+          </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{assessments.counts.total}</div>
-            <div className="text-sm text-gray-600">Total Assigned</div>
+        {/* 4 Summary Metrics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-gray-200/80 shadow-xs">
+            <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Tests</span>
+            <span className="text-2xl sm:text-3xl font-black text-[#1a3a2a] mt-1 block">
+              {assessments.counts.total}
+            </span>
+            <span className="text-[11px] text-gray-500 mt-0.5 block">Assigned assessments</span>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-600">{assessments.counts.pending}</div>
-            <div className="text-sm text-gray-600">Pending</div>
+
+          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-amber-100 shadow-xs">
+            <span className="block text-[10px] font-bold text-amber-700 uppercase tracking-wider">To Take</span>
+            <span className="text-2xl sm:text-3xl font-black text-amber-700 mt-1 block">
+              {assessments.counts.pending}
+            </span>
+            <span className="text-[11px] text-gray-500 mt-0.5 block">Ready to record</span>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{assessments.counts.submitted}</div>
-            <div className="text-sm text-gray-600">Under Review</div>
+
+          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-blue-100 shadow-xs">
+            <span className="block text-[10px] font-bold text-blue-700 uppercase tracking-wider">Under Review</span>
+            <span className="text-2xl sm:text-3xl font-black text-blue-700 mt-1 block">
+              {assessments.counts.submitted}
+            </span>
+            <span className="text-[11px] text-gray-500 mt-0.5 block">Awaiting admin score</span>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{assessments.counts.reviewed}</div>
-            <div className="text-sm text-gray-600">Completed</div>
+
+          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-emerald-100 shadow-xs">
+            <span className="block text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Evaluated</span>
+            <span className="text-2xl sm:text-3xl font-black text-emerald-700 mt-1 block">
+              {assessments.counts.reviewed}
+            </span>
+            <span className="text-[11px] text-gray-500 mt-0.5 block">Graded out of 100</span>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
+        {/* Tab Selector & Search */}
+        <div className="bg-white p-3.5 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             <button
               onClick={() => setActiveTab('pending')}
-              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === 'pending'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-[#1a3a2a] text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
-              Pending ({assessments.counts.pending})
+              📝 Pending Tests ({assessments.counts.pending})
             </button>
             <button
               onClick={() => setActiveTab('submitted')}
-              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === 'submitted'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-blue-700 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
-              Under Review ({assessments.counts.submitted})
+              ⏳ Under Review ({assessments.counts.submitted})
             </button>
             <button
               onClick={() => setActiveTab('reviewed')}
-              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === 'reviewed'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-emerald-700 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
-              Completed ({assessments.counts.reviewed})
+              🏆 Evaluated & Graded ({assessments.counts.reviewed})
             </button>
-          </nav>
+          </div>
+
+          <div className="relative min-w-[200px]">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">🔍</span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search tests..."
+              className="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2d6a4f]"
+            />
+          </div>
         </div>
 
-        {/* Assessment List */}
-        {currentAssessments.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">
+        {/* Loading State */}
+        {loading && (
+          <div className="bg-white rounded-3xl border border-gray-100 py-16 text-center shadow-xs">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-3 border-[#2d6a4f] border-t-transparent mb-3" />
+            <p className="text-sm font-semibold text-gray-700">Loading your assessments...</p>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && currentAssessments.length === 0 && (
+          <div className="bg-white rounded-3xl border border-gray-200/80 py-16 px-6 text-center shadow-xs max-w-md mx-auto">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-3xl mx-auto mb-3">
               {activeTab === 'pending' ? '📝' : activeTab === 'submitted' ? '⏳' : '🏆'}
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {activeTab === 'pending' && 'No pending assessments'}
-              {activeTab === 'submitted' && 'No assessments under review'}
-              {activeTab === 'reviewed' && 'No completed assessments'}
+            <h3 className="text-base font-bold text-gray-900">
+              {activeTab === 'pending'
+                ? 'No pending assessments'
+                : activeTab === 'submitted'
+                ? 'No assessments under review'
+                : 'No evaluated assessments yet'}
             </h3>
-            <p className="text-gray-500">
-              {activeTab === 'pending' && 'Check back later for new assessments from the admin.'}
-              {activeTab === 'submitted' && 'Complete some assessments to see them here.'}
-              {activeTab === 'reviewed' && 'Your completed assessments will appear here.'}
+            <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto leading-relaxed">
+              {activeTab === 'pending'
+                ? 'You have completed all assigned assessments. New ones will appear here as soon as they are assigned.'
+                : activeTab === 'submitted'
+                ? 'Completed assessments will appear here while our academic administration reviews and grades them.'
+                : 'Once an administrator reviews your reading test and provides an official grade, it will be displayed here.'}
             </p>
           </div>
-        ) : (
+        )}
+
+        {/* Assessments List */}
+        {!loading && currentAssessments.length > 0 && (
           <div className="space-y-4">
-            {currentAssessments.map((submission: AssessmentSubmission) => (
-              <div key={submission.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{submission.assessment.title}</h3>
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${getStatusColor(submission.status)}`}>
-                        {getStatusLabel(submission.status)}
-                      </span>
-                      {submission.status === 'REVIEWED' && submission.overallScore && (
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 text-xs rounded-full font-medium">
-                          Score: {submission.overallScore}/100
+            {currentAssessments.map((sub: AssessmentSubmission) => {
+              const isReviewed = sub.status === 'REVIEWED';
+              const tier = getTier(sub.overallScore);
+
+              return (
+                <div
+                  key={sub.id}
+                  className="bg-white rounded-3xl border border-gray-200/80 hover:border-[#2d6a4f]/35 p-5 sm:p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
+                >
+                  <div className="space-y-3">
+                    {/* Header Row */}
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                          <span>📋</span>
+                          <span>READING ASSESSMENT</span>
                         </span>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                          Grade {sub.assessment.grade.replace('GRADE_', '')}
+                        </span>
+                      </div>
+
+                      <span className={`px-3 py-1 text-xs rounded-full font-bold border ${
+                        isReviewed
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : sub.status === 'SUBMITTED'
+                          ? 'bg-blue-50 text-blue-800 border-blue-200'
+                          : 'bg-amber-50 text-amber-800 border-amber-200'
+                      }`}>
+                        {isReviewed
+                          ? '✓ Evaluated & Graded'
+                          : sub.status === 'SUBMITTED'
+                          ? '⏳ Under Admin Review'
+                          : '📝 Ready to Take'}
+                      </span>
+                    </div>
+
+                    {/* Title */}
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-[#1a3a2a] group-hover:text-[#2d6a4f] transition-colors">
+                        {sub.assessment.title}
+                      </h2>
+                      {sub.assessment.description && (
+                        <p className="text-xs sm:text-sm text-gray-600 mt-1 leading-relaxed">
+                          {sub.assessment.description}
+                        </p>
                       )}
                     </div>
-                    {submission.assessment.description && (
-                      <p className="text-gray-600 text-sm mb-2">{submission.assessment.description}</p>
+
+                    {/* Meta info */}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 font-medium">
+                      <span>Assigned: {formatDate(sub.assessment.createdAt)}</span>
+                      {sub.submittedAt && (
+                        <span>• Submitted: {formatDate(sub.submittedAt)}</span>
+                      )}
+                      {sub.reviewedAt && (
+                        <span>• Evaluated: {formatDate(sub.reviewedAt)}</span>
+                      )}
+                      {sub.assessment.skillAreas && (
+                        <span>• Skills: {parseSkillAreas(sub.assessment.skillAreas).join(', ')}</span>
+                      )}
+                    </div>
+
+                    {/* ── VALUATION RESULT BANNER (When Reviewed) ── */}
+                    {isReviewed && sub.overallScore !== undefined && (
+                      <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-emerald-50/50 border border-emerald-200 space-y-3">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg font-black shadow-2xs">
+                              {sub.overallScore}
+                            </span>
+                            <div>
+                              <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">
+                                OFFICIAL VALUATION RESULT
+                              </span>
+                              <span className="text-sm font-extrabold text-[#1a3a2a]">
+                                Overall Score: {sub.overallScore} / 100
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className={`px-3 py-1 rounded-xl text-xs font-black border ${tier.color}`}>
+                            <span>{tier.icon}</span> {tier.label}
+                          </div>
+                        </div>
+
+                        {/* Skill Score Breakdown Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-emerald-100">
+                          {sub.fluencyScore !== undefined && (
+                            <div className="bg-white/90 p-2 rounded-xl border border-emerald-100 text-center">
+                              <span className="block text-[9px] font-bold text-gray-400 uppercase">Fluency</span>
+                              <span className="text-xs font-black text-[#1a3a2a]">{sub.fluencyScore}/100</span>
+                            </div>
+                          )}
+                          {sub.accuracyScore !== undefined && (
+                            <div className="bg-white/90 p-2 rounded-xl border border-emerald-100 text-center">
+                              <span className="block text-[9px] font-bold text-gray-400 uppercase">Accuracy</span>
+                              <span className="text-xs font-black text-blue-700">{sub.accuracyScore}/100</span>
+                            </div>
+                          )}
+                          {sub.phonicsDecodingScore !== undefined && (
+                            <div className="bg-white/90 p-2 rounded-xl border border-emerald-100 text-center">
+                              <span className="block text-[9px] font-bold text-gray-400 uppercase">Phonics</span>
+                              <span className="text-xs font-black text-amber-700">{sub.phonicsDecodingScore}/100</span>
+                            </div>
+                          )}
+                          {sub.comprehensionScore !== undefined && (
+                            <div className="bg-white/90 p-2 rounded-xl border border-emerald-100 text-center">
+                              <span className="block text-[9px] font-bold text-gray-400 uppercase">Comprehension</span>
+                              <span className="text-xs font-black text-purple-700">{sub.comprehensionScore}/100</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Evaluator Notes Quote */}
+                        {sub.feedback && (
+                          <div className="pt-2 text-xs text-gray-700 italic border-l-2 border-emerald-500 pl-2.5 leading-relaxed">
+                            "{sub.feedback}"
+                          </div>
+                        )}
+                      </div>
                     )}
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>Grade: {submission.assessment.grade.replace('GRADE_', '')}</span>
-                      <span>Skills: {parseSkillAreas(submission.assessment.skillAreas).join(', ')}</span>
-                      <span>Assigned: {formatDate(submission.assessment.createdAt)}</span>
-                      {submission.submittedAt && (
-                        <span>Submitted: {formatDate(submission.submittedAt)}</span>
-                      )}
-                    </div>
+                  </div>
+
+                  {/* Action Bar */}
+                  <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-end gap-2.5 flex-wrap">
+                    {sub.status === 'IN_PROGRESS' && (
+                      <Link
+                        to={`/student/assessments/${sub.assessment.id}`}
+                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#1a3a2a] to-[#2d6a4f] hover:brightness-110 text-white text-xs sm:text-sm font-bold shadow-xs transition-all flex items-center gap-1.5"
+                      >
+                        <span>🎙️</span>
+                        <span>Start Reading Assessment</span>
+                        <span>→</span>
+                      </Link>
+                    )}
+
+                    {sub.status === 'SUBMITTED' && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-500">
+                          Submitted for grading
+                        </span>
+                        <Link
+                          to={`/student/assessments/${sub.assessment.id}`}
+                          className="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                        >
+                          Review Recording
+                        </Link>
+                      </div>
+                    )}
+
+                    {isReviewed && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Link
+                          to="/student/assessment-feedback"
+                          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1a3a2a] to-[#2d6a4f] hover:brightness-110 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all"
+                        >
+                          <span>📋</span>
+                          <span>View Full Evaluation & Roadmap</span>
+                        </Link>
+                        <Link
+                          to={`/student/assessments/${sub.assessment.id}`}
+                          className="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                        >
+                          Review Recording
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                <div className="flex justify-end">
-                  {submission.status === 'IN_PROGRESS' && (
-                    <Link
-                      to={`/student/assessments/${submission.assessment.id}`}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                    >
-                      Start Assessment
-                    </Link>
-                  )}
-                  {submission.status === 'SUBMITTED' && (
-                    <span className="text-blue-600 text-sm font-medium">Waiting for review...</span>
-                  )}
-                  {submission.status === 'REVIEWED' && (
-                    <Link
-                      to={`/student/assessments/${submission.assessment.id}`}
-                      className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50"
-                    >
-                      View Results
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
     </StudentLayout>
   );
-};
-
-export default MyAssessmentsPage;
+}

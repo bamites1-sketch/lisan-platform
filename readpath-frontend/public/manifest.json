@@ -1,26 +1,80 @@
 {
-  "name": "Lisan | ልሳን — Reading Diagnostic & Learning Platform",
-  "short_name": "Lisan ልሳን",
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "id": "/",
+  "name": "LiSAN | ልሳን — Reading Diagnostic & Literacy Platform",
+  "short_name": "LiSAN ልሳን",
   "description": "An Intelligent Reading Diagnostic & Literacy Platform for Ethiopian Students.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "any",
   "background_color": "#1a3a2a",
   "theme_color": "#1a3a2a",
+  "categories": ["education", "books", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/founder.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "/founder.png",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["education", "books", "productivity"],
-  "lang": "en"
+  "shortcuts": [
+    {
+      "name": "My Learning Plan",
+      "short_name": "Lessons",
+      "description": "Open your personalized reading lessons",
+      "url": "/student/plan",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI Reading Coach",
+      "short_name": "AI Coach",
+      "description": "Practice reading aloud with live AI feedback",
+      "url": "/student/karaoke-coach",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Reading Assessments",
+      "short_name": "Assessments",
+      "description": "Take diagnostic reading assessments",
+      "url": "/student/assessments",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Direct Admin Chat",
+      "short_name": "Chat",
+      "description": "Message teachers and administrators",
+      "url": "/student/chat",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
 }

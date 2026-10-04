@@ -36,6 +36,13 @@ import CreateAssignmentPage from './components/admin/CreateAssignmentPage'
 import KaraokeReadingCoach from './pages/student/KaraokeReadingCoach'
 import BilingualStoryLibrary from './pages/student/BilingualStoryLibrary'
 import ReadingBattleArena from './pages/student/ReadingBattleArena'
+import ParentFeedbackPage from './pages/parent/ParentFeedbackPage'
+import StudentAdminChatPage from './pages/student/StudentAdminChatPage'
+import AssessmentFeedbackPage from './pages/student/AssessmentFeedbackPage'
+import AdminParentFeedbackPage from './pages/admin/AdminParentFeedbackPage'
+import AdminStudentChatPage from './pages/admin/AdminStudentChatPage'
+import AdminAssessmentFeedbackPage from './pages/admin/AdminAssessmentFeedbackPage'
+import { FloatingInstallPill } from './components/ui/InstallAppModal'
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { user, isLoading } = useAuth()
@@ -95,6 +102,7 @@ export default function App() {
           <Route path="/student/assessment" element={<ProtectedRoute roles={['STUDENT']}><AssessmentPage /></ProtectedRoute>} />
           <Route path="/student/assessments" element={<ProtectedRoute roles={['STUDENT']}><MyAssessmentsPage /></ProtectedRoute>} />
           <Route path="/student/assessments/:assessmentId" element={<ProtectedRoute roles={['STUDENT']}><LisanAssessmentPage /></ProtectedRoute>} />
+          <Route path="/student/assessments/:assessmentId/result/:submissionId" element={<ProtectedRoute roles={['STUDENT']}><LisanAssessmentPage /></ProtectedRoute>} />
           <Route path="/student/profile" element={<ProtectedRoute roles={['STUDENT']}><ReadingProfilePage /></ProtectedRoute>} />
           <Route path="/student/plan" element={<ProtectedRoute roles={['STUDENT']}><LearningPlanPage /></ProtectedRoute>} />
           <Route path="/student/lesson/:id" element={<ProtectedRoute roles={['STUDENT']}><LessonPage /></ProtectedRoute>} />
@@ -107,9 +115,12 @@ export default function App() {
           <Route path="/student/assignments" element={<ProtectedRoute roles={['STUDENT']}><AssignmentsPage /></ProtectedRoute>} />
           <Route path="/student/classes" element={<ProtectedRoute roles={['STUDENT']}><ClassesPage /></ProtectedRoute>} />
           <Route path="/student/resources" element={<ProtectedRoute roles={['STUDENT']}><ResourcesPage /></ProtectedRoute>} />
+          <Route path="/student/chat" element={<ProtectedRoute roles={['STUDENT']}><StudentAdminChatPage /></ProtectedRoute>} />
+          <Route path="/student/assessment-feedback" element={<ProtectedRoute roles={['STUDENT']}><AssessmentFeedbackPage /></ProtectedRoute>} />
 
           {/* Parent routes */}
           <Route path="/parent/dashboard" element={<ProtectedRoute roles={['PARENT']}><ParentDashboard /></ProtectedRoute>} />
+          <Route path="/parent/feedback" element={<ProtectedRoute roles={['PARENT']}><ParentFeedbackPage /></ProtectedRoute>} />
 
           {/* Teacher routes */}
           <Route path="/teacher/dashboard" element={<ProtectedRoute roles={['TEACHER']}><TeacherDashboard /></ProtectedRoute>} />
@@ -117,6 +128,10 @@ export default function App() {
           {/* Admin routes */}
           <Route path="/admin" element={<AdminRedirect />} />
           <Route path="/admin/dashboard" element={<ProtectedRoute roles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/parent-feedback" element={<ProtectedRoute roles={['ADMIN']}><AdminParentFeedbackPage /></ProtectedRoute>} />
+          <Route path="/admin/chat" element={<ProtectedRoute roles={['ADMIN']}><AdminStudentChatPage /></ProtectedRoute>} />
+          <Route path="/admin/student-chat" element={<ProtectedRoute roles={['ADMIN']}><AdminStudentChatPage /></ProtectedRoute>} />
+          <Route path="/admin/assessment-feedback" element={<ProtectedRoute roles={['ADMIN']}><AdminAssessmentFeedbackPage /></ProtectedRoute>} />
           <Route path="/admin/assessment-submissions" element={<ProtectedRoute roles={['ADMIN']}><AssessmentSubmissionsPage /></ProtectedRoute>} />
           <Route path="/admin/assignments/create" element={<ProtectedRoute roles={['ADMIN']}><CreateAssignmentPage /></ProtectedRoute>} />
 
@@ -126,6 +141,7 @@ export default function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <FloatingInstallPill />
       </BrowserRouter>
     </AuthProvider>
     </LangProvider>

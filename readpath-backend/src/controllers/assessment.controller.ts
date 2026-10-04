@@ -1480,7 +1480,7 @@ export const getSubmissionsForReview = async (
     const { status = 'SUBMITTED', assessmentId, studentId, page = 1, limit = 20 } = req.query;
 
     const where: any = {};
-    if (status) where.status = status;
+    if (status && status !== 'ALL') where.status = status;
     if (assessmentId) where.assessmentId = assessmentId;
     if (studentId) where.studentId = studentId;
 
@@ -1619,8 +1619,8 @@ export const scoreSubmission = async (
       throw new AppError('Submission not found', 404);
     }
 
-    if (submission.status !== 'SUBMITTED') {
-      throw new AppError('Submission must be in SUBMITTED status to be reviewed', 400);
+    if (submission.status !== 'SUBMITTED' && submission.status !== 'REVIEWED') {
+      throw new AppError('Submission must be submitted or previously reviewed to be evaluated', 400);
     }
 
     // Update submission with scores and feedback
@@ -1691,6 +1691,70 @@ export const scoreSubmission = async (
           recommendations: recommendations ? JSON.stringify(recommendations) : '[]'
         }
       });
+    }
+
+    // Sync to AssessmentFeedback table for the unified feedback module
+    try {
+      const existingFb = await prisma.assessmentFeedback.findFirst({
+        where: { submissionId: id }
+      });
+
+      const skillScoresObj = {
+        overall: overallScore,
+        fluency: fluencyScore ?? 0,
+        accuracy: accuracyScore ?? 0,
+        comprehension: comprehensionScore ?? 0,
+        phonemicAwareness: phonemicAwarenessScore ?? 0,
+        phonicsDecoding: phonicsDecodingScore ?? 0,
+        vocabulary: vocabularyScore ?? 0,
+        wordsPerMinute: wordsPerMinute ?? 0,
+        correctWordsPerMinute: correctWordsPerMinute ?? 0
+      };
+
+      const reviewerUser = await prisma.user.findUnique({
+        where: { id: reviewerId },
+        include: { admin: true }
+      });
+      const adminName = reviewerUser?.admin ? `${reviewerUser.admin.firstName} ${reviewerUser.admin.lastName}`.trim() : 'Admin';
+
+      if (existingFb) {
+        await prisma.assessmentFeedback.update({
+          where: { id: existingFb.id },
+          data: {
+            overallScore,
+            skillScores: JSON.stringify(skillScoresObj),
+            problemAreas: weaknesses ? JSON.stringify(weaknesses) : '[]',
+            weaknessesSummary: typeof weaknesses === 'string' ? weaknesses : null,
+            feedback: feedback || 'Assessment completed and reviewed.',
+            recommendations: recommendations ? JSON.stringify(recommendations) : '[]',
+            recommendedLevel: recommendedNextLevel || null,
+            actionPlan: intervention || null,
+            createdByAdminId: reviewerId,
+            adminName
+          }
+        });
+      } else {
+        await prisma.assessmentFeedback.create({
+          data: {
+            studentId: submission.studentId,
+            assessmentId: submission.assessmentId,
+            assessmentTitle: submission.assessment.title,
+            submissionId: id,
+            overallScore,
+            skillScores: JSON.stringify(skillScoresObj),
+            problemAreas: weaknesses ? JSON.stringify(weaknesses) : '[]',
+            weaknessesSummary: typeof weaknesses === 'string' ? weaknesses : null,
+            feedback: feedback || 'Assessment completed and reviewed.',
+            recommendations: recommendations ? JSON.stringify(recommendations) : '[]',
+            recommendedLevel: recommendedNextLevel || null,
+            actionPlan: intervention || null,
+            createdByAdminId: reviewerId,
+            adminName
+          }
+        });
+      }
+    } catch (fbErr) {
+      console.error('Failed to sync to AssessmentFeedback:', fbErr);
     }
 
     // Notify student that their assessment has been reviewed

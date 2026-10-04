@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { InstallAppModal } from '../components/ui/InstallAppModal'
 
 // ─── Design tokens ────────────────────────────────────────────────
 const C = {
@@ -60,7 +61,7 @@ const NAV_ITEMS = [
   { label: 'Contact',  id: 'contact' },
 ]
 
-function Navbar({ user }: { user: { role: string } | null }) {
+function Navbar({ user, onOpenInstall }: { user: { role: string } | null; onOpenInstall?: () => void }) {
   const navigate        = useNavigate()
   const [active, setActive]     = useState('top')
   const [scrolled, setScrolled] = useState(false)
@@ -140,8 +141,17 @@ function Navbar({ user }: { user: { role: string } | null }) {
             ))}
           </div>
 
-          {/* Auth buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Auth & Download App buttons */}
+          <div className="hidden md:flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={onOpenInstall}
+              className="text-xs font-extrabold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 border border-[#d4a017]/60 text-[#f3ca52] bg-white/5 hover:bg-white/15 active:scale-95 cursor-pointer shadow-xs"
+            >
+              <span>📲</span>
+              <span>Download App</span>
+            </button>
+
             {user ? (
               <Link to="/dashboard"
                 className="text-sm font-semibold px-5 py-2 rounded-lg text-white transition-opacity hover:opacity-90"
@@ -164,17 +174,26 @@ function Navbar({ user }: { user: { role: string } | null }) {
           </div>
 
           {/* Mobile burger */}
-          <button
-            className="md:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
-            onClick={() => setOpen(o => !o)}
-            aria-label="Toggle menu"
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {open
-                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
-            </svg>
-          </button>
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              type="button"
+              onClick={onOpenInstall}
+              className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-[#d4a017]/60 text-[#f3ca52] bg-white/10 active:scale-95 flex items-center gap-1"
+            >
+              <span>📲</span> App
+            </button>
+            <button
+              className="text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+              onClick={() => setOpen(o => !o)}
+              aria-label="Toggle menu"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {open
+                  ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -188,6 +207,19 @@ function Navbar({ user }: { user: { role: string } | null }) {
       {open && (
         <div className="md:hidden relative z-50 border-t border-white/10 px-4 pb-6 pt-3 space-y-1 shadow-2xl safe-bottom"
           style={{ backgroundColor: C.dark }}>
+          
+          <button
+            type="button"
+            onClick={() => { setOpen(false); onOpenInstall?.(); }}
+            className="w-full text-left px-3.5 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between text-[#f3ca52] bg-[#d4a017]/15 border border-[#d4a017]/40 mb-2"
+          >
+            <span className="flex items-center gap-2">
+              <span className="text-base">📲</span>
+              <span>Download LiSAN App (Works Offline)</span>
+            </span>
+            <span>→</span>
+          </button>
+
           {NAV_ITEMS.map(item => (
             <button key={item.id} onClick={() => handleNavClick(item.id)}
               className="w-full text-left px-3.5 py-3 rounded-xl text-sm font-semibold transition-all touch-target"
@@ -216,7 +248,7 @@ function Navbar({ user }: { user: { role: string } | null }) {
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────
-function Hero() {
+function Hero({ onOpenInstall }: { onOpenInstall?: () => void }) {
   return (
     <section id="top" className="relative pt-16 min-h-screen flex items-center overflow-hidden">
       {/* Background */}
@@ -262,8 +294,16 @@ function Hero() {
               Get Started Free →
             </Link>
             <button
+              type="button"
+              onClick={onOpenInstall}
+              className="inline-flex items-center justify-center gap-2 text-sm font-bold px-6 py-3.5 rounded-xl border-2 transition-all hover:bg-[#d4a017]/25 text-center w-full sm:w-auto active:scale-98 cursor-pointer shadow-xs"
+              style={{ borderColor: C.gold, color: C.dark, backgroundColor: 'rgba(212, 160, 23, 0.15)' }}>
+              <span>📲</span>
+              <span>Download App</span>
+            </button>
+            <button
               onClick={() => scrollTo('about')}
-              className="inline-flex items-center justify-center gap-2 text-sm font-semibold px-7 py-3.5 rounded-xl border-2 transition-colors hover:bg-white/50 text-center w-full sm:w-auto active:scale-98"
+              className="inline-flex items-center justify-center gap-2 text-sm font-semibold px-6 py-3.5 rounded-xl border-2 transition-colors hover:bg-white/50 text-center w-full sm:w-auto active:scale-98"
               style={{ borderColor: C.dark, color: C.dark }}>
               Learn More
             </button>
@@ -1345,6 +1385,7 @@ function Footer() {
 export default function LandingPage() {
   const { user } = useAuth()
   const hasScrolled = useRef(false)
+  const [installModalOpen, setInstallModalOpen] = useState(false)
 
   useEffect(() => {
     if (!hasScrolled.current) {
@@ -1355,15 +1396,17 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
-      <Navbar user={user} />
+      <Navbar user={user} onOpenInstall={() => setInstallModalOpen(true)} />
       <main>
-        <Hero />
+        <Hero onOpenInstall={() => setInstallModalOpen(true)} />
         <About />
         <Features />
         <Pricing />
         <Contact />
       </main>
       <Footer />
+      <InstallAppModal isOpen={installModalOpen} onClose={() => setInstallModalOpen(false)} />
     </div>
   )
 }
+

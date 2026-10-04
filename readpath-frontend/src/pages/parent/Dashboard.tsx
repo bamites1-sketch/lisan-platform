@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { parentApi, type ApiChildDetail } from '../../services/api'
 import type { ParentProfile } from '../../types'
 import PrintableReportCard from '../../components/ui/PrintableReportCard'
+import { InstallAppModal } from '../../components/ui/InstallAppModal'
 
 // ─── Skill bar ────────────────────────────────────────────────────────────────
 function SkillBar({ label, value, color }: { label: string; value: number; color: string }) {
@@ -183,6 +184,7 @@ export default function ParentDashboard() {
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState('')
   const [selectedChildCert, setSelectedChildCert] = useState<ApiChildDetail | null>(null)
+  const [installModalOpen, setInstallModalOpen] = useState(false)
 
   useEffect(() => {
     const ac = new AbortController()
@@ -199,34 +201,73 @@ export default function ParentDashboard() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-100 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-20">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-brand-600 rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-sm">ል</span>
+    <div className="min-h-screen bg-[#f8faf9] flex flex-col antialiased text-gray-900">
+      {/* ── TOP HEADER ── */}
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link to="/parent/dashboard" className="flex items-center gap-2 group">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1a3a2a] to-[#2d6a4f] text-[#d4a017] flex items-center justify-center font-black text-sm shadow-xs group-hover:scale-105 transition-transform">
+                ል
+              </div>
+              <div>
+                <span className="font-extrabold text-gray-900 tracking-wide text-base block leading-tight">LiSAN</span>
+                <span className="text-[10px] text-[#2d6a4f] font-bold uppercase tracking-wider block">Parent Portal</span>
+              </div>
+            </Link>
           </div>
-          <span className="font-bold text-gray-900">Lisan | ልሳን</span>
-          <span className="hidden sm:inline text-gray-300 mx-1">·</span>
-          <span className="hidden sm:inline text-sm text-gray-500">Parent Dashboard</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600 hidden sm:block">
-            Hello, {profile?.firstName}
-          </span>
-          <button
-            onClick={() => { logout(); navigate('/') }}
-            className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            Sign Out
-          </button>
+
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Navigation Tabs */}
+            <div className="flex items-center bg-gray-100 p-1 rounded-xl">
+              <Link
+                to="/parent/dashboard"
+                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-[#1a3a2a] shadow-xs transition-colors"
+              >
+                👨‍👩‍👧 My Children
+              </Link>
+              <Link
+                to="/parent/feedback"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                💬 Feedback & Concerns
+              </Link>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setInstallModalOpen(true)}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#d4a017]/50 text-[#1a3a2a] bg-[#d4a017]/15 hover:bg-[#d4a017]/25 text-xs font-bold transition-all cursor-pointer shadow-xs"
+            >
+              <span>📲</span> Download App
+            </button>
+
+            <span className="text-xs font-semibold text-gray-600 hidden md:block">
+              {profile?.firstName ? `Hi, ${profile.firstName}` : 'Parent'}
+            </span>
+
+            <button
+              onClick={() => { logout(); navigate('/') }}
+              className="text-xs text-gray-500 hover:text-rose-600 font-semibold px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">👨‍👩‍👧 My Children</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Track your child's reading progress</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">👨‍👩‍👧 My Children</h1>
+            <p className="text-gray-500 text-sm mt-0.5">Track your child's reading progress</p>
+          </div>
+          <Link
+            to="/parent/feedback"
+            className="px-4 py-2 bg-gradient-to-r from-[#1a3a2a] to-[#2d6a4f] hover:brightness-105 text-[#d4a017] text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 self-start sm:self-auto"
+          >
+            <span>💬</span> Share Feedback or Concern
+          </Link>
         </div>
 
         {/* Error */}
@@ -298,6 +339,9 @@ export default function ParentDashboard() {
           </div>
         )}
       </main>
+
+      {/* Universal Install App Modal */}
+      <InstallAppModal isOpen={installModalOpen} onClose={() => setInstallModalOpen(false)} />
     </div>
   )
 }

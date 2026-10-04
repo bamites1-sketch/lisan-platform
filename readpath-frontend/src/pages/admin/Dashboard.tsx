@@ -21,29 +21,55 @@ import ClassesTab     from '../../components/admin/ClassesTab'
 import ResourcesTab   from '../../components/admin/ResourcesTab'
 import { PaymentPlansTab, TransactionsTab, ReportsTab, SettingsTab } from '../../components/admin/AdminTools'
 import RecordingsTab  from '../../components/admin/RecordingsTab'
+import ParentFeedbackTab from '../../components/admin/ParentFeedbackTab'
+import StudentChatTab from '../../components/admin/StudentChatTab'
+import AssessmentFeedbackTab from '../../components/admin/AssessmentFeedbackTab'
+import { InstallAppModal } from '../../components/ui/InstallAppModal'
 
 // ─── Tab definitions ──────────────────────────────────────────────────────────
-type MainTab = 'dashboard' | 'students' | 'parents' | 'admins' | 'content' | 'assessments' | 'assignments' | 'classes' | 'resources' | 'recordings' | 'payments' | 'analytics' | 'reports' | 'settings'
+type MainTab = 'dashboard' | 'students' | 'student-chat' | 'parents' | 'parent-feedback' | 'admins' | 'content' | 'assessments' | 'assessment-feedback' | 'assignments' | 'classes' | 'resources' | 'recordings' | 'payments' | 'analytics' | 'reports' | 'settings'
 type PaymentSubTab = 'verifications' | 'plans' | 'transactions'
-type AssessmentSubTab = 'list' | 'results'
+type AssessmentSubTab = 'list' | 'results' | 'feedback'
 type AssignmentSubTab = 'assignments' | 'lesson-assignments'
 type ResourceSubTab = 'materials' | 'library'
 
 const MAIN_TABS: { id: MainTab; label: string; icon: string; hasSubmenu?: boolean }[] = [
-  { id: 'dashboard',    label: 'Dashboard',     icon: '🏠' },
-  { id: 'students',     label: 'Students',      icon: '👥' },
-  { id: 'parents',      label: 'Parents',       icon: '👨‍👩‍👧' },
-  { id: 'admins',       label: 'Admins',        icon: '🛡️' },
-  { id: 'content',      label: 'Content',       icon: '📚' },
-  { id: 'assessments',  label: 'Assessments',   icon: '📋', hasSubmenu: true },
-  { id: 'assignments',  label: 'Assignments',   icon: '📝', hasSubmenu: true },
-  { id: 'classes',      label: 'Classes',       icon: '🎓' },
-  { id: 'resources',    label: 'Resources',     icon: '☁️', hasSubmenu: true },
-  { id: 'recordings',   label: 'Voice Recordings', icon: '🎙️' },
-  { id: 'payments',     label: 'Payments',      icon: '💳', hasSubmenu: true },
-  { id: 'analytics',    label: 'Analytics',     icon: '📈' },
-  { id: 'reports',      label: 'Reports',       icon: '📊' },
-  { id: 'settings',     label: 'Settings',      icon: '⚙️' },
+  { id: 'dashboard',           label: 'Dashboard',           icon: '🏠' },
+  { id: 'students',            label: 'Students',            icon: '👥' },
+  { id: 'student-chat',        label: 'Student Chat',        icon: '💬' },
+  { id: 'parents',             label: 'Parents',             icon: '👨‍👩‍👧' },
+  { id: 'parent-feedback',     label: 'Parent Feedback',     icon: '📬' },
+  { id: 'content',             label: 'Content',             icon: '📚' },
+  { id: 'assessments',         label: 'Assessments',         icon: '📋', hasSubmenu: true },
+  { id: 'assessment-feedback', label: 'Assessment Feedback', icon: '📝' },
+  { id: 'assignments',         label: 'Assignments',         icon: '✍️', hasSubmenu: true },
+  { id: 'classes',             label: 'Classes',             icon: '🎓' },
+  { id: 'resources',           label: 'Resources',           icon: '☁️', hasSubmenu: true },
+  { id: 'recordings',          label: 'Voice Recordings',    icon: '🎙️' },
+  { id: 'payments',            label: 'Payments',            icon: '💳', hasSubmenu: true },
+  { id: 'analytics',           label: 'Analytics',           icon: '📈' },
+  { id: 'reports',             label: 'Reports',             icon: '📊' },
+  { id: 'admins',              label: 'Admins',              icon: '🛡️' },
+  { id: 'settings',            label: 'Settings',            icon: '⚙️' },
+]
+
+const TAB_GROUPS: { title: string; tabIds: MainTab[] }[] = [
+  {
+    title: 'OVERVIEW & INTEL',
+    tabIds: ['dashboard', 'analytics', 'reports']
+  },
+  {
+    title: 'LEARNERS & COMMUNITY',
+    tabIds: ['students', 'student-chat', 'parents', 'parent-feedback']
+  },
+  {
+    title: 'ACADEMICS & CURRICULUM',
+    tabIds: ['assessments', 'assessment-feedback', 'assignments', 'classes', 'content', 'resources']
+  },
+  {
+    title: 'OPERATIONS & BILLING',
+    tabIds: ['recordings', 'payments', 'admins', 'settings']
+  }
 ]
 
 const PAYMENT_TABS: { id: PaymentSubTab; label: string; icon: string }[] = [
@@ -53,8 +79,9 @@ const PAYMENT_TABS: { id: PaymentSubTab; label: string; icon: string }[] = [
 ]
 
 const ASSESSMENT_TABS: { id: AssessmentSubTab; label: string; icon: string }[] = [
-  { id: 'list',    label: 'Assessment List',    icon: '📋' },
-  { id: 'results', label: 'Assessment Results', icon: '📊' },
+  { id: 'list',     label: 'Assessment List',     icon: '📋' },
+  { id: 'results',  label: 'Assessment Results',  icon: '📊' },
+  { id: 'feedback', label: 'Diagnostic Feedback', icon: '📝' },
 ]
 
 const ASSIGNMENT_TABS: { id: AssignmentSubTab; label: string; icon: string }[] = [
@@ -95,6 +122,7 @@ function AdminDashboardInner() {
   })
   const [resourceSubTab, setResourceSub]  = useState<ResourceSubTab>('materials')
   const [sidebarOpen, setSidebar]         = useState(false)
+  const [installModalOpen, setInstallModalOpen] = useState(false)
 
   // Sync tab if URL changes
   useEffect(() => {
@@ -170,89 +198,134 @@ function AdminDashboardInner() {
           </div>
         </div>
 
-        {/* Main nav */}
-        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
-          {VISIBLE_MAIN_TABS.map(tab => (
-            <div key={tab.id}>
-              <button onClick={() => selectMainTab(tab.id)}
-                className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${
-                  mainTab === tab.id
-                    ? 'bg-gradient-to-r from-[#2d6a4f] to-[#36795b] text-white shadow-md border-l-[3px] border-[#d4a017]'
-                    : 'text-emerald-100/75 hover:text-white hover:bg-white/8'
-                }`}>
-                <div className="flex items-center gap-2.5">
-                  <span className="text-base">{tab.icon}</span>
-                  <span className="font-semibold">{tab.label}</span>
-                </div>
-                {tab.hasSubmenu && (
-                  <span className="text-xs opacity-70">{mainTab === tab.id ? '▼' : '▶'}</span>
-                )}
-              </button>
+        {/* Main nav grouped */}
+        <nav className="flex-1 px-3 py-3 space-y-4 overflow-y-auto scrollbar-thin">
+          {TAB_GROUPS.map(group => {
+            const groupTabs = VISIBLE_MAIN_TABS.filter(t => group.tabIds.includes(t.id));
+            if (groupTabs.length === 0) return null;
 
-              {/* Payments submenu */}
-              {tab.id === 'payments' && mainTab === 'payments' && (
-                <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
-                  {PAYMENT_TABS.map(subTab => (
-                    <button key={subTab.id} onClick={() => setPaymentSub(subTab.id)}
-                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
-                        paymentSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:text-white hover:bg-white/5'
-                      }`}>
-                      <span>{subTab.icon}</span>{subTab.label}
+            return (
+              <div key={group.title} className="space-y-1">
+                <p className="px-3 text-[10px] font-extrabold text-[#d4a017]/80 tracking-wider uppercase">
+                  {group.title}
+                </p>
+                {groupTabs.map(tab => (
+                  <div key={tab.id}>
+                    <button
+                      onClick={() => selectMainTab(tab.id)}
+                      className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer ${
+                        mainTab === tab.id
+                          ? 'bg-gradient-to-r from-[#2d6a4f] to-[#36795b] text-white shadow-sm border-l-[3px] border-[#d4a017]'
+                          : 'text-emerald-100/75 hover:text-white hover:bg-white/8'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-sm flex-shrink-0">{tab.icon}</span>
+                        <span className="truncate">{tab.label}</span>
+                      </div>
+                      {tab.hasSubmenu && (
+                        <span className="text-[10px] opacity-70">{mainTab === tab.id ? '▼' : '▶'}</span>
+                      )}
                     </button>
-                  ))}
-                </div>
-              )}
 
-              {/* Assessments submenu */}
-              {tab.id === 'assessments' && mainTab === 'assessments' && (
-                <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
-                  {ASSESSMENT_TABS.map(subTab => (
-                    <button key={subTab.id} onClick={() => setAssessmentSub(subTab.id)}
-                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
-                        assessmentSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:text-white hover:bg-white/5'
-                      }`}>
-                      <span>{subTab.icon}</span>{subTab.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+                    {/* Payments submenu */}
+                    {tab.id === 'payments' && mainTab === 'payments' && (
+                      <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
+                        {PAYMENT_TABS.map(subTab => (
+                          <button
+                            key={subTab.id}
+                            onClick={() => setPaymentSub(subTab.id)}
+                            className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
+                              paymentSubTab === subTab.id
+                                ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold'
+                                : 'text-white/60 hover:text-white hover:bg-white/5'
+                            }`}
+                          >
+                            <span>{subTab.icon}</span>
+                            {subTab.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
-              {/* Assignments submenu */}
-              {tab.id === 'assignments' && mainTab === 'assignments' && (
-                <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
-                  {ASSIGNMENT_TABS.map(subTab => (
-                    <button key={subTab.id} onClick={() => setAssignmentSub(subTab.id)}
-                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
-                        assignmentSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:text-white hover:bg-white/5'
-                      }`}>
-                      <span>{subTab.icon}</span>{subTab.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+                    {/* Assessments submenu */}
+                    {tab.id === 'assessments' && mainTab === 'assessments' && (
+                      <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
+                        {ASSESSMENT_TABS.map(subTab => (
+                          <button
+                            key={subTab.id}
+                            onClick={() => setAssessmentSub(subTab.id)}
+                            className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
+                              assessmentSubTab === subTab.id
+                                ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold'
+                                : 'text-white/60 hover:text-white hover:bg-white/5'
+                            }`}
+                          >
+                            <span>{subTab.icon}</span>
+                            {subTab.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
-              {/* Resources submenu */}
-              {tab.id === 'resources' && mainTab === 'resources' && (
-                <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
-                  {RESOURCE_TABS.map(subTab => (
-                    <button key={subTab.id} onClick={() => setResourceSub(subTab.id)}
-                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
-                        resourceSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:text-white hover:bg-white/5'
-                      }`}>
-                      <span>{subTab.icon}</span>{subTab.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+                    {/* Assignments submenu */}
+                    {tab.id === 'assignments' && mainTab === 'assignments' && (
+                      <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
+                        {ASSIGNMENT_TABS.map(subTab => (
+                          <button
+                            key={subTab.id}
+                            onClick={() => setAssignmentSub(subTab.id)}
+                            className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
+                              assignmentSubTab === subTab.id
+                                ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold'
+                                : 'text-white/60 hover:text-white hover:bg-white/5'
+                            }`}
+                          >
+                            <span>{subTab.icon}</span>
+                            {subTab.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Resources submenu */}
+                    {tab.id === 'resources' && mainTab === 'resources' && (
+                      <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
+                        {RESOURCE_TABS.map(subTab => (
+                          <button
+                            key={subTab.id}
+                            onClick={() => setResourceSub(subTab.id)}
+                            className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
+                              resourceSubTab === subTab.id
+                                ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold'
+                                : 'text-white/60 hover:text-white hover:bg-white/5'
+                            }`}
+                          >
+                            <span>{subTab.icon}</span>
+                            {subTab.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </nav>
 
         {/* Bottom */}
         <div className="px-3 pb-4 space-y-1 border-t border-white/10 pt-3">
+          <button
+            type="button"
+            onClick={() => setInstallModalOpen(true)}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-[#f3ca52] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <span>📲</span> Download App
+          </button>
           <LangSwitcher compact />
           <button onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
             <span>🚪</span> {t.signOut}
           </button>
         </div>
@@ -376,80 +449,116 @@ function AdminDashboardInner() {
               </div>
               <button onClick={() => setSidebar(false)} className="text-white/60 hover:text-white p-1">✕</button>
             </div>
-            <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
-              {VISIBLE_MAIN_TABS.map(tab => (
-                <div key={tab.id}>
-                  <button onClick={() => { selectMainTab(tab.id); setSidebar(false) }}
-                    className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${
-                      mainTab === tab.id ? 'bg-gradient-to-r from-[#2d6a4f] to-[#36795b] text-white border-l-[3px] border-[#d4a017]' : 'text-white/80 hover:bg-white/10'
-                    }`}>
-                    <div className="flex items-center gap-2.5">
-                      <span>{tab.icon}</span><span className="font-semibold">{tab.label}</span>
-                    </div>
-                    {tab.hasSubmenu && (
-                      <span className="text-xs opacity-70">{mainTab === tab.id ? '▼' : '▶'}</span>
-                    )}
-                  </button>
+            <nav className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
+              {TAB_GROUPS.map(group => {
+                const groupTabs = VISIBLE_MAIN_TABS.filter(t => group.tabIds.includes(t.id));
+                if (groupTabs.length === 0) return null;
 
-                  {/* Payments submenu */}
-                  {tab.id === 'payments' && mainTab === 'payments' && (
-                    <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
-                      {PAYMENT_TABS.map(subTab => (
-                        <button key={subTab.id} onClick={() => { setPaymentSub(subTab.id); setSidebar(false) }}
-                          className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
-                            paymentSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:bg-white/5'
-                          }`}>
-                          <span>{subTab.icon}</span>{subTab.label}
+                return (
+                  <div key={group.title} className="space-y-1">
+                    <p className="px-3 text-[10px] font-extrabold text-[#d4a017]/80 tracking-wider uppercase">
+                      {group.title}
+                    </p>
+                    {groupTabs.map(tab => (
+                      <div key={tab.id}>
+                        <button
+                          onClick={() => { selectMainTab(tab.id); setSidebar(false) }}
+                          className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left ${
+                            mainTab === tab.id
+                              ? 'bg-gradient-to-r from-[#2d6a4f] to-[#36795b] text-white border-l-[3px] border-[#d4a017]'
+                              : 'text-emerald-100/75 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-sm">{tab.icon}</span>
+                            <span className="font-semibold">{tab.label}</span>
+                          </div>
+                          {tab.hasSubmenu && (
+                            <span className="text-xs opacity-70">{mainTab === tab.id ? '▼' : '▶'}</span>
+                          )}
                         </button>
-                      ))}
-                    </div>
-                  )}
 
-                  {/* Assessments submenu */}
-                  {tab.id === 'assessments' && mainTab === 'assessments' && (
-                    <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
-                      {ASSESSMENT_TABS.map(subTab => (
-                        <button key={subTab.id} onClick={() => { setAssessmentSub(subTab.id); setSidebar(false) }}
-                          className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
-                            assessmentSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:bg-white/5'
-                          }`}>
-                          <span>{subTab.icon}</span>{subTab.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                        {/* Payments submenu */}
+                        {tab.id === 'payments' && mainTab === 'payments' && (
+                          <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
+                            {PAYMENT_TABS.map(subTab => (
+                              <button
+                                key={subTab.id}
+                                onClick={() => { setPaymentSub(subTab.id); setSidebar(false) }}
+                                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
+                                  paymentSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:bg-white/5'
+                                }`}
+                              >
+                                <span>{subTab.icon}</span>{subTab.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
-                  {/* Assignments submenu */}
-                  {tab.id === 'assignments' && mainTab === 'assignments' && (
-                    <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
-                      {ASSIGNMENT_TABS.map(subTab => (
-                        <button key={subTab.id} onClick={() => { setAssignmentSub(subTab.id); setSidebar(false) }}
-                          className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
-                            assignmentSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:bg-white/5'
-                          }`}>
-                          <span>{subTab.icon}</span>{subTab.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                        {/* Assessments submenu */}
+                        {tab.id === 'assessments' && mainTab === 'assessments' && (
+                          <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
+                            {ASSESSMENT_TABS.map(subTab => (
+                              <button
+                                key={subTab.id}
+                                onClick={() => { setAssessmentSub(subTab.id); setSidebar(false) }}
+                                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
+                                  assessmentSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:bg-white/5'
+                                }`}
+                              >
+                                <span>{subTab.icon}</span>{subTab.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
-                  {/* Resources submenu */}
-                  {tab.id === 'resources' && mainTab === 'resources' && (
-                    <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
-                      {RESOURCE_TABS.map(subTab => (
-                        <button key={subTab.id} onClick={() => { setResourceSub(subTab.id); setSidebar(false) }}
-                          className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
-                            resourceSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:bg-white/5'
-                          }`}>
-                          <span>{subTab.icon}</span>{subTab.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                        {/* Assignments submenu */}
+                        {tab.id === 'assignments' && mainTab === 'assignments' && (
+                          <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
+                            {ASSIGNMENT_TABS.map(subTab => (
+                              <button
+                                key={subTab.id}
+                                onClick={() => { setAssignmentSub(subTab.id); setSidebar(false) }}
+                                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
+                                  assignmentSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:bg-white/5'
+                                }`}
+                              >
+                                <span>{subTab.icon}</span>{subTab.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Resources submenu */}
+                        {tab.id === 'resources' && mainTab === 'resources' && (
+                          <div className="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-2">
+                            {RESOURCE_TABS.map(subTab => (
+                              <button
+                                key={subTab.id}
+                                onClick={() => { setResourceSub(subTab.id); setSidebar(false) }}
+                                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all text-left ${
+                                  resourceSubTab === subTab.id ? 'bg-[#d4a017]/20 text-[#d4a017] font-bold' : 'text-white/60 hover:bg-white/5'
+                                }`}
+                              >
+                                <span>{subTab.icon}</span>{subTab.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
             </nav>
             <div className="px-3 pb-4 pt-3 border-t border-white/10 space-y-1">
+              <button
+                type="button"
+                onClick={() => { setSidebar(false); setInstallModalOpen(true); }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-[#f3ca52] bg-[#d4a017]/15 border border-[#d4a017]/30 hover:bg-[#d4a017]/25 transition-colors cursor-pointer"
+              >
+                <span>📲</span> Download LiSAN App
+              </button>
               <LangSwitcher compact />
               <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white rounded-xl hover:bg-white/10 transition-colors">
                 🚪 {t.signOut}
@@ -504,8 +613,10 @@ function AdminDashboardInner() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
           {mainTab === 'dashboard' && <OverviewTab onNavigate={handleNavigate} />}
           {mainTab === 'students' && <StudentsTab />}
+          {mainTab === 'student-chat' && <StudentChatTab />}
           {mainTab === 'parents' && <ParentsTab />}
-                    {mainTab === 'admins' && <AdminsTab />}
+          {mainTab === 'parent-feedback' && <ParentFeedbackTab />}
+          {mainTab === 'admins' && <AdminsTab />}
           {mainTab === 'recordings' && <RecordingsTab />}
           {mainTab === 'content' && <ContentTab />}
           
@@ -513,8 +624,11 @@ function AdminDashboardInner() {
             <div className="space-y-5">
               {assessmentSubTab === 'list' && <AssessmentsTab />}
               {assessmentSubTab === 'results' && <AssessmentSubmissions />}
+              {assessmentSubTab === 'feedback' && <AssessmentFeedbackTab />}
             </div>
           )}
+
+          {mainTab === 'assessment-feedback' && <AssessmentFeedbackTab />}
 
           {mainTab === 'assignments' && (
             <div className="space-y-5">
@@ -544,6 +658,9 @@ function AdminDashboardInner() {
           {mainTab === 'settings' && <SettingsTab />}
         </div>
       </main>
+
+      {/* Universal Install App Modal */}
+      <InstallAppModal isOpen={installModalOpen} onClose={() => setInstallModalOpen(false)} />
     </div>
   )
 }

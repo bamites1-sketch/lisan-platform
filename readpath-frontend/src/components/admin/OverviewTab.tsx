@@ -394,6 +394,125 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
             </div>
           </div>
 
+          {/* ── FEEDBACK & COMMUNICATION SUITE ── */}
+          <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase tracking-wide">
+                  <span>✨</span> NEW COMMUNICATION MODULES
+                </div>
+                <h2 className="text-lg font-bold text-[#1a3a2a] flex items-center gap-2 mt-1">
+                  <span>💬</span> Feedback & Communication Operations
+                </h2>
+              </div>
+              <span className="text-xs text-gray-500 font-medium">Real-time Learner & Parent Channels</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Student Chat */}
+              <div className="p-4 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-[#f0f9f5] to-white flex flex-col justify-between group hover:shadow-md transition-all">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="w-10 h-10 rounded-xl bg-[#2d6a4f] text-[#d4a017] flex items-center justify-center text-xl shadow-xs">
+                      💬
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-200/60 text-emerald-900 text-[10px] font-bold">
+                      Telegram-Style
+                    </span>
+                  </div>
+                  <h3 className="font-extrabold text-[#1a3a2a] text-sm group-hover:text-[#2d6a4f] transition-colors">
+                    Student ↔ Admin Chat
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                    Direct real-time messaging with individual learners, timestamps, quick replies, and message history.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-emerald-100 flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => onNavigate('student-chat')}
+                    className="text-xs font-bold text-[#2d6a4f] hover:underline"
+                  >
+                    Open Tab →
+                  </button>
+                  <a
+                    href="/admin/chat"
+                    className="px-2.5 py-1 rounded-lg bg-[#2d6a4f] text-white text-[11px] font-bold hover:bg-[#1a3a2a] transition-colors"
+                  >
+                    Full Page ↗
+                  </a>
+                </div>
+              </div>
+
+              {/* Parent Feedback */}
+              <div className="p-4 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-[#fefbf0] to-white flex flex-col justify-between group hover:shadow-md transition-all">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="w-10 h-10 rounded-xl bg-[#d4a017] text-[#1a3a2a] flex items-center justify-center text-xl shadow-xs">
+                      📬
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-200/60 text-amber-900 text-[10px] font-bold">
+                      Parent Portal
+                    </span>
+                  </div>
+                  <h3 className="font-extrabold text-[#1a3a2a] text-sm group-hover:text-[#936605] transition-colors">
+                    Parent Feedback & Concerns
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                    Review parent submissions regarding progress, concerns, and suggestions. Submit official admin replies.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => onNavigate('parent-feedback')}
+                    className="text-xs font-bold text-[#936605] hover:underline"
+                  >
+                    Open Tab →
+                  </button>
+                  <a
+                    href="/admin/parent-feedback"
+                    className="px-2.5 py-1 rounded-lg bg-[#d4a017] text-[#1a3a2a] text-[11px] font-bold hover:brightness-95 transition-colors"
+                  >
+                    Full Page ↗
+                  </a>
+                </div>
+              </div>
+
+              {/* Assessment Feedback */}
+              <div className="p-4 rounded-2xl border border-blue-200/80 bg-gradient-to-br from-[#f0f6ff] to-white flex flex-col justify-between group hover:shadow-md transition-all">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-xs">
+                      📝
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-blue-200/60 text-blue-900 text-[10px] font-bold">
+                      Evaluations
+                    </span>
+                  </div>
+                  <h3 className="font-extrabold text-[#1a3a2a] text-sm group-hover:text-blue-700 transition-colors">
+                    Assessment Growth Plans
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                    Publish diagnostic evaluations, identify skill problem areas, and provide actionable recommendations for students.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-blue-100 flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => onNavigate('assessment-feedback')}
+                    className="text-xs font-bold text-blue-700 hover:underline"
+                  >
+                    Open Tab →
+                  </button>
+                  <a
+                    href="/admin/assessment-feedback"
+                    className="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors"
+                  >
+                    Full Page ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Quick actions */}
           <div className="bg-white rounded-3xl border border-[#1a3a2a]/10 p-6 shadow-xs">
             <h2 className="text-lg font-bold text-[#1a3a2a] mb-4 flex items-center gap-2">
@@ -401,10 +520,10 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
               {[
-                { emoji: '📋', label: 'Assign Content', desc: 'Deploy tasks to grade', nav: 'assignments'    },
-                { emoji: '👥', label: 'Manage Students', desc: 'Accounts & grades',    nav: 'users_students' },
-                { emoji: '📖', label: 'Passage Library', desc: 'Upload reading text',   nav: 'content'        },
-                { emoji: '📈', label: 'Analytics Hub',   desc: 'Platform deep-dive',   nav: 'analytics'      },
+                { emoji: '📋', label: 'Assign Content', desc: 'Deploy tasks to grade', nav: 'assignments' },
+                { emoji: '👥', label: 'Manage Students', desc: 'Accounts & grades',    nav: 'students' },
+                { emoji: '📖', label: 'Passage Library', desc: 'Upload reading text',   nav: 'content' },
+                { emoji: '📈', label: 'Analytics Hub',   desc: 'Platform deep-dive',   nav: 'analytics' },
               ].map(a => (
                 <button
                   key={a.label}

@@ -23,6 +23,11 @@ import {
   getSubmissionForReview,
   scoreSubmission
 } from '../controllers/assessment.controller';
+import {
+  getAdminParentFeedbacks,
+  respondToParentFeedback,
+  deleteParentFeedback
+} from '../controllers/feedback.controller';
 
 const router = express.Router();
 router.use(authenticate);
@@ -92,5 +97,10 @@ router.get('/recordings', getAllRecordingSubmissions);
 router.post('/recordings/:id/review', reviewRecordingSubmission);
 // Get audio URL for recording submission
 router.get('/recordings/:id/audio', getRecordingSubmissionAudioUrl);
+
+// Parent Feedbacks Management
+router.get('/parent-feedbacks', getAdminParentFeedbacks);
+router.post('/parent-feedbacks/:id/respond', respondToParentFeedback);
+router.delete('/parent-feedbacks/:id', deleteParentFeedback);
 
 export default router;
