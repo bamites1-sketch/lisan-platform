@@ -193,8 +193,8 @@ export default function AiTutor() {
       {/* ── Chat panel ─────────────────────────────────────────────── */}
       {open && (
         <div
-          className="fixed bottom-20 right-4 sm:right-6 w-[min(390px,calc(100vw-2rem))] bg-white rounded-3xl shadow-2xl border border-gray-200 z-50 flex flex-col animate-in overflow-hidden"
-          style={{ maxHeight: 'calc(100vh - 100px)' }}
+          className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] lg:bottom-6 right-3 sm:right-6 w-[min(390px,calc(100vw-1.5rem))] bg-white rounded-3xl shadow-2xl border border-gray-200 z-50 flex flex-col animate-in overflow-hidden"
+          style={{ maxHeight: 'calc(100dvh - 6rem - env(safe-area-inset-bottom) - env(safe-area-inset-top))' }}
         >
           {/* Header */}
           <div className="bg-[#003f3a] px-4 py-3 flex items-center justify-between flex-shrink-0">
@@ -377,7 +377,7 @@ export default function AiTutor() {
       {/* ── Floating toggle button ──────────────────────────────────── */}
       <button
         onClick={() => setOpen(p => !p)}
-        className={`fixed bottom-20 lg:bottom-5 right-4 sm:right-6 z-40 text-white px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs sm:text-sm font-bold transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 border border-white/20 active:scale-95 ${
+        className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-5 right-3.5 sm:right-6 z-40 text-white px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs sm:text-sm font-bold transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 border border-white/20 active:scale-95 ${
           open ? 'bg-[#005a53]' : 'bg-gradient-to-r from-[#1a3a2a] to-[#2d6a4f] hover:from-[#224b37] hover:to-[#387e60]'
         }`}
         aria-label="Toggle AI Tutor"

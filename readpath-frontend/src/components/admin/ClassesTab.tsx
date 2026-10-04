@@ -50,7 +50,7 @@ function ClassForm({
         />
       </Field>
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <Field label="Grade Level" required>
           <GradeSelect value={value.grade} onChange={v => onChange('grade', v)} />
         </Field>

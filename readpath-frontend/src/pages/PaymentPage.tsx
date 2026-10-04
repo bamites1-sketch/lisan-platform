@@ -156,13 +156,12 @@ export default function PaymentPage() {
   return (
     <div className="min-h-dvh" style={{ backgroundColor: C.cream }}>
       {/* Header */}
-      <header className="px-4 sm:px-8 py-4 flex items-center justify-between"
+      <header className="px-4 sm:px-8 py-4 pt-[calc(1rem+env(safe-area-inset-top))] flex items-center justify-between"
         style={{ backgroundColor: C.dark }}>
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl overflow-hidden border border-white/20">
-            <img src="/assets/hero-image.png" alt="LISAN"
-              className="w-full h-full object-cover object-top"
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+          <div className="w-9 h-9 rounded-xl overflow-hidden bg-white p-0.5 border border-white/20 flex items-center justify-center">
+            <img src="/icon-192.png" alt="LISAN"
+              className="w-full h-full object-contain" />
           </div>
           <div>
             <p className="font-bold text-white leading-none text-sm">LISAN</p>
@@ -175,7 +174,7 @@ export default function PaymentPage() {
         </button>
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-[calc(2.5rem+env(safe-area-inset-bottom))] space-y-6">
 
         {/* Account status banner */}
         {user?.status === 'PAYMENT_PENDING' && !approved ? (

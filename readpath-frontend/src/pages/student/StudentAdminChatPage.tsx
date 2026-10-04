@@ -99,7 +99,7 @@ export default function StudentAdminChatPage() {
 
   return (
     <StudentLayout>
-      <div className="max-w-4xl mx-auto h-[calc(100dvh-140px)] md:h-[calc(100vh-100px)] min-h-[480px] flex flex-col w-full">
+      <div className="max-w-4xl mx-auto flex-1 min-h-[360px] sm:min-h-[480px] flex flex-col w-full">
         {/* ── TELEGRAM STYLE WINDOW ── */}
         <div className="flex-1 bg-white rounded-3xl shadow-card border border-gray-200/80 flex flex-col overflow-hidden w-full">
           {/* Header */}

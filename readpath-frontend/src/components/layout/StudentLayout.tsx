@@ -371,7 +371,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       </nav>
 
       {/* ── MAIN CONTENT WORKSPACE ── */}
-      <main className="flex-1 lg:ml-64 pt-[calc(3.75rem+env(safe-area-inset-top))] lg:pt-0 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-8 min-h-screen flex flex-col px-3.5 sm:px-6">
+      <main className="flex-1 lg:ml-64 pt-[calc(3.75rem+env(safe-area-inset-top))] lg:pt-0 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-8 min-h-screen flex flex-col">
         <OfflinePwaBanner />
 
         {/* Desktop Top Header Bar */}
@@ -405,7 +405,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           </div>
         </div>
 
-        <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:py-8 flex-1">
+        <div className="max-w-5xl w-full mx-auto px-3.5 sm:px-6 py-4 sm:py-6 lg:py-8 flex-1">
           {children}
         </div>
       </main>

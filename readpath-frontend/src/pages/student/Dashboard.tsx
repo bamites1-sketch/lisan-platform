@@ -242,7 +242,7 @@ export default function StudentDashboard() {
             to="/student/chat"
             className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a3a2a] to-[#2d6a4f] p-5 sm:p-6 text-white shadow-card hover:shadow-lg transition-all duration-200 border border-[#2d6a4f]/40 flex items-center justify-between"
           >
-            <div className="space-y-1.5 z-10">
+            <div className="space-y-1.5 z-10 flex-1 min-w-0">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-emerald-200 text-[10px] font-bold tracking-wide">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 TELEGRAM-STYLE SECURE CHAT
@@ -254,7 +254,7 @@ export default function StudentDashboard() {
                 Ask questions, report issues, or get direct guidance from Lisan administration in real-time.
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-[#d4a017] group-hover:text-[#1a3a2a] text-white flex items-center justify-center text-xl font-bold transition-all shadow-xs flex-shrink-0 ml-3">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/10 group-hover:bg-[#d4a017] group-hover:text-[#1a3a2a] text-white flex items-center justify-center text-xl font-bold transition-all shadow-xs flex-shrink-0 ml-3">
               →
             </div>
           </Link>
@@ -263,7 +263,7 @@ export default function StudentDashboard() {
             to="/student/assessment-feedback"
             className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#142e21] via-[#1a3a2a] to-[#224835] p-5 sm:p-6 text-white shadow-card hover:shadow-lg transition-all duration-200 border border-[#2d6a4f]/40 flex items-center justify-between"
           >
-            <div className="space-y-1.5 z-10">
+            <div className="space-y-1.5 z-10 flex-1 min-w-0">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#d4a017]/20 text-[#d4a017] text-[10px] font-bold tracking-wide">
                 <span>📋</span> DIAGNOSTIC FINDINGS
               </div>
@@ -274,7 +274,7 @@ export default function StudentDashboard() {
                 View identified problem areas, admin commentary, and personalized improvement roadmap.
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-[#d4a017] group-hover:text-[#1a3a2a] text-white flex items-center justify-center text-xl font-bold transition-all shadow-xs flex-shrink-0 ml-3">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/10 group-hover:bg-[#d4a017] group-hover:text-[#1a3a2a] text-white flex items-center justify-center text-xl font-bold transition-all shadow-xs flex-shrink-0 ml-3">
               →
             </div>
           </Link>

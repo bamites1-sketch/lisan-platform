@@ -331,7 +331,7 @@ function RecordingPanel({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
         <button
           onClick={handleRedo}
           className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"

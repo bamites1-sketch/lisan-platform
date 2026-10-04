@@ -250,20 +250,20 @@ export default function NotificationsPage() {
   const content = (
     <div className="space-y-0">
       {/* ── Page header ── */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-2xl bg-[#e8f5f4] flex items-center justify-center text-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#e8f5f4] flex items-center justify-center text-xl flex-shrink-0">
             🔔
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-            <p className="text-sm text-gray-500">Stay updated with your learning activities.</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Notifications</h1>
+            <p className="text-xs sm:text-sm text-gray-500">Stay updated with your learning activities.</p>
           </div>
         </div>
         {unreadCount > 0 && (
           <button
             onClick={handleMarkAllRead}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#003f3a] text-[#003f3a] text-sm font-semibold hover:bg-[#e8f5f4] transition-colors"
+            className="self-start sm:self-auto flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-[#003f3a] text-[#003f3a] text-xs sm:text-sm font-semibold hover:bg-[#e8f5f4] transition-colors"
           >
             <span className="text-xs">✓</span> Mark all as read
           </button>
@@ -273,7 +273,7 @@ export default function NotificationsPage() {
       {/* ── Category tabs ── */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         {/* Tab strip */}
-        <div className="flex items-center gap-0 border-b border-gray-100 overflow-x-auto px-2 pt-2">
+        <div className="flex items-center gap-0 border-b border-gray-100 overflow-x-auto px-2 pt-2 touch-scroll no-scrollbar">
           {CATEGORIES.map(cat => {
             const count = countOf(cat)
             const active = cat === category

@@ -242,7 +242,7 @@ export function SearchBar({
   rightSlot?: React.ReactNode
 }) {
   return (
-    <div className="flex gap-3 items-center">
+    <div className="flex gap-2 sm:gap-3 items-center flex-1 min-w-[200px] w-full sm:w-auto">
       <div className="relative flex-1">
         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
         <input

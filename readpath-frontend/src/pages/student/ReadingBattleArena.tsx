@@ -242,7 +242,7 @@ export default function ReadingBattleArena() {
                     type="button"
                     disabled={isAnswered}
                     onClick={() => handleSelectAnswer(idx)}
-                    className={`p-5 rounded-2xl font-bold text-base sm:text-lg flex items-center gap-3 shadow-md transition-all text-left ${
+                    className={`p-4 sm:p-5 rounded-2xl font-bold text-sm sm:text-lg flex items-center gap-3 shadow-md transition-all text-left min-w-0 ${
                       colors[idx % 4]
                     } ${
                       isAnswered && isCorrect
@@ -254,10 +254,10 @@ export default function ReadingBattleArena() {
                         : 'hover:scale-[1.02]'
                     }`}
                   >
-                    <span className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-sm font-black flex-shrink-0">
+                    <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/20 flex items-center justify-center text-xs sm:text-sm font-black flex-shrink-0">
                       {shapes[idx % 4]}
                     </span>
-                    <span>{opt}</span>
+                    <span className="flex-1 break-words leading-snug">{opt}</span>
                   </button>
                 )
               })}
