@@ -8,9 +8,9 @@ import { apiUrl } from '../lib/apiBase'
 const C = { dark: '#1a3a2a', mid: '#2d6a4f', gold: '#d4a017', light: '#e8f4f0', cream: '#f5f0e8' }
 
 const BANK_ACCOUNTS = [
-  { name: 'CBE',       full: 'Commercial Bank of Ethiopia', account: '1000XXXXXXXXXX', color: '#1565c0' },
-  { name: 'Telebirr',  full: 'Ethio Telecom Telebirr',      account: '09XXXXXXXX',     color: '#e65100' },
-  { name: 'Abyssinia', full: 'Bank of Abyssinia',           account: '0XXXXXXXXX',     color: '#4a148c' },
+  { name: 'CBE',       full: 'Commercial Bank of Ethiopia', account: '1000021808567', color: '#1565c0' },
+  { name: 'Telebirr',  full: 'Ethio Telecom Telebirr',      account: '0927417210',    color: '#e65100' },
+  { name: 'Abyssinia', full: 'Bank of Abyssinia',           account: '34842965',      color: '#4a148c' },
 ]
 
 const PACKAGES = [
@@ -219,8 +219,11 @@ export default function PaymentPage() {
           </div>
         )}
 
-        {/* Payment accounts & QR codes */}
-        <PaymentQrCard onSelectBank={(bankName) => set('paymentMethod', bankName)} />
+        {/* Payment accounts */}
+        <PaymentQrCard
+          selectedMethod={form.paymentMethod}
+          onSelectBank={(bankName) => set('paymentMethod', bankName)}
+        />
 
         {/* Submission form */}
         {!latestPending ? (

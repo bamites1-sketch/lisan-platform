@@ -23,6 +23,7 @@ Thumbs.db
 
 .vercel
 .env*
+Genbegnaw
 
 # Deployment secrets — never commit
 YOUR_DEPLOYMENT_SECRETS.md
