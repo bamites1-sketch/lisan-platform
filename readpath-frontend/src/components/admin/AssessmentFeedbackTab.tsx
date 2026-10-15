@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { assessmentFeedbackApi } from '../../services/feedbackCommunicationApi';
+import { apiUrl } from '../../lib/apiBase';
 import type { AssessmentFeedbackItem } from '../../types';
 import { useToast } from '../ui/Toast';
 
@@ -68,7 +69,7 @@ export default function AssessmentFeedbackTab() {
       setLoading(true);
       const [feedbacksData, studentsRes] = await Promise.all([
         assessmentFeedbackApi.getAdminFeedbacks({ grade: gradeFilter, search }),
-        fetch('/api/admin/students', {
+        fetch(apiUrl('/api/admin/students'), {
           headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` }
         }).then(r => r.ok ? r.json() : null).catch(() => null)
       ]);

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { adminApi } from '../../services/api'
+import { apiUrl } from '../../lib/apiBase'
 import { useToast } from '../ui/Toast'
 import {
   Modal, ConfirmDialog, Field, ActivePill,
@@ -166,7 +167,7 @@ export default function AdminsTab() {
     if (!validate()) return
     setSaving(true)
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await fetch(apiUrl('/api/admin/users'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

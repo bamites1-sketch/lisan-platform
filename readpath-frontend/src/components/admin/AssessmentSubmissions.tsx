@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../lib/apiBase';
 import { useToast } from '../ui/Toast';
 
 export interface AssessmentSubmission {
@@ -73,7 +74,7 @@ export default function AssessmentSubmissions({
       if (statusFilter) params.append('status', statusFilter);
       if (assessmentId) params.append('assessmentId', assessmentId);
 
-      const response = await fetch(`/api/admin/assessments/submissions/review?${params}`, {
+      const response = await fetch(apiUrl(`/api/admin/assessments/submissions/review?${params}`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('lisan_token')}`
         }
@@ -419,7 +420,7 @@ function EvaluationEditor({ submission, onBack, onSaveSuccess }: EvaluationEdito
 
     try {
       setSaving(true);
-      const res = await fetch(`/api/admin/assessments/submissions/${submission.id}/score`, {
+      const res = await fetch(apiUrl(`/api/admin/assessments/submissions/${submission.id}/score`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

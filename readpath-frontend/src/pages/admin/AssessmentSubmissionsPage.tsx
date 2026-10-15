@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { apiUrl } from '../../lib/apiBase';
 import { useToast } from '../../components/ui/Toast';
 
 interface AssessmentSubmission {

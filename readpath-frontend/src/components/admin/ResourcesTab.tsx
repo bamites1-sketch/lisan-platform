@@ -477,10 +477,10 @@ function LibraryView() {
       
       // Load all content types
       const [passages, lessons, vocabulary, questions] = await Promise.all([
-        fetch('/api/admin/content/passages', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch('/api/admin/content/lessons', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch('/api/admin/content/vocabulary', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        fetch('/api/admin/content/questions', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
+        fetch(apiUrl('/api/admin/content/passages'), { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(apiUrl('/api/admin/content/lessons'), { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(apiUrl('/api/admin/content/vocabulary'), { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+        fetch(apiUrl('/api/admin/content/questions'), { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
       ])
 
       const items: LibraryItem[] = [

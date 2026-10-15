@@ -176,6 +176,34 @@ router.post('/create-admin', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/create-test-submission', async (req: Request, res: Response) => {
+  try {
+    if (!checkSetupKey(req, res)) return;
+    
+    const { assessmentId, studentId, audioData, duration } = req.body;
+    
+    console.log('Creating test submission:', { assessmentId, studentId, duration });
+    
+    // Create a test assessment submission with audio
+    const submission = await prisma.assessmentSubmission.create({
+      data: {
+        assessmentId,
+        studentId,
+        audioUrl: audioData,
+        duration: duration || 30,
+        status: 'SUBMITTED',
+        submittedAt: new Date(),
+        responses: '[]'
+      }
+    });
+    
+    res.json({ success: true, data: submission });
+  } catch (error: any) {
+    console.error('Error creating test submission:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.post('/reset-admin', async (req: Request, res: Response) => {
   try {
     if (!checkSetupKey(req, res)) return;

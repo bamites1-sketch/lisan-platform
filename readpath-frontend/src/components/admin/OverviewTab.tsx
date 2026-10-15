@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { adminApi, recordingApi, type ApiStudent, type ApiTeacher, type ApiParent, type ApiRecording } from '../../services/api'
+import { apiUrl } from '../../lib/apiBase'
 import { timeAgo } from '../../lib/utils'
 
 function SvgBar({ data }: { data: { label: string; value: number; color: string }[] }) {
@@ -43,13 +44,13 @@ export default function OverviewTab({ onNavigate }: { onNavigate: (tab: string) 
       adminApi.parents(ac.signal),
       recordingApi.forAdmin(),
       // Fetch assignments + content titles
-      fetch('/api/admin/assignments', { headers, signal: ac.signal })
+      fetch(apiUrl('/api/admin/assignments'), { headers, signal: ac.signal })
         .then(r => r.ok ? r.json() : { data: [] })
         .then(j => j.data ?? []),
-      fetch('/api/admin/content/passages', { headers, signal: ac.signal })
+      fetch(apiUrl('/api/admin/content/passages'), { headers, signal: ac.signal })
         .then(r => r.ok ? r.json() : { data: [] })
         .then(j => j.data ?? []),
-      fetch('/api/admin/content/lessons', { headers, signal: ac.signal })
+      fetch(apiUrl('/api/admin/content/lessons'), { headers, signal: ac.signal })
         .then(r => r.ok ? r.json() : { data: [] })
         .then(j => j.data ?? []),
     ])

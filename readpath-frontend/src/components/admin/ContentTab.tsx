@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { adminApi, type ApiPassage, type ApiQuestion, type ApiVocabulary, type ApiLesson } from '../../services/api'
+import { apiUrl } from '../../lib/apiBase'
 import { useToast } from '../ui/Toast'
 import {
   Modal, ConfirmDialog, Field, GradeSelect, DifficultySelect, SkillSelect,
@@ -1470,7 +1471,7 @@ function AssessmentsSection() {
 
   const refresh = () => {
     setLoading(true)
-    fetch('/api/admin/content/assessments', {
+    fetch(apiUrl('/api/admin/content/assessments'), {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('lisan_token')}`,
       }
@@ -1495,7 +1496,7 @@ function AssessmentsSection() {
 
     setSaving(true)
     try {
-      const response = await fetch('/api/admin/content', {
+      const response = await fetch(apiUrl('/api/admin/content'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1848,7 +1849,7 @@ function PDFsSection() {
     formData.append('title', file.name.replace('.pdf', ''))
 
     try {
-      const response = await fetch('/api/admin/upload/pdf-resource', {
+      const response = await fetch(apiUrl('/api/admin/upload/pdf-resource'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('lisan_token')}`,
