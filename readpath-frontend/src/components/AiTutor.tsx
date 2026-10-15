@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { apiUrl } from '../lib/apiBase'
 import type { ChatMessage, StudentProfile } from '../types'
 
 const QUICK_ACTIONS = [
@@ -101,7 +102,7 @@ export default function AiTutor() {
     if (!open || historyLoaded) return
     const loadHistory = async () => {
       try {
-        const res = await fetch('/api/chat/history', {
+        const res = await fetch(apiUrl('/api/chat/history'), {
           headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` },
         })
         if (res.ok) {
@@ -145,7 +146,7 @@ export default function AiTutor() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/chat/messages', {
+      const res = await fetch(apiUrl('/api/chat/messages'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

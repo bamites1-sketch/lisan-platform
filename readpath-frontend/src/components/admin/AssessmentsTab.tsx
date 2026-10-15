@@ -408,10 +408,18 @@ export default function AssessmentsTab() {
 
                         <button
                           onClick={() => viewSubmissions(assessment.id)}
-                          className="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 font-bold text-xs transition-colors flex items-center gap-1.5"
+                          className={`px-3.5 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 ${
+                            (assessment.stats?.pendingReview || 0) > 0
+                              ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 shadow-2xs animate-pulse-subtle'
+                              : 'bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200'
+                          }`}
                         >
-                          <span>📊</span>
-                          <span>Submissions & Valuation</span>
+                          <span>{(assessment.stats?.pendingReview || 0) > 0 ? '🎙️' : '📊'}</span>
+                          <span>
+                            {(assessment.stats?.pendingReview || 0) > 0
+                              ? `Listen & Review (${assessment.stats?.pendingReview})`
+                              : 'Submissions & Audio'}
+                          </span>
                         </button>
 
                         <button

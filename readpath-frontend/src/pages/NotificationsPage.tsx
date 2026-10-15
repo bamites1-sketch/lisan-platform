@@ -54,7 +54,7 @@ function notifLink(notif: AppNotification, role: string): string | null {
     case 'plan_updated':        return '/student/plan'
     case 'new_content':         return '/student/assignments'
     case 'teacher_feedback':    return '/student/progress'
-    case 'new_recording':       return role === 'STUDENT' ? '/student/progress' : '/teacher/dashboard'
+    case 'new_recording':       return role === 'STUDENT' ? '/student/progress' : role === 'ADMIN' ? '/admin/dashboard?tab=recordings' : '/teacher/dashboard'
     default:                    return null
   }
 }

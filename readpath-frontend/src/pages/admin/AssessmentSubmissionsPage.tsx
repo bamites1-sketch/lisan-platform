@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiUrl } from '../../lib/apiBase';
 import { useToast } from '../../components/ui/Toast';
+import { AudioPlayer } from '../../components/admin/RecordingsTab';
 
 interface AssessmentSubmission {
   id: string;
   status: 'ASSIGNED' | 'IN_PROGRESS' | 'SUBMITTED' | 'REVIEWED';
   audioUrl?: string;
+  duration?: number;
   submittedAt?: string;
   reviewedAt?: string;
   overallScore?: number;
@@ -67,10 +69,10 @@ const AssessmentSubmissionsPage = () => {
       
       // Load assessment details and submissions
       const [assessmentRes, submissionsRes] = await Promise.all([
-        fetch(`/api/admin/assessments/${assessmentId}`, {
+        fetch(apiUrl(`/api/admin/assessments/${assessmentId}`), {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('lisan_token')}` }
         }),
-        fetch(`/api/admin/assessments/submissions/review?assessmentId=${assessmentId}`, {
+        fetch(apiUrl(`/api/admin/assessments/submissions/review?assessmentId=${assessmentId}`), {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('lisan_token')}` }
         })
       ]);
@@ -103,7 +105,7 @@ const AssessmentSubmissionsPage = () => {
     if (!selectedSubmission) return;
 
     try {
-      const response = await fetch(`/api/admin/assessments/submissions/${selectedSubmission.id}/score`, {
+      const response = await fetch(apiUrl(`/api/admin/assessments/submissions/${selectedSubmission.id}/score`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -258,30 +260,34 @@ const AssessmentSubmissionsPage = () => {
                         {submission.overallScore ? `${submission.overallScore}%` : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {submission.status === 'SUBMITTED' && (
-                          <button
-                            onClick={() => startReview(submission)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Review
-                          </button>
-                        )}
-                        {submission.status === 'REVIEWED' && (
-                          <button
-                            onClick={() => startReview(submission)}
-                            className="text-green-600 hover:text-green-900"
-                          >
-                            View Review
-                          </button>
-                        )}
-                        {submission.audioUrl && (
-                          <button
-                            onClick={() => window.open(submission.audioUrl, '_blank')}
-                            className="ml-4 text-gray-600 hover:text-gray-900"
-                          >
-                            Play Recording
-                          </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {submission.status === 'SUBMITTED' && (
+                            <button
+                              onClick={() => startReview(submission)}
+                              className="text-blue-600 hover:text-blue-900 font-semibold text-xs py-1 px-2.5 rounded-lg hover:bg-blue-50"
+                            >
+                              Review
+                            </button>
+                          )}
+                          {submission.status === 'REVIEWED' && (
+                            <button
+                              onClick={() => startReview(submission)}
+                              className="text-green-600 hover:text-green-900 font-semibold text-xs py-1 px-2.5 rounded-lg hover:bg-green-50"
+                            >
+                              View Review
+                            </button>
+                          )}
+                          {submission.audioUrl && (
+                            <button
+                              onClick={() => startReview(submission)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#e8f4f0] text-[#1a3a2a] hover:bg-[#2d6a4f] hover:text-white transition-all shadow-2xs border border-[#2d6a4f]/25"
+                              title="Listen to student recording & review"
+                            >
+                              <span>🎙️</span>
+                              <span>Listen &amp; Grade</span>
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -294,31 +300,47 @@ const AssessmentSubmissionsPage = () => {
 
       {/* Review Modal */}
       {reviewMode && selectedSubmission && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Review Submission: {selectedSubmission.student.firstName} {selectedSubmission.student.lastName}
-              </h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full mx-auto max-h-[92vh] overflow-y-auto shadow-2xl border border-gray-100 animate-fade-in">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-black text-gray-900">
+                  Review Submission: {selectedSubmission.student.firstName} {selectedSubmission.student.lastName}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Grade {selectedSubmission.student.grade?.replace('GRADE_', '')} · {assessment.title}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReviewMode(false)}
+                className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                ✕
+              </button>
             </div>
             
-            <div className="p-6">
+            <div className="p-6 space-y-6">
               {/* Assessment Passage */}
-              <div className="mb-6">
-                <h4 className="font-medium text-gray-900 mb-2">Reading Passage</h4>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-700 leading-relaxed">{assessment.passage}</p>
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Reading Passage</h4>
+                <div className="bg-gray-50 border border-gray-200/80 p-4 rounded-2xl">
+                  <p className="text-gray-800 leading-relaxed text-sm sm:text-base font-serif">{assessment.passage}</p>
                 </div>
               </div>
 
-              {/* Audio Player */}
+              {/* Professional Audio Player */}
               {selectedSubmission.audioUrl && (
-                <div className="mb-6">
-                  <h4 className="font-medium text-gray-900 mb-2">Student Recording</h4>
-                  <audio controls className="w-full">
-                    <source src={selectedSubmission.audioUrl} type="audio/wav" />
-                    Your browser does not support the audio element.
-                  </audio>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 flex items-center gap-1.5">
+                    <span>🎙️</span> Student Audio Recording
+                  </h4>
+                  <AudioPlayer
+                    src={selectedSubmission.audioUrl}
+                    passageTitle={assessment.title}
+                    studentName={`${selectedSubmission.student.firstName} ${selectedSubmission.student.lastName}`}
+                    initialDuration={selectedSubmission.duration || 0}
+                  />
                 </div>
               )}
 

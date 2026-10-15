@@ -193,7 +193,6 @@ router.post('/create-test-submission', async (req: Request, res: Response) => {
         duration: duration || 30,
         status: 'SUBMITTED',
         submittedAt: new Date(),
-        responses: '[]'
       }
     });
     

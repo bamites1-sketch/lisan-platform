@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import StudentLayout from '../../components/layout/StudentLayout'
 import type { LearningPlan, LearningActivity } from '../../types'
 import { skillLabel, skillEmoji } from '../../lib/utils'
+import { apiUrl } from '../../lib/apiBase'
 
 export default function LearningPlanPage() {
   const [plan, setPlan] = useState<LearningPlan | null>(null)
@@ -13,7 +14,7 @@ export default function LearningPlanPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/learning/plan', {
+        const res = await fetch(apiUrl('/api/learning/plan'), {
           headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` }
         })
         if (!res.ok) {
@@ -46,7 +47,7 @@ export default function LearningPlanPage() {
   const toggleActivity = async (actId: string) => {
     if (!plan) return
     try {
-      const response = await fetch(`/api/learning/activities/${actId}/complete`, {
+      const response = await fetch(apiUrl(`/api/learning/activities/${actId}/complete`), {
         method: 'POST',
         headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` },
       })

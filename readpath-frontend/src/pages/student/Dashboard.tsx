@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { apiUrl } from '../../lib/apiBase'
 import StudentLayout from '../../components/layout/StudentLayout'
 import SkillCard from '../../components/ui/SkillCard'
 import ReadinessGauge from '../../components/ui/ReadinessGauge'
@@ -23,7 +24,7 @@ export default function StudentDashboard() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const res = await fetch('/api/students/dashboard', {
+        const res = await fetch(apiUrl('/api/students/dashboard'), {
           headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` },
         })
         if (!res.ok) {

@@ -3,7 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import prisma from '../lib/prisma';
 import { AppError } from '../middleware/errorHandler';
 import { createNotification, broadcastToRole } from './notification.controller';
-import { uploadToR2, deleteFromR2, FileCategory } from '../lib/r2storage';
+import { uploadToR2, deleteFromR2, FileCategory, isR2Configured } from '../lib/r2storage';
 
 // Upload audio + save recording metadata
 export const uploadRecording = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -15,11 +15,16 @@ export const uploadRecording = async (req: AuthRequest, res: Response, next: Nex
     const file = (req as any).file as Express.Multer.File | undefined;
     const { passageTitle, passageId, durationSeconds, wpm, accuracy, cwpm, totalWords, pauseCount, hesitationCount, score } = req.body;
 
-    // Upload to R2 if file provided
+    // Upload to R2 if configured; otherwise use data URI for 100% serverless persistence
     let audioKey: string | undefined;
     if (file) {
-      const result = await uploadToR2(file, FileCategory.RECORDING);
-      audioKey = result.key;
+      if (isR2Configured()) {
+        const result = await uploadToR2(file, FileCategory.RECORDING);
+        audioKey = result.key;
+      } else {
+        const mime = file.mimetype || 'audio/webm';
+        audioKey = `data:${mime};base64,${file.buffer.toString('base64')}`;
+      }
     }
 
     const recording = await prisma.fluencyRecording.create({
@@ -80,7 +85,7 @@ export const uploadRecording = async (req: AuthRequest, res: Response, next: Nex
       title: '🎤 New Fluency Recording',
       message: `${studentName} submitted "${recTitle}". Score: ${recScore}/100.`,
       icon: '🎤',
-      link: '/admin/dashboard',
+      link: '/admin/dashboard?tab=recordings',
       meta: notifMeta,
     });
 

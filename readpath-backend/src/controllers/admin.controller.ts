@@ -813,14 +813,14 @@ export const deleteUser = async (req: AuthRequest, res: Response, next: NextFunc
   } catch (error) { next(error); }
 };
 
-// Get all assessment submissions with audio recordings for admin review
+// Get all assessment submissions and fluency recordings with audio for admin review
 export const getAllRecordingSubmissions = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // Get all assessment submissions that have audio files
+    // 1. Get all assessment submissions that have audio files
     const submissions = await prisma.assessmentSubmission.findMany({
       where: {
         audioUrl: { not: null }
@@ -844,19 +844,19 @@ export const getAllRecordingSubmissions = async (
       orderBy: { submittedAt: 'desc' }
     });
 
-    // Transform submissions to match the expected format for recordings
-    const recordings = submissions.map(submission => ({
+    // Transform assessment submissions
+    const assessmentRecordings = submissions.map(submission => ({
       id: submission.id,
       studentId: submission.student.id,
       studentName: `${submission.student.firstName} ${submission.student.lastName}`,
       studentGrade: submission.student.grade,
-      passageTitle: submission.assessment.title,
+      passageTitle: submission.assessment?.title || 'Diagnostic Reading Assessment',
       audioUrl: submission.audioUrl,
       durationSeconds: submission.duration || 0,
-      wpm: 0, // Not calculated for assessment submissions
-      accuracy: 0, // Will be set during review
-      cwpm: 0,
-      totalWords: 0,
+      wpm: submission.wordsPerMinute || 0,
+      accuracy: submission.accuracyScore || 0,
+      cwpm: submission.correctWordsPerMinute || 0,
+      totalWords: submission.totalWords || 0,
       pauseCount: 0,
       hesitationCount: 0,
       score: submission.overallScore || 0,
@@ -865,13 +865,62 @@ export const getAllRecordingSubmissions = async (
       teacherRating: 3, // Default rating
       reviewedAt: submission.reviewedAt?.toISOString() || null,
       recordedAt: submission.submittedAt?.toISOString() || submission.createdAt.toISOString(),
-      // Add type to distinguish from fluency recordings
-      type: 'assessment'
+      type: 'assessment' as const
     }));
+
+    // 2. Get all fluency practice recordings that have audio files
+    const fluencyList = await prisma.fluencyRecording.findMany({
+      where: {
+        audioUrl: { not: null }
+      },
+      orderBy: { recordedAt: 'desc' }
+    });
+
+    const fluencyStudentIds = [...new Set(fluencyList.map(f => f.studentId))];
+    const students = fluencyStudentIds.length > 0
+      ? await prisma.student.findMany({
+          where: { id: { in: fluencyStudentIds } },
+          select: { id: true, firstName: true, lastName: true, grade: true }
+        })
+      : [];
+    const studentMap = new Map(students.map(s => [s.id, s]));
+
+    const fluencyRecordings = fluencyList.map(f => {
+      const st = studentMap.get(f.studentId);
+      return {
+        id: f.id,
+        studentId: f.studentId,
+        studentName: st ? `${st.firstName} ${st.lastName}` : 'Student',
+        studentGrade: st?.grade || 'GRADE_1',
+        passageTitle: f.passageTitle || 'Fluency Reading Practice',
+        audioUrl: f.audioUrl,
+        durationSeconds: f.durationSeconds || 0,
+        wpm: f.wpm || 0,
+        accuracy: f.accuracy || 0,
+        cwpm: f.cwpm || 0,
+        totalWords: f.totalWords || 0,
+        pauseCount: f.pauseCount || 0,
+        hesitationCount: f.hesitationCount || 0,
+        score: f.score || 0,
+        reviewed: f.reviewed,
+        teacherNote: f.teacherNote || '',
+        teacherRating: f.teacherRating || 3,
+        reviewedAt: f.reviewedAt?.toISOString() || null,
+        recordedAt: f.recordedAt.toISOString(),
+        type: 'fluency' as const
+      };
+    });
+
+    // Combine and sort by newest first
+    const allRecordings = [...assessmentRecordings, ...fluencyRecordings].sort((a, b) => {
+      const timeA = new Date(a.recordedAt).getTime();
+      const timeB = new Date(b.recordedAt).getTime();
+      return timeB - timeA;
+    });
 
     res.json({
       success: true,
-      data: recordings
+      data: allRecordings
     });
 
   } catch (error) {
@@ -879,25 +928,21 @@ export const getAllRecordingSubmissions = async (
   }
 };
 
-// Review assessment submission (for recordings shown in admin panel)
+// Review recording submission (for assessment or fluency recordings)
 export const reviewRecordingSubmission = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params; // submission ID
+    const { id } = req.params; // submission or recording ID
     const { note, rating } = req.body;
+    const stars = parseInt(String(rating)) || 3;
+    const ratingLabel = ['', 'Needs significant support', 'Below expectations', 'Meeting expectations', 'Good progress', 'Excellent reading!'][stars] ?? '';
 
-    // Update the assessment submission with admin feedback
-    const updatedSubmission = await prisma.assessmentSubmission.update({
+    // Check if it's an assessment submission
+    const existingSubmission = await prisma.assessmentSubmission.findUnique({
       where: { id },
-      data: {
-        status: 'REVIEWED',
-        feedback: note || null,
-        reviewedAt: new Date(),
-        reviewedBy: req.user!.userId
-      },
       include: {
         student: {
           select: {
@@ -914,70 +959,142 @@ export const reviewRecordingSubmission = async (
       }
     });
 
-    // Notify the student about the review
-    if (updatedSubmission.student) {
-      const stars = parseInt(String(rating)) || 0;
-      const ratingLabel = ['', 'Needs significant support', 'Below expectations', 'Meeting expectations', 'Good progress', 'Excellent reading!'][stars] ?? '';
-      
-      await createNotification({
-        recipientId: updatedSubmission.student.userId,
-        role: 'STUDENT',
-        type: 'teacher_feedback',
-        title: '🎉 Your assessment was reviewed!',
-        message: `Your assessment "${updatedSubmission.assessment.title}" was reviewed by an admin. ${ratingLabel}`,
-        icon: '🧑‍🏫',
-        link: '/student/progress',
-        meta: {
-          assessmentTitle: updatedSubmission.assessment.title,
-          rating: String(stars),
-          note: note?.trim() || '',
-          submissionId: updatedSubmission.id,
-        },
+    if (existingSubmission) {
+      const updatedSubmission = await prisma.assessmentSubmission.update({
+        where: { id },
+        data: {
+          status: 'REVIEWED',
+          feedback: note || null,
+          reviewedAt: new Date(),
+          reviewedBy: req.user!.userId
+        }
+      });
+
+      if (existingSubmission.student) {
+        await createNotification({
+          recipientId: existingSubmission.student.userId,
+          role: 'STUDENT',
+          type: 'teacher_feedback',
+          title: '🎉 Your assessment recording was reviewed!',
+          message: `Your assessment "${existingSubmission.assessment?.title || 'Reading'}" was reviewed by an admin. ${ratingLabel}`,
+          icon: '🧑‍🏫',
+          link: '/student/progress',
+          meta: {
+            assessmentTitle: existingSubmission.assessment?.title,
+            rating: String(stars),
+            note: note?.trim() || '',
+            submissionId: updatedSubmission.id,
+          },
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          id: updatedSubmission.id,
+          reviewed: true,
+          teacherNote: note || '',
+          teacherRating: stars,
+          reviewedAt: updatedSubmission.reviewedAt?.toISOString() || null
+        }
       });
     }
 
-    res.json({
-      success: true,
-      data: {
-        id: updatedSubmission.id,
-        reviewed: true,
-        teacherNote: note || '',
-        teacherRating: rating || 3,
-        reviewedAt: updatedSubmission.reviewedAt?.toISOString() || null
-      }
+    // Check if it's a fluency recording
+    const existingFluency = await prisma.fluencyRecording.findUnique({
+      where: { id }
     });
+
+    if (existingFluency) {
+      const updatedFluency = await prisma.fluencyRecording.update({
+        where: { id },
+        data: {
+          reviewed: true,
+          teacherNote: note || null,
+          teacherRating: stars,
+          reviewedAt: new Date()
+        }
+      });
+
+      const student = await prisma.student.findUnique({
+        where: { id: existingFluency.studentId },
+        select: { userId: true, firstName: true, lastName: true }
+      });
+
+      if (student) {
+        await createNotification({
+          recipientId: student.userId,
+          role: 'STUDENT',
+          type: 'teacher_feedback',
+          title: '🎉 Your reading recording was reviewed!',
+          message: `Your reading of "${existingFluency.passageTitle}" was reviewed by an admin. ${ratingLabel}`,
+          icon: '🎤',
+          link: '/student/progress',
+          meta: {
+            passageTitle: existingFluency.passageTitle,
+            rating: String(stars),
+            note: note?.trim() || '',
+            recordingId: updatedFluency.id,
+          },
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          id: updatedFluency.id,
+          reviewed: true,
+          teacherNote: note || '',
+          teacherRating: stars,
+          reviewedAt: updatedFluency.reviewedAt?.toISOString() || null
+        }
+      });
+    }
+
+    throw new AppError('Recording not found', 404);
 
   } catch (error) {
     next(error);
   }
 };
-// Get signed or direct URL for assessment submission audio
+
+// Get signed or direct URL for recording audio (assessment or fluency)
 export const getRecordingSubmissionAudioUrl = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params; // submission ID
+    const { id } = req.params;
+
+    let audioUrl: string | null = null;
 
     const submission = await prisma.assessmentSubmission.findUnique({
       where: { id },
       select: { audioUrl: true }
     });
 
-    if (!submission) {
-      throw new AppError('Submission not found', 404);
+    if (submission?.audioUrl) {
+      audioUrl = submission.audioUrl;
+    } else {
+      const fluency = await prisma.fluencyRecording.findUnique({
+        where: { id },
+        select: { audioUrl: true }
+      });
+      if (fluency?.audioUrl) {
+        audioUrl = fluency.audioUrl;
+      }
     }
 
-    if (!submission.audioUrl) {
-      throw new AppError('No audio file available', 404);
+    if (!audioUrl) {
+      throw new AppError('No audio file available for this recording', 404);
     }
 
-    // Direct playback for data URIs or public HTTP links
-    if (submission.audioUrl.startsWith('data:') || submission.audioUrl.startsWith('http://') || submission.audioUrl.startsWith('https://')) {
+    // Direct playback for data URIs, blob URLs, or public HTTP links
+    if (audioUrl.startsWith('data:') || audioUrl.startsWith('blob:') || audioUrl.startsWith('http://') || audioUrl.startsWith('https://')) {
       return res.json({ 
         success: true, 
-        data: { url: submission.audioUrl } 
+        data: { url: audioUrl } 
       });
     }
 
@@ -985,7 +1102,7 @@ export const getRecordingSubmissionAudioUrl = async (
     try {
       const { getSignedDownloadUrl, isR2Configured } = await import('../lib/r2storage');
       if (isR2Configured()) {
-        const signedUrl = await getSignedDownloadUrl(submission.audioUrl, 3600);
+        const signedUrl = await getSignedDownloadUrl(audioUrl, 3600);
         return res.json({ 
           success: true, 
           data: { url: signedUrl } 
@@ -997,11 +1114,11 @@ export const getRecordingSubmissionAudioUrl = async (
 
     // Fallback to local storage URL
     const { getLocalUrl } = await import('../lib/localStorage');
-    const localUrl = getLocalUrl(submission.audioUrl);
+    const localUrl = getLocalUrl(audioUrl);
 
     res.json({ 
       success: true, 
-      data: { url: localUrl || submission.audioUrl } 
+      data: { url: localUrl || audioUrl } 
     });
 
   } catch (error) {

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { apiUrl } from '../lib/apiBase'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { InstallAppModal } from '../components/ui/InstallAppModal'
 
@@ -1008,7 +1009,7 @@ function Contact() {
 
     setStatus('submitting')
     try {
-      const res  = await fetch('/api/contact', {
+      const res  = await fetch(apiUrl('/api/contact'), {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(form),

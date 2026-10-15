@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { apiUrl } from '../../lib/apiBase'
 import StudentLayout from '../../components/layout/StudentLayout'
 import ReadinessGauge from '../../components/ui/ReadinessGauge'
 import type { ReadingProfile, StudentProfile } from '../../types'
@@ -49,7 +50,7 @@ export default function ReadingProfilePage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/profiles/current', {
+        const res = await fetch(apiUrl('/api/profiles/current'), {
           headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` }
         })
         if (!res.ok) {

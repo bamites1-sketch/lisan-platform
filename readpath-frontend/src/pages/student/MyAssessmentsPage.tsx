@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiUrl } from '../../lib/apiBase';
 import StudentLayout from '../../components/layout/StudentLayout';
 
 export interface AssessmentSubmission {
@@ -66,7 +67,7 @@ export default function MyAssessmentsPage() {
   const loadAssessments = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/assessments', {
+      const response = await fetch(apiUrl('/api/assessments'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('lisan_token')}`
         }
