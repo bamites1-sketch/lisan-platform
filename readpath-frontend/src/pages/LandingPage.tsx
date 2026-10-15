@@ -259,7 +259,7 @@ function Hero({ onOpenInstall }: { onOpenInstall?: () => void }) {
       <EthPattern className="absolute top-20 left-0 w-20 h-20 opacity-25 pointer-events-none" style={{ color: C.gold }} />
       <EthPattern className="absolute top-20 right-0 w-20 h-20 opacity-25 pointer-events-none" style={{ color: C.gold }} />
 
-      {/* Photo — right half desktop */}
+      {/* Photo — right half desktop with seamless left & bottom gradient blending */}
       <div className="absolute right-0 top-16 bottom-0 w-1/2 hidden lg:block overflow-hidden pointer-events-none">
         <img
           src="/assets/hero-image.png"
@@ -268,19 +268,23 @@ function Hero({ onOpenInstall }: { onOpenInstall?: () => void }) {
           style={{ objectPosition: '60% center' }}
           onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none' }}
         />
-        {/* Gradient fade left edge */}
-        <div className="absolute inset-0"
-          style={{ background: `linear-gradient(to right, ${C.light} 0%, rgba(232,244,240,0.55) 28%, transparent 58%)` }} />
+        {/* Dual gradient fade (left edge into hero + bottom transition into page divider) */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(to right, ${C.light} 0%, rgba(232,244,240,0.65) 26%, transparent 60%), linear-gradient(to top, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.4) 18%, transparent 36%)`
+          }}
+        />
       </div>
 
-      {/* Hero copy */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-10 sm:py-12 lg:py-16">
+      {/* Hero copy with generous bottom breathing room above section divider */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-10 sm:pt-14 lg:pt-18 pb-20 sm:pb-28 lg:pb-36">
         <div className="lg:w-[52%]">
           <Label>WELCOME TO LISAN</Label>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 sm:mb-5 tracking-tight"
             style={{ color: C.dark }}>
-            Better Readers<br />
-            Brighter <span style={{ color: C.gold }}>Futures</span>
+            <span className="inline-block">Better Readers</span>{' '}
+            <span className="inline-block">Brighter <span style={{ color: C.gold }}>Futures</span></span>
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-lg leading-relaxed">
             LISAN is an intelligent reading and literacy platform that helps students
@@ -318,6 +322,27 @@ function Hero({ onOpenInstall }: { onOpenInstall?: () => void }) {
           </div>
         </div>
       </div>
+
+      {/* ── Professional Section Divider (Seamless Page Break to About) ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none overflow-hidden leading-none select-none">
+        <svg
+          viewBox="0 0 1440 96"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full h-8 sm:h-14 lg:h-20 text-white fill-current block"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0,32 C320,78 640,16 960,54 C1200,80 1360,46 1440,38 L1440,96 L0,96 Z"
+            fill="#ffffff"
+            fillOpacity="0.5"
+          />
+          <path
+            d="M0,52 C240,94 560,40 880,74 C1160,98 1340,64 1440,58 L1440,96 L0,96 Z"
+            fill="#ffffff"
+          />
+        </svg>
+      </div>
     </section>
   )
 }
@@ -334,7 +359,7 @@ const PHILOSOPHY = [
 
 function About() {
   return (
-    <section id="about" className="py-20 bg-white">
+    <section id="about" className="py-20 bg-white relative z-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
         {/* Intro */}
@@ -457,6 +482,9 @@ function About() {
             </div>
           </div>
         </div>
+
+        {/* Subtle section break divider */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-200/60 to-transparent mt-16" />
 
       </div>
     </section>
@@ -588,6 +616,9 @@ function Features() {
             Start for Free →
           </Link>
         </div>
+
+        {/* Subtle section break divider */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-200/60 to-transparent mt-16" />
       </div>
     </section>
   )
@@ -974,6 +1005,9 @@ function Pricing() {
             ))}
           </div>
         </div>
+
+        {/* Subtle section break divider */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-200/60 to-transparent mt-16" />
 
       </div>
     </section>
@@ -1396,6 +1430,14 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+      <style>{`
+        @media print {
+          section {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+          }
+        }
+      `}</style>
       <Navbar user={user} onOpenInstall={() => setInstallModalOpen(true)} />
       <main>
         <Hero onOpenInstall={() => setInstallModalOpen(true)} />
