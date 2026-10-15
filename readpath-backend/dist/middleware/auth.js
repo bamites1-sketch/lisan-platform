@@ -26,7 +26,8 @@ const authenticate = async (req, _res, next) => {
         // 2. Verify signature + expiry
         let decoded;
         try {
-            decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+            const secret = process.env.JWT_SECRET || 'readpath-super-secret-jwt-key-2026';
+            decoded = jsonwebtoken_1.default.verify(token, secret);
         }
         catch (err) {
             if (err instanceof jsonwebtoken_1.default.TokenExpiredError) {

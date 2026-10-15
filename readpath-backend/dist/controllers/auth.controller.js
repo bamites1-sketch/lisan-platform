@@ -34,10 +34,12 @@ function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 function signAccessToken(payload) {
-    return jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, { expiresIn: JWT_ACCESS_EXPIRY });
+    const secret = process.env.JWT_SECRET || 'readpath-super-secret-jwt-key-2026';
+    return jsonwebtoken_1.default.sign(payload, secret, { expiresIn: JWT_ACCESS_EXPIRY });
 }
 function signRefreshToken(payload) {
-    return jsonwebtoken_1.default.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRY });
+    const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'readpath-super-secret-refresh-key-2026-different';
+    return jsonwebtoken_1.default.sign(payload, secret, { expiresIn: JWT_REFRESH_EXPIRY });
 }
 function buildUserResponse(user) {
     return {
@@ -176,7 +178,8 @@ const refreshToken = async (req, res, next) => {
             throw new errorHandler_1.AppError('No refresh token provided.', 401);
         let decoded;
         try {
-            decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_REFRESH_SECRET);
+            const refreshSecret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'readpath-super-secret-refresh-key-2026-different';
+            decoded = jsonwebtoken_1.default.verify(token, refreshSecret);
         }
         catch {
             throw new errorHandler_1.AppError('Refresh token is invalid or expired. Please sign in again.', 401);

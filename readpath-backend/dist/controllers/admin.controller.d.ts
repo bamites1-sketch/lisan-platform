@@ -31,7 +31,7 @@ export declare const getParents: (_req: AuthRequest, res: Response, next: NextFu
 export declare const createUser: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
 export declare const deleteUser: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
 export declare const getAllRecordingSubmissions: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
-export declare const reviewRecordingSubmission: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
+export declare const reviewRecordingSubmission: (req: AuthRequest, res: Response, next: NextFunction) => Promise<Response<any, Record<string, any>> | undefined>;
 export declare const getRecordingSubmissionAudioUrl: (req: AuthRequest, res: Response, next: NextFunction) => Promise<Response<any, Record<string, any>> | undefined>;
 export declare const updateAdminProfile: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
 export declare const updateUserStatus: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;

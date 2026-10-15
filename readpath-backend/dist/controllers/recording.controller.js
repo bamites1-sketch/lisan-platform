@@ -50,11 +50,17 @@ const uploadRecording = async (req, res, next) => {
             throw new errorHandler_1.AppError('Student not found', 404);
         const file = req.file;
         const { passageTitle, passageId, durationSeconds, wpm, accuracy, cwpm, totalWords, pauseCount, hesitationCount, score } = req.body;
-        // Upload to R2 if file provided
+        // Upload to R2 if configured; otherwise use data URI for 100% serverless persistence
         let audioKey;
         if (file) {
-            const result = await (0, r2storage_1.uploadToR2)(file, r2storage_1.FileCategory.RECORDING);
-            audioKey = result.key;
+            if ((0, r2storage_1.isR2Configured)()) {
+                const result = await (0, r2storage_1.uploadToR2)(file, r2storage_1.FileCategory.RECORDING);
+                audioKey = result.key;
+            }
+            else {
+                const mime = file.mimetype || 'audio/webm';
+                audioKey = `data:${mime};base64,${file.buffer.toString('base64')}`;
+            }
         }
         const recording = await prisma_1.default.fluencyRecording.create({
             data: {
@@ -111,7 +117,7 @@ const uploadRecording = async (req, res, next) => {
             title: '🎤 New Fluency Recording',
             message: `${studentName} submitted "${recTitle}". Score: ${recScore}/100.`,
             icon: '🎤',
-            link: '/admin/dashboard',
+            link: '/admin/dashboard?tab=recordings',
             meta: notifMeta,
         });
         res.status(201).json({ success: true, data: recording });
