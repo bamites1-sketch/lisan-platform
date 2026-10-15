@@ -30,6 +30,7 @@ export const errorHandler = (
 
   return res.status(500).json({
     success: false,
-    message: 'Something went wrong. Please try again later.'
+    message: err?.message || 'Something went wrong. Please try again later.',
+    error: err?.message,
   });
 };
