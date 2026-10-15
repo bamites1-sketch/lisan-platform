@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import StudentLayout from '../../components/layout/StudentLayout';
 import InteractivePassage from '../../components/ui/InteractivePassage';
 import { apiUrl } from '../../lib/apiBase';
+import { createOptimizedMediaRecorder, createCompressedAudioBlob } from '../../lib/audioRecorder';
 
 function AssessmentRecorder({
   onComplete,
@@ -34,7 +35,7 @@ function AssessmentRecorder({
     try {
       setError('');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const { recorder } = createOptimizedMediaRecorder(stream, { targetBitrate: 32000 });
       streamRef.current = stream;
       recorderRef.current = recorder;
       chunksRef.current = [];
@@ -45,7 +46,7 @@ function AssessmentRecorder({
 
       recorder.onstop = () => {
         stream.getTracks().forEach(track => track.stop());
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        const blob = createCompressedAudioBlob(chunksRef.current, recorder.mimeType);
         const nextUrl = URL.createObjectURL(blob);
         setAudioUrl(nextUrl);
         setState('stopped');

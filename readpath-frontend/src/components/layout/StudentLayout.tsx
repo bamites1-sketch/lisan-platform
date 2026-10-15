@@ -192,7 +192,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                     {badge > 0 && (
                       <span className={`text-[10px] font-black px-1.5 py-0.2 rounded-full flex-shrink-0 ${
                         active ? 'bg-[#d4a017] text-[#1a3a2a]' : 'bg-rose-500 text-white shadow-xs'
-                      }`}>
+                      } ${item.badgeKey === 'chat' ? 'animate-pulse' : ''}`}>
                         {badge > 9 ? '9+' : badge}
                       </span>
                     )}
@@ -236,6 +236,20 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           </div>
         </Link>
         <div className="flex items-center gap-2 text-white">
+          {/* Direct Admin Chat Quick Icon with Real-time Badge */}
+          <Link
+            to="/student/chat"
+            className="relative w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm active:scale-95 transition-colors border border-white/15"
+            title={`Admin Chat${unreadChatCount > 0 ? ` (${unreadChatCount} new)` : ''}`}
+          >
+            <span>💬</span>
+            {unreadChatCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-0.5 animate-pulse shadow-sm">
+                {unreadChatCount > 9 ? '9+' : unreadChatCount}
+              </span>
+            )}
+          </Link>
+
           <NotificationBell />
           <Link
             to="/student/profile"

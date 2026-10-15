@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import StudentLayout from '../../components/layout/StudentLayout'
 import {
   BILINGUAL_STORIES,
@@ -6,6 +6,7 @@ import {
   lookupBilingualWord,
   type BilingualWord,
 } from '../../lib/bilingualDictionary'
+import { initOfflineStoryCache } from '../../lib/offlineStoryCache'
 
 export default function BilingualStoryLibrary() {
   const [selectedStory, setSelectedStory] = useState<BilingualStory>(BILINGUAL_STORIES[0])
@@ -14,6 +15,14 @@ export default function BilingualStoryLibrary() {
   const [activeWordData, setActiveWordData] = useState<BilingualWord | null>(null)
   const [selectedRawWord, setSelectedRawWord] = useState<string | null>(null)
   const [showWordBankModal, setShowWordBankModal] = useState(false)
+  const [offlineCount, setOfflineCount] = useState<number>(BILINGUAL_STORIES.length)
+
+  // Pre-cache stories into IndexedDB on load for 100% offline resilience
+  useEffect(() => {
+    initOfflineStoryCache().then(count => {
+      if (count > 0) setOfflineCount(count)
+    })
+  }, [])
 
   // Saved vocabulary in localStorage
   const [savedVocab, setSavedVocab] = useState<string[]>(() => {
@@ -68,8 +77,14 @@ export default function BilingualStoryLibrary() {
           <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-72 h-72 bg-[#d4a017]/10 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 bg-[#d4a017]/20 border border-[#d4a017]/40 text-[#f3ca52] px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase mb-3">
-                <span>📖</span> የልሳን ታሪኮች · Bilingual Story Library
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <div className="inline-flex items-center gap-2 bg-[#d4a017]/20 border border-[#d4a017]/40 text-[#f3ca52] px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase">
+                  <span>📖</span> የልሳን ታሪኮች · Bilingual Story Library
+                </div>
+                <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 px-3 py-1 rounded-full text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>🟢 {offlineCount} Stories Offline Ready (PWA)</span>
+                </div>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
                 Interactive Bilingual Stories (እንግሊዝኛ & አማርኛ)

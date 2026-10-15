@@ -3,8 +3,108 @@
 
 import { apiUrl } from '../lib/apiBase'
 
+const REFRESH_STORAGE_KEY = 'lisan_refresh_token'
+
 function token() {
   return localStorage.getItem('lisan_token') ?? ''
+}
+
+/** Decode the `exp` claim without verifying signature. Returns expiry Date or null. */
+function getTokenExpiry(t: string): Date | null {
+  try {
+    const payload = JSON.parse(atob(t.split('.')[1]))
+    if (typeof payload.exp === 'number') return new Date(payload.exp * 1000)
+    return null
+  } catch {
+    return null
+  }
+}
+
+/** True if token is expired or expires within the next 45 seconds */
+function isTokenExpiringSoon(t: string): boolean {
+  const exp = getTokenExpiry(t)
+  if (!exp) return false
+  return exp.getTime() - 45_000 < Date.now()
+}
+
+// Concurrency mutex so multiple simultaneous 401s only trigger ONE refresh call
+let isRefreshing = false
+let refreshQueue: Array<(newToken: string | null) => void> = []
+
+function subscribeTokenRefresh(cb: (newToken: string | null) => void) {
+  refreshQueue.push(cb)
+}
+
+function notifyTokenRefreshed(newToken: string | null) {
+  refreshQueue.forEach((cb) => cb(newToken))
+  refreshQueue = []
+}
+
+/**
+ * Silently refreshes the access token using HttpOnly cookie or stored refresh token.
+ */
+export async function silentRefreshToken(): Promise<string | null> {
+  if (isRefreshing) {
+    return new Promise((resolve) => {
+      subscribeTokenRefresh((newToken) => resolve(newToken))
+    })
+  }
+
+  isRefreshing = true
+
+  try {
+    const storedRefresh = localStorage.getItem(REFRESH_STORAGE_KEY)
+    const refreshHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (storedRefresh) {
+      refreshHeaders['Authorization'] = `Bearer ${storedRefresh}`
+    }
+
+    const res = await fetch(apiUrl('/api/auth/refresh'), {
+      method: 'POST',
+      credentials: 'include',
+      headers: refreshHeaders,
+    })
+
+    if (!res.ok) {
+      notifyTokenRefreshed(null)
+      return null
+    }
+
+    const json = await res.json()
+    const newAccess = json?.data?.token ?? null
+    const newRefresh = json?.data?.refreshToken ?? null
+
+    if (newAccess) {
+      localStorage.setItem('lisan_token', newAccess)
+      if (newRefresh) {
+        localStorage.setItem(REFRESH_STORAGE_KEY, newRefresh)
+      }
+      notifyTokenRefreshed(newAccess)
+      return newAccess
+    }
+
+    notifyTokenRefreshed(null)
+    return null
+  } catch (err) {
+    console.warn('[API] Silent token renewal failed:', err)
+    notifyTokenRefreshed(null)
+    return null
+  } finally {
+    isRefreshing = false
+  }
+}
+
+/**
+ * Returns a guaranteed-valid access token, proactively renewing if expiring soon.
+ */
+export async function getFreshToken(): Promise<string> {
+  const currentToken = token()
+  if (!currentToken) return ''
+  if (isTokenExpiringSoon(currentToken)) {
+    const refreshed = await silentRefreshToken()
+    if (refreshed) return refreshed
+  }
+  return currentToken
 }
 
 function headers(extra?: Record<string, string>) {
@@ -16,7 +116,14 @@ async function request<T>(
   path: string,
   body?: unknown,
   signal?: AbortSignal,
+  isRetry = false
 ): Promise<T> {
+  // Proactive check: renew if expiring soon and this is not an auth route
+  const currentToken = token()
+  if (currentToken && !path.startsWith('/api/auth/') && isTokenExpiringSoon(currentToken)) {
+    await silentRefreshToken().catch(() => {})
+  }
+
   const res = await fetch(apiUrl(path), {
     method,
     headers: headers(),
@@ -24,6 +131,15 @@ async function request<T>(
     signal,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
+
+  // Reactive 401 Interception: silently refresh token and retry original request
+  if (res.status === 401 && !isRetry && !path.startsWith('/api/auth/login') && !path.startsWith('/api/auth/refresh')) {
+    const refreshedToken = await silentRefreshToken()
+    if (refreshedToken) {
+      return request<T>(method, path, body, signal, true)
+    }
+  }
+
   const json = await res.json().catch(() => ({}))
   if (!res.ok) {
     const msg = json.message || json.error || `Request failed: ${res.status} ${res.statusText}`
@@ -31,6 +147,42 @@ async function request<T>(
     throw new Error(msg)
   }
   return json.data as T
+}
+
+/**
+ * Drop-in fetch wrapper with automatic token management & 401 retry.
+ */
+export async function authFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  isRetry = false
+): Promise<Response> {
+  const freshToken = await getFreshToken()
+  const hdrs = new Headers(init?.headers || {})
+  if (freshToken && !hdrs.has('Authorization')) {
+    hdrs.set('Authorization', `Bearer ${freshToken}`)
+  }
+
+  const res = await fetch(input, {
+    ...init,
+    headers: hdrs,
+    credentials: 'include',
+  })
+
+  if (res.status === 401 && !isRetry) {
+    const refreshed = await silentRefreshToken()
+    if (refreshed) {
+      const retryHeaders = new Headers(init?.headers || {})
+      retryHeaders.set('Authorization', `Bearer ${refreshed}`)
+      return fetch(input, {
+        ...init,
+        headers: retryHeaders,
+        credentials: 'include',
+      })
+    }
+  }
+
+  return res
 }
 
 const get  = <T>(path: string, signal?: AbortSignal) => request<T>('GET',  path, undefined, signal)

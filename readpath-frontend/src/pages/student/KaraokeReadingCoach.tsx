@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import StudentLayout from '../../components/layout/StudentLayout'
 import { BILINGUAL_STORIES, type BilingualStory, lookupBilingualWord } from '../../lib/bilingualDictionary'
 import { saveOfflineRecording } from '../../lib/offlineSync'
+import { createOptimizedMediaRecorder, createCompressedAudioBlob } from '../../lib/audioRecorder'
 
 // ─── Word Karaoke Status ──────────────────────────────────────────────────────
 type WordStatus = 'pending' | 'current' | 'correct' | 'hesitant' | 'mispronounced'
@@ -123,7 +124,7 @@ export default function KaraokeReadingCoach() {
     try {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        const recorder = new MediaRecorder(stream)
+        const { recorder } = createOptimizedMediaRecorder(stream, { targetBitrate: 32000 })
         audioChunksRef.current = []
         recorder.ondataavailable = (e) => {
           if (e.data.size > 0) audioChunksRef.current.push(e.data)
@@ -262,7 +263,7 @@ export default function KaraokeReadingCoach() {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop()
       mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        const audioBlob = createCompressedAudioBlob(audioChunksRef.current, mediaRecorderRef.current?.mimeType)
         // Save recording locally (IndexedDB) for offline resilience
         await saveOfflineRecording({
           id: `karaoke-${Date.now()}`,

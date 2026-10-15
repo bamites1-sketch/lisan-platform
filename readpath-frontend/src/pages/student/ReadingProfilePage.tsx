@@ -116,11 +116,124 @@ export default function ReadingProfilePage() {
 
   if (!data) return (
     <StudentLayout>
-      <div className="max-w-lg mx-auto text-center py-20 animate-in">
-        <div className="text-5xl mb-4">📋</div>
-        <h1 className="text-xl font-bold text-gray-900 mb-2">No reading profile yet</h1>
-        <p className="text-gray-500 mb-6">Your reading profile will appear after your first assessment.</p>
-        <Link to="/student/assessment" className="btn-primary">Start Assessment →</Link>
+      <div className="max-w-3xl mx-auto py-8 sm:py-12 space-y-6 animate-in">
+        {/* Onboarding Header Banner */}
+        <div className="bg-gradient-to-r from-[#1a3a2a] via-[#24523c] to-[#12281d] rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+          <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-[#d4a017]/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#d4a017]/20 text-[#f3ca52] border border-[#d4a017]/40 mb-3">
+              🌱 Welcome to LiSAN · Your Reading Journey Begins
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Let's Build Your Reading Profile, {profile?.firstName || 'Learner'}!
+            </h1>
+            <p className="text-sm text-emerald-100/80 mt-1 max-w-xl leading-relaxed">
+              Your reading profile visualizes your strengths across the 5 core literacy pillars. Complete the 3 steps below to unlock your personalized curriculum.
+            </p>
+          </div>
+        </div>
+
+        {/* 3-Step Interactive Onboarding Walkthrough */}
+        <div className="space-y-4">
+          {/* Step 1: Active Diagnostic Assessment */}
+          <div className="bg-white rounded-2xl border-2 border-[#2d6a4f]/30 shadow-md p-5 sm:p-6 transition-all hover:shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 left-0 bottom-0 w-2 bg-[#2d6a4f]" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 font-black text-xl flex items-center justify-center flex-shrink-0 shadow-xs">
+                  1
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                      Step 1 · Ready to Begin
+                    </span>
+                    <span className="text-xs text-gray-500 font-medium">~20 minutes</span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900">
+                    Complete your 20-min Reading Diagnostic Assessment
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1 leading-relaxed">
+                    Evaluates your phonemic awareness, phonics decoding, oral reading fluency, vocabulary, and reading comprehension.
+                  </p>
+                </div>
+              </div>
+              <Link
+                to="/student/assessment"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white shadow-md transition-all hover:opacity-95 active:scale-98 flex-shrink-0"
+                style={{ backgroundColor: '#1a3a2a' }}
+              >
+                <span>Start Assessment</span>
+                <span>→</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Step 2: Personalized Roadmap (Unlocked after assessment) */}
+          <div className="bg-gray-50/80 rounded-2xl border border-gray-200/80 p-5 sm:p-6 opacity-90 transition-all">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gray-200 text-gray-500 font-black text-xl flex items-center justify-center flex-shrink-0">
+                2
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gray-200 text-gray-600">
+                    Step 2 · Unlocks After Assessment
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-gray-700">
+                  Unlock your Personalized 4-Week Skill Roadmap
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed">
+                  Our system diagnoses exact reading skill gaps and maps out week-by-week interactive lessons, oral practice, and vocabulary tasks.
+                </p>
+              </div>
+              <div className="hidden sm:flex items-center text-gray-400 text-xl font-bold pr-2">
+                🔒
+              </div>
+            </div>
+          </div>
+
+          {/* Step 3: Starter Reading Badge */}
+          <div className="bg-gray-50/80 rounded-2xl border border-gray-200/80 p-5 sm:p-6 opacity-90 transition-all">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100/70 text-[#d4a017] font-black text-xl flex items-center justify-center flex-shrink-0">
+                3
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                    Step 3 · Reward
+                  </span>
+                  <span className="text-xs text-[#d4a017] font-bold">+100 XP Starter Bonus</span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-gray-700">
+                  Earn your first LiSAN Reading Badge
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed">
+                  Celebrate your baseline readiness score and show your verified certificate to your parents and classroom teachers!
+                </p>
+              </div>
+              <div className="hidden sm:flex items-center text-amber-500 text-xl font-bold pr-2">
+                ⭐
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick exploratory links */}
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 border-t border-gray-200">
+          <span>Want to explore first without taking a test?</span>
+          <div className="flex items-center gap-3 font-semibold text-[#2d6a4f]">
+            <Link to="/student/bilingual-library" className="hover:underline">
+              📖 Explore Bilingual Stories →
+            </Link>
+            <span className="text-gray-300">•</span>
+            <Link to="/student/karaoke-coach" className="hover:underline">
+              🎙️ Try Live AI Coach →
+            </Link>
+          </div>
+        </div>
       </div>
     </StudentLayout>
   )

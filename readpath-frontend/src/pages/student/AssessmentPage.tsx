@@ -7,6 +7,7 @@ import VoiceRecorder from '../../components/ui/VoiceRecorder'
 import type { SkillArea, StudentProfile, Question } from '../../types'
 import { recordingApi, calculateFluencyScore, assessmentApi } from '../../services/api'
 import { apiUrl } from '../../lib/apiBase'
+import { createOptimizedMediaRecorder, createCompressedAudioBlob } from '../../lib/audioRecorder'
 
 // ─── Section config ───────────────────────────────────────────────────────────
 const SECTIONS: { id: SkillArea; label: string; emoji: string; description: string }[] = [
@@ -81,10 +82,10 @@ function FluencySection({
     chunksRef.current = []
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mr = new MediaRecorder(stream)
-      mediaRecRef.current = mr
-      mr.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data)
-      mr.start()
+      const { recorder } = createOptimizedMediaRecorder(stream, { targetBitrate: 32000 })
+      mediaRecRef.current = recorder
+      recorder.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data)
+      recorder.start()
       setRecording(true)
     } catch {
       // No mic — timer-only mode still counts duration
@@ -107,7 +108,7 @@ function FluencySection({
 
     const duration = Math.max(seconds, 10)
     const audioBlob = chunksRef.current.length > 0
-      ? new Blob(chunksRef.current, { type: 'audio/webm' })
+      ? createCompressedAudioBlob(chunksRef.current, mediaRecRef.current?.mimeType)
       : undefined
 
     // Upload recording to backend — accuracy is 0 (pending teacher review)

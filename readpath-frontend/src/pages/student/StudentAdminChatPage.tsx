@@ -22,6 +22,27 @@ export default function StudentAdminChatPage() {
 
   const quickEmojis = ['👍', '👏', '❤️', '📚', '⭐', '❓', '💡', '🔥', '🙏', '😊'];
 
+  const prevCountRef = useRef(0);
+
+  // Subtle web audio chime using Web Audio API (zero asset download needed)
+  const playNotificationChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.35);
+    } catch {}
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -30,7 +51,28 @@ export default function StudentAdminChatPage() {
     try {
       if (isInitial) setLoading(true);
       const data = await directChatApi.getStudentMessages();
-      setMessages(data || []);
+      const currentList = data || [];
+
+      // Check for incoming new messages from educator
+      if (!isInitial && currentList.length > prevCountRef.current) {
+        const lastMsg = currentList[currentList.length - 1];
+        if (lastMsg && lastMsg.senderRole !== 'STUDENT') {
+          playNotificationChime();
+
+          if (document.hidden) {
+            document.title = '🔔 (1) New Message • LiSAN Chat';
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification('LiSAN Educator & Admin', {
+                body: lastMsg.message.slice(0, 80),
+                icon: '/icon-192.png',
+              });
+            }
+          }
+        }
+      }
+
+      prevCountRef.current = currentList.length;
+      setMessages(currentList);
       if (isInitial) {
         setTimeout(scrollToBottom, 150);
       }
@@ -41,9 +83,19 @@ export default function StudentAdminChatPage() {
     }
   };
 
-  // Initial load
+  // Initial load & notification permission request
   useEffect(() => {
     loadMessages(true);
+
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {});
+    }
+
+    const resetTitle = () => {
+      document.title = 'LiSAN | Learner Portal';
+    };
+    window.addEventListener('focus', resetTitle);
+    return () => window.removeEventListener('focus', resetTitle);
   }, []);
 
   // Real-time polling every 3.5 seconds

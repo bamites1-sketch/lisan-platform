@@ -6,6 +6,7 @@ import { recordingApi, calculateFluencyScore } from '../../services/api'
 import type { StudentProfile } from '../../types'
 import InteractivePassage from '../../components/ui/InteractivePassage'
 import { apiUrl } from '../../lib/apiBase'
+import { createOptimizedMediaRecorder, createCompressedAudioBlob } from '../../lib/audioRecorder'
 
 // ─── Assignment type (from real API) ─────────────────────────────────────────
 interface AssignedPassage {
@@ -158,11 +159,11 @@ function RecordingPanel({
     setSeconds(0)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mr = new MediaRecorder(stream)
-      mediaRecRef.current = mr
-      mr.ondataavailable = e => e.data.size > 0 && chunksRef.current.push(e.data)
-      mr.onstop = () => stream.getTracks().forEach(t => t.stop())
-      mr.start()
+      const { recorder } = createOptimizedMediaRecorder(stream, { targetBitrate: 32000 })
+      mediaRecRef.current = recorder
+      recorder.ondataavailable = e => e.data.size > 0 && chunksRef.current.push(e.data)
+      recorder.onstop = () => stream.getTracks().forEach(t => t.stop())
+      recorder.start()
     } catch {
       /* mic unavailable — timer-only mode */
     }
@@ -181,7 +182,7 @@ function RecordingPanel({
     // Brief UI delay for processing state
     setTimeout(async () => {
       const blob = chunksRef.current.length > 0
-        ? new Blob(chunksRef.current, { type: 'audio/webm' })
+        ? createCompressedAudioBlob(chunksRef.current, mediaRecRef.current?.mimeType)
         : null
       const url = blob ? URL.createObjectURL(blob) : null
 
