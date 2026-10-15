@@ -13,7 +13,10 @@ async function getAudioUrl(recordingId: string): Promise<string> {
   try {
     const token = localStorage.getItem('lisan_token') || localStorage.getItem('token') || '';
     
-    const response = await fetch(`/api/admin/recordings/${recordingId}/audio`, {
+    // Use proper API URL construction
+    const { apiUrl } = await import('../../lib/apiBase');
+    
+    const response = await fetch(apiUrl(`/api/admin/recordings/${recordingId}/audio`), {
       headers: { 
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
