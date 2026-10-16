@@ -10,17 +10,21 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'crypto';
 import path from 'path';
 
-// ─── R2 Client Configuration ──────────────────────────────────────────────────
+// ─── R2 / S3 Client Configuration ─────────────────────────────────────────────
+const accountId = process.env.R2_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+const accessKeyId = process.env.R2_ACCESS_KEY_ID || process.env.CLOUDFLARE_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '';
+const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY || process.env.CLOUDFLARE_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '';
+const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+const BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.CLOUDFLARE_BUCKET_NAME || process.env.AWS_S3_BUCKET || 'lisan-storage';
+
 const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: process.env.R2_ENDPOINT,
+  region: process.env.CLOUDFLARE_REGION || process.env.AWS_REGION || 'auto',
+  endpoint,
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+    accessKeyId,
+    secretAccessKey,
   },
 });
-
-const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'lisan-storage';
 
 // ─── File Type Configurations ─────────────────────────────────────────────────
 export enum FileCategory {
@@ -187,13 +191,9 @@ export async function batchDeleteFromR2(keys: string[]): Promise<void> {
 
 // ─── Check if R2 is Configured ────────────────────────────────────────────────
 export function isR2Configured(): boolean {
-  return !!(
-    process.env.R2_ACCOUNT_ID &&
-    process.env.R2_ACCESS_KEY_ID &&
-    process.env.R2_SECRET_ACCESS_KEY &&
-    process.env.R2_BUCKET_NAME &&
-    process.env.R2_ENDPOINT
-  );
+  const hasKeys = !!(accessKeyId && secretAccessKey);
+  const hasTarget = !!(process.env.R2_ENDPOINT || accountId || process.env.AWS_S3_BUCKET);
+  return hasKeys && hasTarget;
 }
 
 // ─── Get Public URL (if configured) ───────────────────────────────────────────

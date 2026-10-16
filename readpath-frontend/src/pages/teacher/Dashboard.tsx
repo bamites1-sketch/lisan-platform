@@ -7,6 +7,7 @@ import LangSwitcher from '../../components/ui/LangSwitcher'
 import { recordingApi, type ApiRecording } from '../../services/api'
 import { timeAgo } from '../../lib/utils'
 import LiveReadingBattleHost from '../../components/teacher/LiveReadingBattleHost'
+import { apiUrl } from '../../lib/apiBase'
 
 type FluencyRecording = ApiRecording & {
   studentName: string
@@ -548,7 +549,7 @@ function AssignmentsView({
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/admin/assignments', {
+    fetch(apiUrl('/api/teachers/assignments'), {
       headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` },
     })
       .then(r => r.ok ? r.json() : Promise.reject(new Error(`Server error ${r.status}`)))
@@ -641,7 +642,7 @@ export default function TeacherDashboard() {
 
     // Load students
     setStudentsLoading(true)
-    fetch('/api/teachers/students', { headers })
+    fetch(apiUrl('/api/teachers/students'), { headers })
       .then(r => r.ok ? r.json() : Promise.reject(new Error(`Server error ${r.status}`)))
       .then(j => {
         if (j?.success) setStudents(j.data?.students ?? j.data ?? [])

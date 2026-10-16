@@ -86,8 +86,8 @@ console.log('🌐 Allowed CORS origins:', allowedOrigins);
 
 app.use(cors({
   origin: (origin, cb) => {
-    // Allow server-to-server calls (no origin), whitelisted origins, or any Vercel deployment
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) return cb(null, true);
+    // Allow server-to-server calls (no origin), whitelisted origins, or project Vercel deployments
+    if (!origin || allowedOrigins.includes(origin) || (origin.endsWith('.vercel.app') && (origin.includes('readpath') || origin.includes('lisan')))) return cb(null, true);
     console.log('CORS rejected origin:', origin);
     cb(new Error('CORS: origin not allowed'));
   },
@@ -103,21 +103,23 @@ app.use(cookieParser());                          // needed for HttpOnly refresh
 
 // ─── Rate Limiters ────────────────────────────────────────────────────────────
 
-// Strict limiter for auth endpoints (login / register / refresh)
+// Limiter for auth endpoints (login / register / refresh)
+// Sized to allow schools sharing a single public IP while protecting against brute force
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20,                   // 20 attempts per window per IP
+  max: 60,                   // 60 attempts per window per IP
   standardHeaders: true,
   legacyHeaders: false,
   validate: { xForwardedForHeader: false, default: false },
   message: { success: false, message: 'Too many requests. Please try again in 15 minutes.' },
-  skipSuccessfulRequests: false,
+  skipSuccessfulRequests: true,
 });
 
-// Lighter limiter for all other API routes
+// General API limiter for all other routes
+// Generously sized to support dashboard polling without lockouts
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
+  max: 1500,
   standardHeaders: true,
   legacyHeaders: false,
   validate: { xForwardedForHeader: false, default: false },

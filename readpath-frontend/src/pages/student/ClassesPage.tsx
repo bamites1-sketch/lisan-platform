@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import StudentLayout from '../../components/layout/StudentLayout'
+import { apiUrl } from '../../lib/apiBase'
 
 type ClassGroup = { id: string; name: string; grade: string; description?: string | null; onlineLink?: string | null; memberships: { student: { firstName: string; lastName: string } }[] }
 
@@ -8,7 +9,7 @@ export default function ClassesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   useEffect(() => {
-    fetch('/api/students/classes', { headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token') ?? ''}` } })
+    fetch(apiUrl('/api/students/classes'), { headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token') ?? ''}` } })
       .then(response => { if (!response.ok) throw new Error('Could not load your classes'); return response.json() })
       .then(data => setClasses(data.data ?? []))
       .catch(err => setError(err instanceof Error ? err.message : 'Could not load your classes'))

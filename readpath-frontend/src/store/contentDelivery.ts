@@ -2,6 +2,8 @@
 // Students see content assigned to their grade via GET /api/admin/assignments.
 // This module is kept for interface compatibility but all data comes from the backend.
 
+import { apiUrl } from '../lib/apiBase'
+
 export interface ContentAssignment {
   id: string
   contentType: 'passage' | 'lesson'
@@ -20,7 +22,7 @@ export async function fetchAssignmentsForStudent(
   grade: string,
   token: string
 ): Promise<ContentAssignment[]> {
-  const res = await fetch('/api/admin/assignments', {
+  const res = await fetch(apiUrl('/api/students/assignments'), {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) return []

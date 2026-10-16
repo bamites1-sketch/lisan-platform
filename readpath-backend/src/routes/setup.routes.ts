@@ -10,7 +10,13 @@ const prisma = new PrismaClient();
 
 function checkSetupKey(req: Request, res: Response): boolean {
   const expectedKey = process.env.SETUP_KEY;
-  if (!expectedKey) return true;
+  if (!expectedKey) {
+    if (process.env.NODE_ENV === 'production') {
+      res.status(403).json({ error: 'Setup endpoints are disabled in production unless SETUP_KEY is configured.' });
+      return false;
+    }
+    return true;
+  }
   const provided = (req.body && req.body.setupKey) || req.headers['x-setup-key'];
   if (provided !== expectedKey) {
     res.status(403).json({ error: 'Invalid setup key' });

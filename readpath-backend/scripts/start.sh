@@ -13,14 +13,14 @@ fi
 export NODE_ENV=production
 export PORT=3000
 
-# Initialize database
+# Initialize database safely (no data loss)
 echo "📊 Setting up database..."
-if ! npx prisma db push --force-reset --accept-data-loss; then
+if ! npx prisma db push --schema prisma/schema.production.prisma; then
   echo "⚠️  Database setup failed, continuing anyway..."
 fi
 
-# Create admin user
-echo "👤 Creating admin user..."
+# Create default admin user if none exists
+echo "👤 Checking admin user..."
 node -e "
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
@@ -28,31 +28,34 @@ const bcrypt = require('bcrypt');
 (async () => {
   const prisma = new PrismaClient();
   try {
-    const hashedPassword = await bcrypt.hash('LiSAN2026!', 10);
-    await prisma.user.upsert({
-      where: { email: 'admin@readpath.com' },
-      update: {},
-      create: {
-        email: 'admin@readpath.com',
-        passwordHash: hashedPassword,
-        role: 'ADMIN',
-        status: 'ACTIVE',
-        profile: {
-          create: {
-            firstName: 'Admin',
-            lastName: 'User'
+    const existing = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+    if (!existing) {
+      const hashedPassword = await bcrypt.hash('LiSAN2026!', 12);
+      await prisma.user.create({
+        data: {
+          email: 'admin@readpath.com',
+          password: hashedPassword,
+          role: 'ADMIN',
+          status: 'ACTIVE',
+          admin: {
+            create: {
+              firstName: 'Admin',
+              lastName: 'User'
+            }
           }
         }
-      }
-    });
-    console.log('✅ Admin user ready');
+      });
+      console.log('✅ Admin user created (admin@readpath.com)');
+    } else {
+      console.log('✅ Admin user already exists');
+    }
   } catch (error) {
-    console.log('⚠️  Admin user setup:', error.message);
+    console.log('⚠️  Admin user setup notice:', error.message);
   } finally {
     await prisma.\$disconnect();
   }
 })();
-" || echo "⚠️  Admin setup failed, continuing..."
+" || echo "⚠️  Admin check completed with notice"
 
 # Start the application
 echo "🎯 Starting the server..."

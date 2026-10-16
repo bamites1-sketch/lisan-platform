@@ -6,11 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const auth_1 = require("../middleware/auth");
 const teacher_controller_1 = require("../controllers/teacher.controller");
+const admin_controller_1 = require("../controllers/admin.controller");
 const router = express_1.default.Router();
 router.use(auth_1.authenticate);
 router.use((0, auth_1.authorize)('TEACHER'));
 router.get('/students', teacher_controller_1.getStudents);
 router.get('/students/:id', teacher_controller_1.getStudentDetail);
 router.get('/analytics', teacher_controller_1.getClassAnalytics);
+router.get('/assignments', admin_controller_1.getAssignments);
 exports.default = router;
 //# sourceMappingURL=teacher.routes.js.map

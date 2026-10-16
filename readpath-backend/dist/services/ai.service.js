@@ -208,7 +208,9 @@ const getTutorResponse = async (messages, context) => {
     // Gemini's free API is the primary provider. The key stays on the server.
     if (process.env.GEMINI_API_KEY) {
         try {
-            const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+            let model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+            if (model === 'gemini-3.5-flash')
+                model = 'gemini-1.5-flash';
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

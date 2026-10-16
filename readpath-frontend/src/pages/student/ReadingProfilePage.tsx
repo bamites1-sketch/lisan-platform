@@ -74,7 +74,7 @@ export default function ReadingProfilePage() {
     if (history.length > 0) return
     setHistoryLoading(true)
     try {
-      const res = await fetch('/api/profiles/history', {
+      const res = await fetch(apiUrl('/api/profiles/history'), {
         headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` }
       })
       if (!res.ok) throw new Error(`Server error ${res.status}`)

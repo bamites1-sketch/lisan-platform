@@ -83,8 +83,8 @@ if (process.env.FRONTEND_URL) {
 console.log('🌐 Allowed CORS origins:', allowedOrigins);
 app.use((0, cors_1.default)({
     origin: (origin, cb) => {
-        // Allow server-to-server calls (no origin), whitelisted origins, or any Vercel deployment
-        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app'))
+        // Allow server-to-server calls (no origin), whitelisted origins, or project Vercel deployments
+        if (!origin || allowedOrigins.includes(origin) || (origin.endsWith('.vercel.app') && (origin.includes('readpath') || origin.includes('lisan'))))
             return cb(null, true);
         console.log('CORS rejected origin:', origin);
         cb(new Error('CORS: origin not allowed'));
@@ -98,20 +98,22 @@ app.use(express_1.default.json({ limit: '1mb' })); // cap JSON body size
 app.use(express_1.default.urlencoded({ extended: true, limit: '1mb' }));
 app.use((0, cookie_parser_1.default)()); // needed for HttpOnly refresh token
 // ─── Rate Limiters ────────────────────────────────────────────────────────────
-// Strict limiter for auth endpoints (login / register / refresh)
+// Limiter for auth endpoints (login / register / refresh)
+// Sized to allow schools sharing a single public IP while protecting against brute force
 const authLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // 20 attempts per window per IP
+    max: 60, // 60 attempts per window per IP
     standardHeaders: true,
     legacyHeaders: false,
     validate: { xForwardedForHeader: false, default: false },
     message: { success: false, message: 'Too many requests. Please try again in 15 minutes.' },
-    skipSuccessfulRequests: false,
+    skipSuccessfulRequests: true,
 });
-// Lighter limiter for all other API routes
+// General API limiter for all other routes
+// Generously sized to support dashboard polling without lockouts
 const apiLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
-    max: 300,
+    max: 1500,
     standardHeaders: true,
     legacyHeaders: false,
     validate: { xForwardedForHeader: false, default: false },

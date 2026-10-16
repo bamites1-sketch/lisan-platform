@@ -10,7 +10,7 @@
     "start:prod": "NODE_ENV=production node dist/server.js",
     "vercel-build": "prisma generate --schema prisma/schema.production.prisma && npm run build",
     "prisma:generate": "prisma generate --schema prisma/schema.production.prisma",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate": "prisma migrate dev --schema prisma/schema.production.prisma",
     "prisma:migrate:prod": "prisma migrate deploy --schema prisma/schema.production.prisma",
     "prisma:studio": "prisma studio --schema prisma/schema.production.prisma",
     "prisma:seed": "ts-node prisma/seed.ts",

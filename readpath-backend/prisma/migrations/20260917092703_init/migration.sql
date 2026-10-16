@@ -6,9 +6,9 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL,
     "role" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'PENDING',
-    "passwordChangedAt" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "passwordChangedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -23,9 +23,9 @@ CREATE TABLE "students" (
     "xp" INTEGER NOT NULL DEFAULT 0,
     "level" INTEGER NOT NULL DEFAULT 1,
     "streakDays" INTEGER NOT NULL DEFAULT 0,
-    "lastActiveAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "lastActiveAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "students_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "students_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "parents" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "students_teacherId_fkey" FOREIGN KEY ("teacherId") REFERENCES "teachers" ("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -37,8 +37,8 @@ CREATE TABLE "parents" (
     "userId" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "parents_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -48,8 +48,8 @@ CREATE TABLE "teachers" (
     "userId" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "teachers_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -59,8 +59,8 @@ CREATE TABLE "admins" (
     "userId" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "admins_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -71,8 +71,8 @@ CREATE TABLE "class_groups" (
     "grade" TEXT NOT NULL,
     "description" TEXT,
     "onlineLink" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -80,7 +80,7 @@ CREATE TABLE "class_memberships" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "classId" TEXT NOT NULL,
     "studentId" TEXT NOT NULL,
-    "joinedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "class_memberships_classId_fkey" FOREIGN KEY ("classId") REFERENCES "class_groups" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "class_memberships_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "students" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -96,8 +96,8 @@ CREATE TABLE "assessments" (
     "instructions" TEXT,
     "status" TEXT NOT NULL DEFAULT 'DRAFT',
     "createdBy" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -107,10 +107,10 @@ CREATE TABLE "assessment_assignments" (
     "assignmentType" TEXT NOT NULL,
     "targetId" TEXT,
     "targetGrade" TEXT,
-    "dueDate" DATETIME,
+    "dueDate" TIMESTAMP(3),
     "status" TEXT NOT NULL DEFAULT 'ACTIVE',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "assessment_assignments_assessmentId_fkey" FOREIGN KEY ("assessmentId") REFERENCES "assessments" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -122,8 +122,8 @@ CREATE TABLE "assessment_submissions" (
     "audioUrl" TEXT,
     "duration" INTEGER,
     "status" TEXT NOT NULL DEFAULT 'IN_PROGRESS',
-    "submittedAt" DATETIME,
-    "reviewedAt" DATETIME,
+    "submittedAt" TIMESTAMP(3),
+    "reviewedAt" TIMESTAMP(3),
     "reviewedBy" TEXT,
     "overallScore" INTEGER,
     "fluencyScore" INTEGER,
@@ -142,8 +142,8 @@ CREATE TABLE "assessment_submissions" (
     "recommendations" TEXT,
     "recommendedNextLevel" TEXT,
     "intervention" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "assessment_submissions_assessmentId_fkey" FOREIGN KEY ("assessmentId") REFERENCES "assessments" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "assessment_submissions_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "students" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -158,7 +158,7 @@ CREATE TABLE "assessment_responses" (
     "timeSpent" INTEGER,
     "hintsUsed" INTEGER NOT NULL DEFAULT 0,
     "attempts" INTEGER NOT NULL DEFAULT 1,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "assessment_responses_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "assessment_submissions" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "assessment_responses_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "questions" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
@@ -180,8 +180,8 @@ CREATE TABLE "reading_profiles" (
     "weaknesses" TEXT NOT NULL,
     "priorities" TEXT NOT NULL,
     "recommendations" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "reading_profiles_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "students" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "reading_profiles_assessmentSubmissionId_fkey" FOREIGN KEY ("assessmentSubmissionId") REFERENCES "assessment_submissions" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -194,8 +194,8 @@ CREATE TABLE "learning_plans" (
     "title" TEXT NOT NULL,
     "durationWeeks" INTEGER NOT NULL DEFAULT 6,
     "status" TEXT NOT NULL DEFAULT 'active',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "learning_plans_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "students" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "learning_plans_readingProfileId_fkey" FOREIGN KEY ("readingProfileId") REFERENCES "reading_profiles" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
@@ -207,8 +207,8 @@ CREATE TABLE "learning_weeks" (
     "weekNumber" INTEGER NOT NULL,
     "title" TEXT NOT NULL,
     "goals" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "learning_weeks_learningPlanId_fkey" FOREIGN KEY ("learningPlanId") REFERENCES "learning_plans" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -222,9 +222,9 @@ CREATE TABLE "learning_activities" (
     "description" TEXT NOT NULL,
     "order" INTEGER NOT NULL,
     "completed" BOOLEAN NOT NULL DEFAULT false,
-    "completedAt" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "completedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "learning_activities_learningWeekId_fkey" FOREIGN KEY ("learningWeekId") REFERENCES "learning_weeks" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "learning_activities_lessonId_fkey" FOREIGN KEY ("lessonId") REFERENCES "lessons" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -242,8 +242,8 @@ CREATE TABLE "passages" (
     "status" TEXT NOT NULL DEFAULT 'DRAFT',
     "assignedGrades" TEXT,
     "requiredPlan" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -263,8 +263,8 @@ CREATE TABLE "questions" (
     "status" TEXT NOT NULL DEFAULT 'DRAFT',
     "assignedGrades" TEXT,
     "requiredPlan" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "questions_passageId_fkey" FOREIGN KEY ("passageId") REFERENCES "passages" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
@@ -285,8 +285,8 @@ CREATE TABLE "vocabulary" (
     "status" TEXT NOT NULL DEFAULT 'DRAFT',
     "assignedGrades" TEXT,
     "requiredPlan" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -307,8 +307,8 @@ CREATE TABLE "lessons" (
     "status" TEXT NOT NULL DEFAULT 'DRAFT',
     "assignedGrades" TEXT,
     "requiredPlan" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -330,7 +330,7 @@ CREATE TABLE "fluency_assessments" (
     "repetitions" INTEGER,
     "substitutions" INTEGER,
     "score" INTEGER,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "fluency_assessments_passageId_fkey" FOREIGN KEY ("passageId") REFERENCES "passages" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
@@ -339,14 +339,14 @@ CREATE TABLE "practice_history" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "studentId" TEXT NOT NULL,
     "skillArea" TEXT NOT NULL,
-    "startedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "completedAt" DATETIME,
+    "startedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "completedAt" TIMESTAMP(3),
     "duration" INTEGER,
     "questionsAttempted" INTEGER NOT NULL DEFAULT 0,
     "questionsCorrect" INTEGER NOT NULL DEFAULT 0,
     "accuracy" REAL,
     "xpEarned" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "practice_history_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "students" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -360,7 +360,7 @@ CREATE TABLE "practice_responses" (
     "hintsUsed" INTEGER NOT NULL DEFAULT 0,
     "attempts" INTEGER NOT NULL DEFAULT 1,
     "timeSpent" INTEGER,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "practice_responses_practiceHistoryId_fkey" FOREIGN KEY ("practiceHistoryId") REFERENCES "practice_history" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "practice_responses_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "questions" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
@@ -372,7 +372,7 @@ CREATE TABLE "chat_messages" (
     "role" TEXT NOT NULL,
     "message" TEXT NOT NULL,
     "context" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "chat_messages_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "students" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -381,7 +381,7 @@ CREATE TABLE "student_badges" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "studentId" TEXT NOT NULL,
     "badgeType" TEXT NOT NULL,
-    "earnedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "earnedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "student_badges_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "students" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -391,7 +391,7 @@ CREATE TABLE "progress_logs" (
     "studentId" TEXT NOT NULL,
     "metric" TEXT NOT NULL,
     "value" REAL NOT NULL,
-    "date" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "metadata" TEXT,
     CONSTRAINT "progress_logs_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "students" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -415,8 +415,8 @@ CREATE TABLE "fluency_recordings" (
     "reviewed" BOOLEAN NOT NULL DEFAULT false,
     "teacherNote" TEXT,
     "teacherRating" INTEGER,
-    "recordedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "reviewedAt" DATETIME
+    "recordedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "reviewedAt" TIMESTAMP(3)
 );
 
 -- CreateTable
@@ -431,7 +431,7 @@ CREATE TABLE "notifications" (
     "link" TEXT,
     "read" BOOLEAN NOT NULL DEFAULT false,
     "meta" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "notifications_recipientId_fkey" FOREIGN KEY ("recipientId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -441,9 +441,9 @@ CREATE TABLE "content_assignments" (
     "contentType" TEXT NOT NULL,
     "contentId" TEXT NOT NULL,
     "grade" TEXT NOT NULL,
-    "assignedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "assignedBy" TEXT NOT NULL,
-    "dueDate" DATETIME,
+    "dueDate" TIMESTAMP(3),
     "note" TEXT,
     "status" TEXT NOT NULL DEFAULT 'active'
 );
@@ -465,8 +465,8 @@ CREATE TABLE "pdf_resources" (
     "requiredPlan" TEXT,
     "uploadedBy" TEXT NOT NULL,
     "downloadCount" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -476,7 +476,7 @@ CREATE TABLE "contact_messages" (
     "email" TEXT NOT NULL,
     "subject" TEXT NOT NULL DEFAULT '',
     "message" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "read" BOOLEAN NOT NULL DEFAULT false
 );
 
@@ -493,10 +493,10 @@ CREATE TABLE "payment_submissions" (
     "notes" TEXT,
     "status" TEXT NOT NULL DEFAULT 'PENDING',
     "adminNote" TEXT,
-    "reviewedAt" DATETIME,
+    "reviewedAt" TIMESTAMP(3),
     "reviewedBy" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "payment_submissions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 

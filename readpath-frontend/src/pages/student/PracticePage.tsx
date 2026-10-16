@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import StudentLayout from '../../components/layout/StudentLayout'
 import type { Question, SkillArea } from '../../types'
 import FlashcardMode from '../../components/ui/FlashcardMode'
+import { apiUrl } from '../../lib/apiBase'
 
 type Phase = 'loading' | 'error' | 'empty' | 'intro' | 'practice' | 'result'
 
@@ -43,7 +44,7 @@ export default function PracticePage() {
     setPhase('loading')
     setLoadError('')
     try {
-      const res = await fetch('/api/practice/start', {
+      const res = await fetch(apiUrl('/api/practice/start'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +97,7 @@ export default function PracticePage() {
 
     if (practiceId) {
       try {
-        await fetch(`/api/practice/${practiceId}/responses`, {
+        await fetch(apiUrl(`/api/practice/${practiceId}/responses`), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -141,7 +142,7 @@ export default function PracticePage() {
   const completePractice = async () => {
     if (practiceId) {
       try {
-        await fetch(`/api/practice/${practiceId}/complete`, {
+        await fetch(apiUrl(`/api/practice/${practiceId}/complete`), {
           method: 'POST',
           headers: { Authorization: `Bearer ${localStorage.getItem('lisan_token')}` },
         })

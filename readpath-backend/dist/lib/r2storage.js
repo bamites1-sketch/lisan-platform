@@ -55,16 +55,20 @@ const client_s3_1 = require("@aws-sdk/client-s3");
 const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const crypto_1 = __importDefault(require("crypto"));
 const path_1 = __importDefault(require("path"));
-// ─── R2 Client Configuration ──────────────────────────────────────────────────
+// ─── R2 / S3 Client Configuration ─────────────────────────────────────────────
+const accountId = process.env.R2_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+const accessKeyId = process.env.R2_ACCESS_KEY_ID || process.env.CLOUDFLARE_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '';
+const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY || process.env.CLOUDFLARE_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '';
+const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+const BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.CLOUDFLARE_BUCKET_NAME || process.env.AWS_S3_BUCKET || 'lisan-storage';
 const r2Client = new client_s3_1.S3Client({
-    region: 'auto',
-    endpoint: process.env.R2_ENDPOINT,
+    region: process.env.CLOUDFLARE_REGION || process.env.AWS_REGION || 'auto',
+    endpoint,
     credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+        accessKeyId,
+        secretAccessKey,
     },
 });
-const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'lisan-storage';
 // ─── File Type Configurations ─────────────────────────────────────────────────
 var FileCategory;
 (function (FileCategory) {
@@ -191,11 +195,9 @@ async function batchDeleteFromR2(keys) {
 }
 // ─── Check if R2 is Configured ────────────────────────────────────────────────
 function isR2Configured() {
-    return !!(process.env.R2_ACCOUNT_ID &&
-        process.env.R2_ACCESS_KEY_ID &&
-        process.env.R2_SECRET_ACCESS_KEY &&
-        process.env.R2_BUCKET_NAME &&
-        process.env.R2_ENDPOINT);
+    const hasKeys = !!(accessKeyId && secretAccessKey);
+    const hasTarget = !!(process.env.R2_ENDPOINT || accountId || process.env.AWS_S3_BUCKET);
+    return hasKeys && hasTarget;
 }
 // ─── Get Public URL (if configured) ───────────────────────────────────────────
 function getPublicUrl(key) {

@@ -18,7 +18,7 @@ COPY . .
 RUN chmod +x scripts/start.sh
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN npx prisma generate --schema prisma/schema.production.prisma
 
 # Build TypeScript
 RUN npm run build

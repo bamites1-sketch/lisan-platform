@@ -28,9 +28,10 @@ export const errorHandler = (
   // Log unexpected errors
   console.error('Unexpected Error:', err);
 
+  const isProd = process.env.NODE_ENV === 'production';
   return res.status(500).json({
     success: false,
-    message: err?.message || 'Something went wrong. Please try again later.',
-    error: err?.message,
+    message: isProd ? 'An unexpected error occurred. Please try again later.' : (err?.message || 'Something went wrong.'),
+    ...(isProd ? {} : { error: err?.message }),
   });
 };

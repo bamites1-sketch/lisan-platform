@@ -107,7 +107,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         .catch(() => {})
     }
     fetchUnread()
-    const timer = setInterval(fetchUnread, 4000)
+    const timer = setInterval(fetchUnread, 15000)
     return () => clearInterval(timer)
   }, [location.pathname])
 
