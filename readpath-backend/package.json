@@ -5,10 +5,10 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "prisma generate --schema prisma/schema.production.prisma && tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
     "start:prod": "NODE_ENV=production node dist/server.js",
-    "vercel-build": "prisma generate --schema prisma/schema.production.prisma && npm run build",
+    "vercel-build": "prisma generate && prisma db push --accept-data-loss --skip-generate && npm run build",
     "prisma:generate": "prisma generate --schema prisma/schema.production.prisma",
     "prisma:migrate": "prisma migrate dev --schema prisma/schema.production.prisma",
     "prisma:migrate:prod": "prisma migrate deploy --schema prisma/schema.production.prisma",
