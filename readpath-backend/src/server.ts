@@ -135,6 +135,36 @@ app.get('/', (_req, res) => res.json({
 }));
 app.get('/health', (_req, res) => res.json({ status: 'ok', message: 'ReadPath API is running' }));
 
+// TEMPORARY: Database schema check endpoint (REMOVE AFTER USE)
+app.get('/api/db-check', async (req, res) => {
+  const setupKey = req.query.key;
+  if (setupKey !== process.env.SETUP_KEY) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  
+  try {
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    await prisma.$connect();
+    const tables = await prisma.$queryRaw`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'` as any[];
+    const userColumns = await prisma.$queryRaw`SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users'` as any[];
+    
+    await prisma.$disconnect();
+    
+    return res.json({
+      success: true,
+      tablesCount: tables.length,
+      tables: tables.map(t => t.table_name),
+      userColumns: userColumns.map(c => c.column_name),
+      hasPassword: userColumns.some(c => c.column_name === 'password'),
+      hasStatus: userColumns.some(c => c.column_name === 'status')
+    });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // ─── Static file serving for local development ──────────────────────────────
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 app.use('/uploads', express.static(uploadsDir));
