@@ -1,0 +1,19 @@
+# Development files
+*.md
+!README.md
+.git/
+.gitignore
+
+# Documentation
+docs/
+
+# CI/CD
+.github/
+
+# Editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
