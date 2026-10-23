@@ -328,20 +328,22 @@ export const approvePayment = async (req: AuthRequest, res: Response, next: Next
       data: { status: 'APPROVED', reviewedAt: new Date(), reviewedBy: adminId },
     });
 
-    // Activate the user account
-    await prisma.user.update({ where: { id: submission.userId }, data: { status: 'ACTIVE' } });
+    // Activate the user account if linked
+    if (submission.userId) {
+      await prisma.user.update({ where: { id: submission.userId }, data: { status: 'ACTIVE' } });
 
-    // Notify the user
-    await createNotification({
-      recipientId: submission.userId,
-      role: 'STUDENT',
-      type: 'payment_approved',
-      title: '✅ Payment Approved',
-      message: `Your payment for "${submission.package}" has been approved. Your account is now active — welcome to LISAN!`,
-      icon: '✅',
-      link: '/student/dashboard',
-      meta: { package: submission.package },
-    }).catch(() => {});
+      // Notify the user
+      await createNotification({
+        recipientId: submission.userId,
+        role: 'STUDENT',
+        type: 'payment_approved',
+        title: '✅ Payment Approved',
+        message: `Your payment for "${submission.package}" has been approved. Your account is now active — welcome to LISAN!`,
+        icon: '✅',
+        link: '/student/dashboard',
+        meta: { package: submission.package },
+      }).catch(() => {});
+    }
 
     res.json({ success: true, message: 'Payment approved. Account is now active.' });
   } catch (error) { next(error); }
@@ -365,8 +367,10 @@ export const rejectPayment = async (req: AuthRequest, res: Response, next: NextF
       data: { status: 'REJECTED', adminNote, reviewedAt: new Date(), reviewedBy: adminId },
     });
 
-    // Revert user status to PENDING so they can resubmit
-    await prisma.user.update({ where: { id: submission.userId }, data: { status: 'PENDING' } });
+    // Revert user status to PENDING so they can resubmit if user exists
+    if (submission.userId) {
+      await prisma.user.update({ where: { id: submission.userId }, data: { status: 'PENDING' } });
+    }
 
     // Delete rejected receipt from R2 to save storage
     if (submission.receiptUrl) {
@@ -378,16 +382,18 @@ export const rejectPayment = async (req: AuthRequest, res: Response, next: NextF
     }
 
     // Notify the user with the reason
-    await createNotification({
-      recipientId: submission.userId,
-      role: 'STUDENT',
-      type: 'payment_rejected',
-      title: '❌ Payment Not Verified',
-      message: `Your payment submission was not approved. Reason: ${adminNote} Please resubmit with the correct details.`,
-      icon: '❌',
-      link: '/payment',
-      meta: { package: submission.package, reason: adminNote },
-    }).catch(() => {});
+    if (submission.userId) {
+      await createNotification({
+        recipientId: submission.userId,
+        role: 'STUDENT',
+        type: 'payment_rejected',
+        title: '❌ Payment Not Verified',
+        message: `Your payment submission was not approved. Reason: ${adminNote} Please resubmit with the correct details.`,
+        icon: '❌',
+        link: '/payment',
+        meta: { package: submission.package, reason: adminNote },
+      }).catch(() => {});
+    }
 
     res.json({ success: true, message: 'Payment rejected. User notified.' });
   } catch (error) { next(error); }

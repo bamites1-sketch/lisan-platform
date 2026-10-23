@@ -124,9 +124,14 @@ const apiLimiter = (0, express_rate_limit_1.default)({
 app.get('/', (_req, res) => res.json({
     status: 'ok',
     message: 'ReadPath API is running',
+    version: '1.0.0',
     endpoints: ['/health', '/api/auth/login', '/api/setup/create-admin']
 }));
-app.get('/health', (_req, res) => res.json({ status: 'ok', message: 'ReadPath API is running' }));
+app.get('/health', (_req, res) => res.json({
+    status: 'ok',
+    message: 'ReadPath API is running',
+    timestamp: new Date().toISOString()
+}));
 // ─── Static file serving for local development ──────────────────────────────
 const uploadsDir = path_1.default.join(__dirname, '..', 'uploads');
 app.use('/uploads', express_1.default.static(uploadsDir));

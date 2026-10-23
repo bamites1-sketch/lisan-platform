@@ -357,19 +357,21 @@ const approvePayment = async (req, res, next) => {
             where: { id },
             data: { status: 'APPROVED', reviewedAt: new Date(), reviewedBy: adminId },
         });
-        // Activate the user account
-        await prisma_1.default.user.update({ where: { id: submission.userId }, data: { status: 'ACTIVE' } });
-        // Notify the user
-        await (0, notification_controller_1.createNotification)({
-            recipientId: submission.userId,
-            role: 'STUDENT',
-            type: 'payment_approved',
-            title: '✅ Payment Approved',
-            message: `Your payment for "${submission.package}" has been approved. Your account is now active — welcome to LISAN!`,
-            icon: '✅',
-            link: '/student/dashboard',
-            meta: { package: submission.package },
-        }).catch(() => { });
+        // Activate the user account if linked
+        if (submission.userId) {
+            await prisma_1.default.user.update({ where: { id: submission.userId }, data: { status: 'ACTIVE' } });
+            // Notify the user
+            await (0, notification_controller_1.createNotification)({
+                recipientId: submission.userId,
+                role: 'STUDENT',
+                type: 'payment_approved',
+                title: '✅ Payment Approved',
+                message: `Your payment for "${submission.package}" has been approved. Your account is now active — welcome to LISAN!`,
+                icon: '✅',
+                link: '/student/dashboard',
+                meta: { package: submission.package },
+            }).catch(() => { });
+        }
         res.json({ success: true, message: 'Payment approved. Account is now active.' });
     }
     catch (error) {
@@ -393,8 +395,10 @@ const rejectPayment = async (req, res, next) => {
             where: { id },
             data: { status: 'REJECTED', adminNote, reviewedAt: new Date(), reviewedBy: adminId },
         });
-        // Revert user status to PENDING so they can resubmit
-        await prisma_1.default.user.update({ where: { id: submission.userId }, data: { status: 'PENDING' } });
+        // Revert user status to PENDING so they can resubmit if user exists
+        if (submission.userId) {
+            await prisma_1.default.user.update({ where: { id: submission.userId }, data: { status: 'PENDING' } });
+        }
         // Delete rejected receipt from R2 to save storage
         if (submission.receiptUrl) {
             try {
@@ -405,16 +409,18 @@ const rejectPayment = async (req, res, next) => {
             }
         }
         // Notify the user with the reason
-        await (0, notification_controller_1.createNotification)({
-            recipientId: submission.userId,
-            role: 'STUDENT',
-            type: 'payment_rejected',
-            title: '❌ Payment Not Verified',
-            message: `Your payment submission was not approved. Reason: ${adminNote} Please resubmit with the correct details.`,
-            icon: '❌',
-            link: '/payment',
-            meta: { package: submission.package, reason: adminNote },
-        }).catch(() => { });
+        if (submission.userId) {
+            await (0, notification_controller_1.createNotification)({
+                recipientId: submission.userId,
+                role: 'STUDENT',
+                type: 'payment_rejected',
+                title: '❌ Payment Not Verified',
+                message: `Your payment submission was not approved. Reason: ${adminNote} Please resubmit with the correct details.`,
+                icon: '❌',
+                link: '/payment',
+                meta: { package: submission.package, reason: adminNote },
+            }).catch(() => { });
+        }
         res.json({ success: true, message: 'Payment rejected. User notified.' });
     }
     catch (error) {
